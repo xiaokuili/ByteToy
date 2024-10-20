@@ -137,11 +137,11 @@ const LogoName = ({ className = '', width = 93, height = 22 }) => (
   </svg>
 );
 
-const GlobalizationIcon = ({ className }) => (
+const GlobalizationIcon = () => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
-    className={`dig-UIIcon dig-UIIcon--standard h-6 w-6 ${className} `}
+    className={`dig-UIIcon dig-UIIcon--standard h-6 w-6  `}
     role="presentation"
     focusable="false"
   >
