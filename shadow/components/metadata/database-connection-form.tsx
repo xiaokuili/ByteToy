@@ -4,7 +4,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
@@ -14,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -28,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
   type: z.string(),
@@ -73,18 +70,15 @@ export function DatabaseConnectionFormComponent() {
         toast.success("数据库连接成功");
 
         // 第二步：创建元数据
-        const metadataResult = await createMetadata({
-          ...values,
-          schemas: connectionResult.schemas, // 使用连接检查获取的 schemas
-        });
+        const metadataResult = await createMetadata(values);
 
         if (!metadataResult.success) {
-          toast.error(metadataResult.error || "元数据创建失败");
+          toast.error(metadataResult.error || "数据库添加失败");
           return;
         }
 
         // 全部成功，显示成功消息并跳转
-        toast.success("数据源创建成功");
+        toast.success("数据库添加成功");
         router.push("/metadata");
         router.refresh();
       } catch (error) {

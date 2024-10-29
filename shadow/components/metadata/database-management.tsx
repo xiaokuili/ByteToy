@@ -5,9 +5,8 @@ import React, { useEffect, useState } from "react";
 import { Database, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Datasource } from "@/types/base";
 import { getMetadatas } from "@/lib/datasource-action";
-
+import { Datasource } from "@/types/base";
 export async function DatabaseManagementComponent() {
   return (
     <div className='container mx-auto px-4 py-8'>
@@ -27,7 +26,7 @@ export async function DatabaseManagementComponent() {
 }
 
 function DatabaseCard() {
-  const [metadatas, setMetadatas] = useState<Metadata[]>([]);
+  const [metadatas, setMetadatas] = useState<Datasource[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,7 +54,7 @@ function DatabaseCard() {
     <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
       {metadatas.map((metadata) => (
         <Card
-          key={metadata.id}
+          key={metadata.host}
           className='hover:shadow-lg transition-shadow duration-300'
         >
           <CardContent className='p-6'>

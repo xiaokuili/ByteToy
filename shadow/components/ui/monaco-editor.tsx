@@ -15,13 +15,13 @@ export function MonacoEditor({ value, onChange, ...props }: MonacoEditorProps) {
 
   return (
     <Editor
-      height='30vh'
-      defaultLanguage='sql'
-      defaultValue='SELECT * FROM'
-      theme='vs-dark'
+      height="30vh"
+      defaultLanguage="sql"
+      defaultValue="SELECT * FROM"
+      theme="vs-dark"
       loading={
-        <div className='flex items-center justify-center h-full'>
-          <Loader2 className='h-6 w-6 animate-spin' />
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       }
       value={value}

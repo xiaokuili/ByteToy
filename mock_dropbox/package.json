@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "lint:fix": "next lint --fix"
+    "lint:fix": "next lint --fix",
+    "fix:imports": "ts-prune && eslint . --fix"
+
   },
   "dependencies": {
     "@headlessui/react": "^2.1.10",

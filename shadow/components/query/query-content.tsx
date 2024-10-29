@@ -10,14 +10,14 @@ export function QueryContentComponent() {
     setIsQuerySearchContentVisible(!isQuerySearchContentVisible);
   };
   return (
-    <div className='flex flex-col h-full w-full'>
+    <div className="flex flex-col h-full w-full">
       {/* query header */}
       <QuerySearchHeaderComponent
         onTonggleQuerySearchContent={onTonggleQuerySearchContent}
       />
       {isQuerySearchContentVisible && <QuerySearchSqlEditor />}
-      <div className='flex-1'>query table</div>
-      <div className='h-16'>query footer</div>
+      <div className="flex-1">query table</div>
+      <div className="h-16">query footer</div>
     </div>
   );
 }

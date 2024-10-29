@@ -29,7 +29,7 @@ export function QuerySearchSqlEditor() {
   return (
     <div className='flex gap-2'>
       <div className='flex-1'>
-        <MonacoEditor value={sql} onChange={setSql} />
+        <MonacoEditor value={sql} onChange={(value) => setSql(value || "")} />{" "}
       </div>
       <div className='flex flex-col gap-2 pr-4'>
         <Button
