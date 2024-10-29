@@ -1,4 +1,5 @@
 export interface Datasource {
+  id: string;
   type: string; // 可以扩展为 'PostgreSQL' | 'MySQL' | 'Oracle' 等
   displayName: string;
   host: string;

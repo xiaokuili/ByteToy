@@ -5,7 +5,7 @@ import { MonacoEditor } from "@/components/ui/monaco-editor";
 import { Button } from "@/components/ui/button";
 import { Play, Copy } from "lucide-react";
 
-export function QuerySearchSqlEditor() {
+export function QuerySearchSqlEditor({ databaseId }: { databaseId: string }) {
   const [sql, setSql] = useState<string>("");
   const [isExecuting, setIsExecuting] = useState(false);
 
