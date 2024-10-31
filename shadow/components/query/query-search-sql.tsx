@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import SQLEditor from "@/components/ui/sql-editor";
+import SQLEditor from "@/components/ui/sql-editor/sql-editor";
 import { Button } from "@/components/ui/button";
 import { Play, Copy } from "lucide-react";
 import { getMetadata, checkConnection } from "@/lib/datasource-action";
