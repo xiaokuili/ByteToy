@@ -93,7 +93,6 @@ export function QuerySearchSqlEditor({ databaseId }: { databaseId: string }) {
         <MonacoEditor
           value={sql}
           onChange={(value) => setSql(value || "")}
-          suggestions={suggestions}
         />
       </div>
       <div className='flex flex-col gap-2 pr-4'>
