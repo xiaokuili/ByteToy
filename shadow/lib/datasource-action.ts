@@ -84,17 +84,18 @@ interface PostgresColumn {
   type: string;
   nullable: string;
 }
-async function introspectDatabase(
+export async function introspectDatabase(
   client: PrismaClient,
   datasource: Datasource,
-): Promise<Record<string, any>> {
-  const { type, schemas: targetSchemas } = datasource;
 
+): Promise<Record<string, any>> {
+  const type = "postgresql";
+  const targetSchemas = "All";
   try {
     switch (type.toLowerCase()) {
       case "postgresql": {
         // 构建 schema 过滤条件
-        const schemaFilter =
+        const schemaFilter = 
           targetSchemas === "All"
             ? "AND table_schema = 'public'"
             : `AND table_schema IN (${targetSchemas.map((s) => `'${s}'`).join(",")})`;
