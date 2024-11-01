@@ -3,7 +3,6 @@
 import { Editor, useMonaco } from "@monaco-editor/react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef } from "react";
-import { editor } from "monaco-editor";
 import { BasicSQLCompletionProvider } from "./sql-suggests";
 interface SQLEditorProps {
   value?: string;
