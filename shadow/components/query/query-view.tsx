@@ -62,13 +62,13 @@ export function QueryViewComponent({
   const { rows, columns, rowCount } = data;
 
   return (
-    <Card className='w-full'>
+    <Card className='h-full flex flex-col'>
       <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-4'>
         <CardTitle className='text-sm font-medium'>Query Results</CardTitle>
         <Badge variant='secondary'>{rowCount} rows</Badge>
       </CardHeader>
-      <CardContent className='p-0'>
-        <ScrollArea className='h-full rounded-md border'>
+      <CardContent className='flex-1 min-h-0 p-0'>
+        <ScrollArea className='h-full w-full rounded-md border'>
           <Table>
             <TableHeader>
               <TableRow>

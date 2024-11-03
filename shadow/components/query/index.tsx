@@ -7,7 +7,7 @@ export default function Query() {
       <div className='h-16'>
         <QuestionHeaderComponent />
       </div>
-      <div className='flex-1 '>
+      <div className='flex-1 min-h-0'>
         <QueryContentComponent />
       </div>
     </div>

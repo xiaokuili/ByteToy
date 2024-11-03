@@ -23,16 +23,7 @@ export function QueryContentComponent() {
 
   return (
     <div className='flex flex-col h-full w-full '>
-      <div
-        className='
-        border border-gray-200 
-        dark:border-gray-700 
-        rounded-lg 
-        overflow-hidden
-        bg-gray-50
-        dark:bg-gray-900
-      '
-      >
+      <div className='flex-none border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900'>
         <QuerySearchHeaderComponent
           onTonggleQuerySearchContent={onTonggleQuerySearchContent}
           onSelectDatabase={handleSelectDatabase}
@@ -56,7 +47,7 @@ export function QueryContentComponent() {
           />
         )}
       </div>
-      <div className='flex-1 overflow-auto border-b border-gray-200 dark:border-gray-700'>
+      <div className='flex-1 min-h-0 overflow-hidden mt-4'>
         <QueryViewComponent data={queryResult} error={queryError} />
       </div>
       <div className='h-16'>query footer</div>
