@@ -34,9 +34,12 @@ export function QuerySearchSqlEditor({
     setIsExecuting(true);
     try {
       const result = await executeQuery(databaseId, sql);
-      setQueryError(result.error);
-      setQueryResult(result.data);
       console.log(result);
+      if (result.success) {
+        setQueryResult(result.data);
+      } else {
+        setSqlError(result.error);
+      }
     } catch (error) {
       console.error("Error executing SQL:", error);
     } finally {

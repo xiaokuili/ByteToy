@@ -9,6 +9,8 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 interface QueryViewProps {
   data: {
@@ -21,14 +23,11 @@ interface QueryViewProps {
   };
 }
 
-export function QueryErrorView({
-  error,
-  title = "Query Error",
-}: QueryErrorViewProps) {
+function QueryErrorView({ error, title = "Query Error" }: QueryErrorViewProps) {
   return (
     <Card className='w-full border-destructive/50'>
       <CardHeader className='flex flex-row items-center gap-2 pb-2'>
-        <AlertCircle className='h-4 w-4 text-destructive' />
+        <AlertCircle className='h-4 w-4 text-destructive' /> {/* 修复这里 */}
         <CardTitle className='text-sm font-medium text-destructive'>
           {title}
         </CardTitle>
@@ -53,7 +52,8 @@ export function QueryViewComponent({
   data: QueryViewProps;
   error: string;
 }) {
-  if (!data) {
+  console.log(data, error);
+  if (!data && !error) {
     return null;
   }
   if (error) {
