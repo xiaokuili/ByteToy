@@ -54,7 +54,7 @@ export function QueryContentComponent() {
   };
 
   return (
-    <div className='flex flex-col h-full w-full'>
+    <div className='flex flex-col h-full w-full '>
       <div
         className='
         border border-gray-200 
@@ -86,7 +86,7 @@ export function QueryContentComponent() {
           />
         )}
       </div>
-      <div className='flex-1'>
+      <div className='flex-1 overflow-auto border-b border-gray-200 dark:border-gray-700'>
         <QueryViewComponent data={queryResult} />
       </div>
       <div className='h-16'>query footer</div>

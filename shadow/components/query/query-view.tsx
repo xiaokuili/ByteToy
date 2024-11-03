@@ -31,7 +31,7 @@ export function QueryViewComponent({ data }: QueryViewProps) {
         <Badge variant='secondary'>{rowCount} rows</Badge>
       </CardHeader>
       <CardContent className='p-0'>
-        <ScrollArea className='h-[400px] rounded-md border'>
+        <ScrollArea className='h-full rounded-md border'>
           <Table>
             <TableHeader>
               <TableRow>
