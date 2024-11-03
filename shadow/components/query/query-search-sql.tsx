@@ -5,6 +5,8 @@ import SQLEditor from "@/components/ui/sql-editor/sql-editor";
 import { Button } from "@/components/ui/button";
 import { Play, Copy } from "lucide-react";
 import { executeQuery } from "@/lib/datasource-action";
+import { AlertTitle } from "../ui/alert";
+import { set } from "react-hook-form";
 
 export function QuerySearchSqlEditor({
   databaseId,
@@ -30,7 +32,10 @@ export function QuerySearchSqlEditor({
 
   const handleExecute = async () => {
     if (!sql.trim()) return;
-
+    if (!databaseId) {
+      setQueryError("Please select a database first.");
+      return;
+    }
     setIsExecuting(true);
     try {
       const result = await executeQuery(databaseId, sql);
@@ -48,7 +53,6 @@ export function QuerySearchSqlEditor({
   };
 
   const handleCopy = () => {};
-
   return (
     <div className='flex '>
       <div className='flex flex-col gap-2 '>
@@ -58,7 +62,11 @@ export function QuerySearchSqlEditor({
           onClick={handleExecute}
           disabled={isExecuting}
         >
-          <Play className='h-4 w-4' />
+          {isExecuting ? (
+            <Loader2 className='h-4 w-4 animate-spin' />
+          ) : (
+            <Play className='h-4 w-4' />
+          )}
         </Button>
         <Button variant='ghost' size='icon' onClick={handleCopy}>
           <Copy className='h-4 w-4' />
