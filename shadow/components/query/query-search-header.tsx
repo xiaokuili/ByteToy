@@ -44,7 +44,7 @@ export function QuerySearchHeaderComponent({
     onTonggleQuerySearchContent();
   };
   return (
-    <div className='flex items-center justify-between p-4 border-b border-gray-200 bg-white border-y'>
+    <div className='flex items-center justify-between p-3 border-b border-gray-200  border-y'>
       <Select defaultValue={databases[0]?.id} onValueChange={onSelectDatabase}>
         <SelectTrigger className='w-[180px]'>
           <SelectValue placeholder='Select database' />

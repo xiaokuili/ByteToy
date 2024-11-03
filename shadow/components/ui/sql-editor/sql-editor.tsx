@@ -54,22 +54,40 @@ export function SQLEditor({
   }, [monaco]);
 
   return (
-    <Editor
-      height={height}
-      language='sql'
-      value={value}
-      onChange={onChange}
-      options={{
-        minimap: { enabled: false },
-        quickSuggestions: {
-          other: true,
-          comments: false,
-          strings: true,
-        },
-        suggestOnTriggerCharacters: true,
-        wordBasedSuggestions: false,
-      }}
-    />
+    <div>
+      <Editor
+        height={height}
+        language='sql'
+        value={value}
+        theme='vs-dark'
+        onChange={onChange}
+        options={{
+          minimap: { enabled: false },
+          quickSuggestions: {
+            other: true,
+            comments: false,
+            strings: true,
+          },
+          suggestOnTriggerCharacters: true,
+          wordBasedSuggestions: false,
+          fontSize: 16,
+          fontFamily: 'JetBrains Mono, Menlo, Monaco, "Courier New", monospace',
+          lineNumbers: "off",
+          folding: false,
+          lineDecorationsWidth: 0,
+          padding: { top: 12, bottom: 12 },
+          renderLineHighlight: "none",
+          scrollbar: {
+            vertical: "hidden",
+            horizontal: "hidden",
+          },
+          overviewRulerBorder: false,
+          hideCursorInOverviewRuler: true,
+          glyphMargin: false,
+          contextmenu: false,
+        }}
+      />
+    </div>
   );
 }
 export default SQLEditor;
