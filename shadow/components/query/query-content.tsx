@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { QuerySearchHeaderComponent } from "./query-search-header";
 import { QuerySearchSqlEditor } from "./query-search-sql";
+import { QueryViewComponent } from "./query-view";
+
 export function QueryContentComponent() {
   const [isQuerySearchContentVisible, setIsQuerySearchContentVisible] =
     useState(true);
@@ -15,6 +17,40 @@ export function QueryContentComponent() {
   const handleSelectDatabase = (databaseId: string) => {
     setDatabaseId(databaseId);
     console.log(databaseId);
+  };
+
+  const queryResult = {
+    rows: [
+      {
+        id: 1,
+        username: "john_doe",
+        email: "john@example.com",
+        created_at: "2024-01-15T10:30:00Z",
+        is_active: true,
+      },
+      {
+        id: 2,
+        username: "jane_smith",
+        email: "jane@example.com",
+        created_at: "2024-01-16T14:20:00Z",
+        is_active: true,
+      },
+      {
+        id: 3,
+        username: "bob_wilson",
+        email: "bob@example.com",
+        created_at: "2024-01-17T09:15:00Z",
+        is_active: false,
+      },
+    ],
+    columns: [
+      { name: "id", type: "integer" },
+      { name: "username", type: "varchar" },
+      { name: "email", type: "varchar" },
+      { name: "created_at", type: "timestamp" },
+      { name: "is_active", type: "boolean" },
+    ],
+    rowCount: 3,
   };
 
   return (
@@ -50,7 +86,9 @@ export function QueryContentComponent() {
           />
         )}
       </div>
-      <div className='flex-1'>query table</div>
+      <div className='flex-1'>
+        <QueryViewComponent data={queryResult} />
+      </div>
       <div className='h-16'>query footer</div>
     </div>
   );
