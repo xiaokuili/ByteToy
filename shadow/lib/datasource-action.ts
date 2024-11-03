@@ -22,6 +22,81 @@ interface ConnectionResult {
     }
   >;
 }
+export async function executeQuery(datasourceId: string, sql: string) {
+  try {
+    // 1. 获取数据源信息
+    const metadataResult = await getMetadata(datasourceId);
+    if (!metadataResult.success || !metadataResult.data) {
+      return {
+        success: false,
+        error: "Failed to get datasource information"
+      };
+    }
+
+    const datasource = metadataResult.data;
+    const connectionString = buildConnectionString(datasource);
+
+    // 2. 创建数据库连接
+    const queryClient = new PrismaClient({
+      datasources: {
+        db: {
+          url: connectionString,
+        },
+      },
+    });
+
+    try {
+      // 3. 执行查询
+      const result = await queryClient.$queryRawUnsafe(sql);
+      
+      // 4. 格式化结果
+      return {
+        success: true,
+        data: {
+          rows: result,
+          // 如果是 SELECT 查询，获取列信息
+          columns: result && result.length > 0 
+            ? Object.keys(result[0]).map(key => ({
+                name: key,
+                type: typeof result[0][key]
+              }))
+            : [],
+          rowCount: result?.length || 0,
+        }
+      };
+
+    } catch (queryError) {
+      return {
+        success: false,
+        error: queryError instanceof Error ? queryError.message : "Query execution failed"
+      };
+    } finally {
+      // 5. 关闭连接
+      await queryClient.$disconnect();
+    }
+
+  } catch (error) {
+    console.error("Query execution failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Query execution failed"
+    };
+  }
+}
+
+// 定义返回类型
+interface QueryResult {
+  success: boolean;
+  error?: string;
+  data?: {
+    rows: any[];
+    columns: Array<{
+      name: string;
+      type: string;
+    }>;
+    rowCount: number;
+  };
+}
 // 构建连接字符串
 function buildConnectionString(datasource: Datasource): string {
   const { type, host, port, databaseName, username, password, useSSL } =
@@ -279,3 +354,4 @@ export async function deleteMetadata(id: string) {
     };
   }
 }
+

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import SQLEditor from "@/components/ui/sql-editor/sql-editor";
 import { Button } from "@/components/ui/button";
 import { Play, Copy } from "lucide-react";
-import { getMetadata, checkConnection } from "@/lib/datasource-action";
+import { executeQuery } from "@/lib/datasource-action";
 
 export function QuerySearchSqlEditor({ databaseId }: { databaseId: string }) {
   const [sql, setSql] = useState<string>("");
@@ -28,7 +28,8 @@ export function QuerySearchSqlEditor({ databaseId }: { databaseId: string }) {
 
     setIsExecuting(true);
     try {
-      // 执行 SQL 的逻辑
+      const result = await executeQuery(databaseId, sql);
+      console.log(result);
     } catch (error) {
       console.error("Error executing SQL:", error);
     } finally {
