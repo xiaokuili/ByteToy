@@ -6,6 +6,8 @@ import { QuerySearchSqlEditor } from "./query-search-sql";
 import { QueryViewComponent } from "./query-view";
 
 export function QueryContentComponent() {
+  const [queryResult, setQueryResult] = useState<any>(null);
+  const [queryError, setQueryError] = useState<string>("");
   const [isQuerySearchContentVisible, setIsQuerySearchContentVisible] =
     useState(true);
   const [databaseId, setDatabaseId] = useState<string>("");
@@ -17,40 +19,6 @@ export function QueryContentComponent() {
   const handleSelectDatabase = (databaseId: string) => {
     setDatabaseId(databaseId);
     console.log(databaseId);
-  };
-
-  const queryResult = {
-    rows: [
-      {
-        id: 1,
-        username: "john_doe",
-        email: "john@example.com",
-        created_at: "2024-01-15T10:30:00Z",
-        is_active: true,
-      },
-      {
-        id: 2,
-        username: "jane_smith",
-        email: "jane@example.com",
-        created_at: "2024-01-16T14:20:00Z",
-        is_active: true,
-      },
-      {
-        id: 3,
-        username: "bob_wilson",
-        email: "bob@example.com",
-        created_at: "2024-01-17T09:15:00Z",
-        is_active: false,
-      },
-    ],
-    columns: [
-      { name: "id", type: "integer" },
-      { name: "username", type: "varchar" },
-      { name: "email", type: "varchar" },
-      { name: "created_at", type: "timestamp" },
-      { name: "is_active", type: "boolean" },
-    ],
-    rowCount: 3,
   };
 
   return (
@@ -78,6 +46,8 @@ export function QueryContentComponent() {
         {isQuerySearchContentVisible && (
           <QuerySearchSqlEditor
             databaseId={databaseId}
+            setQueryResult={setQueryResult}
+            setQueryError={setQueryError}
             className='
               bg-gray-50/50
               dark:bg-gray-900/50
@@ -87,7 +57,7 @@ export function QueryContentComponent() {
         )}
       </div>
       <div className='flex-1 overflow-auto border-b border-gray-200 dark:border-gray-700'>
-        <QueryViewComponent data={queryResult} />
+        <QueryViewComponent data={queryResult} error={queryError} />
       </div>
       <div className='h-16'>query footer</div>
     </div>

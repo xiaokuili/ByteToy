@@ -21,7 +21,44 @@ interface QueryViewProps {
   };
 }
 
-export function QueryViewComponent({ data }: QueryViewProps) {
+export function QueryErrorView({
+  error,
+  title = "Query Error",
+}: QueryErrorViewProps) {
+  return (
+    <Card className='w-full border-destructive/50'>
+      <CardHeader className='flex flex-row items-center gap-2 pb-2'>
+        <AlertCircle className='h-4 w-4 text-destructive' />
+        <CardTitle className='text-sm font-medium text-destructive'>
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Alert variant='destructive'>
+          <AlertCircle className='h-4 w-4' />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription className='mt-2 font-mono text-sm'>
+            {error}
+          </AlertDescription>
+        </Alert>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function QueryViewComponent({
+  data,
+  error,
+}: {
+  data: QueryViewProps;
+  error: string;
+}) {
+  if (!data) {
+    return null;
+  }
+  if (error) {
+    return <QueryErrorView error={error} />;
+  }
   const { rows, columns, rowCount } = data;
 
   return (

@@ -6,12 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Play, Copy } from "lucide-react";
 import { executeQuery } from "@/lib/datasource-action";
 
-export function QuerySearchSqlEditor({ databaseId }: { databaseId: string }) {
+export function QuerySearchSqlEditor({
+  databaseId,
+  setQueryResult,
+  setQueryError,
+}: {
+  databaseId: string;
+  setQueryResult: (result: any) => void;
+  setQueryError: (error: string) => void;
+}) {
   const [sql, setSql] = useState<string>("");
   const [isExecuting, setIsExecuting] = useState(false);
-  const [suggestions, setSuggestions] = useState<
-    Monaco.languages.CompletionItem[]
-  >([]);
 
   useEffect(() => {
     const fetchDatabaseStructure = async () => {
@@ -29,6 +34,8 @@ export function QuerySearchSqlEditor({ databaseId }: { databaseId: string }) {
     setIsExecuting(true);
     try {
       const result = await executeQuery(databaseId, sql);
+      setQueryError(result.error);
+      setQueryResult(result.data);
       console.log(result);
     } catch (error) {
       console.error("Error executing SQL:", error);
