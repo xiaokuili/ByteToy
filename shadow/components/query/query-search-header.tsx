@@ -20,10 +20,12 @@ import { Input } from "@/components/ui/input";
 export function QuerySearchHeaderComponent({
   onTonggleQuerySearchContent,
   onSelectDatabase,
+  onUpdateVariable,
   variables,
 }: {
   onTonggleQuerySearchContent: () => void;
   onSelectDatabase: (databaseId: string) => void;
+  onUpdateVariable: (variable: Variable) => void;
   variables: Variable[];
 }) {
   const [databases, setDatabases] = useState<
@@ -49,6 +51,13 @@ export function QuerySearchHeaderComponent({
   }, []);
   const handleClick = () => {
     onTonggleQuerySearchContent();
+  };
+  const handleValueChange = (id: string, newValue: string) => {
+    onUpdateVariable((prevVariables) =>
+      prevVariables.map((variable) =>
+        variable.id === id ? { ...variable, value: newValue } : variable
+      )
+    );
   };
   return (
     <div className='border-y border-border bg-muted/5'>
@@ -122,6 +131,9 @@ export function QuerySearchHeaderComponent({
                       value={variable.value}
                       placeholder={`Enter ${variable.name}`}
                       className='h-8 text-sm bg-muted/30 focus:bg-background transition-colors'
+                      onChange={(e) =>
+                        handleValueChange(variable.id, e.target.value)
+                      }
                     />
                   </div>
                 </div>

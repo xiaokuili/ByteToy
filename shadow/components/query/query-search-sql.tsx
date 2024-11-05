@@ -8,20 +8,34 @@ import { executeQuery } from "@/lib/datasource-action";
 import { AlertTitle } from "../ui/alert";
 import { Loader2 } from "lucide-react";
 import { Variable } from "./tpyes";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Eye } from "lucide-react";
 
 export function QuerySearchSqlEditor({
   databaseId,
+  variables,
   setQueryResult,
   setQueryError,
   setVariables,
+  setSqlContent,
+  sqlContent,
 }: {
   databaseId: string;
+  variables: Variable[];
   setQueryResult: (result: any) => void;
   setQueryError: (error: string) => void;
   setVariables: (variables: Variable[]) => void;
+  setSqlContent: (sqlContent: string) => void;
+  sqlContent: string;
 }) {
-  const [sql, setSql] = useState<string>("");
   const [isExecuting, setIsExecuting] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     const fetchDatabaseStructure = async () => {
@@ -32,9 +46,18 @@ export function QuerySearchSqlEditor({
       fetchDatabaseStructure();
     }
   }, [databaseId]);
+  const getPreviewSql = () => {
+    let previewSql = sqlContent;
+    variables.forEach((variable) => {
+      const regex = new RegExp(`\\{\\{${variable.name}\\}\\}`, "g");
+      const value = variable.value ? `'${variable.value}'` : "NULL";
+      previewSql = previewSql.replace(regex, value);
+    });
+    return previewSql;
+  };
 
   const handleExecute = async () => {
-    if (!sql.trim()) return;
+    if (!sqlContent.trim()) return;
     if (!databaseId) {
       setQueryError("Please select a database first.");
       return;
@@ -78,7 +101,7 @@ export function QuerySearchSqlEditor({
   };
   // 在SQL改变时更新变量
   const handleSqlChange = (value: string) => {
-    setSql(value);
+    setSqlContent(value);
     const newVariables = parseVariables(value);
     if (newVariables.length > 0) {
       setVariables(newVariables);
@@ -103,13 +126,36 @@ export function QuerySearchSqlEditor({
             <Play className='h-4 w-4' />
           )}
         </Button>
-        <Button variant='ghost' size='icon' onClick={handleCopy}>
-          <Copy className='h-4 w-4' />
+
+        <Button
+          variant='ghost'
+          size='icon'
+          onClick={() => setShowPreview(true)}
+        >
+          <Eye className='h-4 w-4' />
         </Button>
+        <Dialog open={showPreview} onOpenChange={setShowPreview}>
+          <DialogContent className='sm:max-w-[600px]'>
+            <DialogHeader>
+              <DialogTitle className='flex items-center gap-2'>
+                <Eye className='h-4 w-4' />
+                SQL Preview
+              </DialogTitle>
+              <DialogDescription>
+                Preview of SQL query with variable values replaced.
+              </DialogDescription>
+            </DialogHeader>
+            <div className='mt-2'>
+              <pre className='p-4 rounded-lg bg-muted text-sm overflow-auto max-h-[400px]'>
+                <code>{getPreviewSql()}</code>
+              </pre>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
       <div className='flex-1'>
         <SQLEditor
-          value={sql}
+          value={sqlContent}
           onChange={handleSqlChange}
           height='200px'
           placeholder='SELECT * FROM users WHERE...'

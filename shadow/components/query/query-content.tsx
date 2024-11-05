@@ -10,6 +10,7 @@ export function QueryContentComponent() {
   const [queryResult, setQueryResult] = useState<any>(null);
   const [queryError, setQueryError] = useState<string>("");
   const [variables, setVariables] = useState<Variable[]>([]);
+  const [sqlContent, setSqlContent] = useState<string>("");
 
   const [isQuerySearchContentVisible, setIsQuerySearchContentVisible] =
     useState(true);
@@ -30,6 +31,7 @@ export function QueryContentComponent() {
         <QuerySearchHeaderComponent
           onTonggleQuerySearchContent={onTonggleQuerySearchContent}
           onSelectDatabase={handleSelectDatabase}
+          onUpdateVariable={setVariables}
           variables={variables}
           className='
             border-b 
@@ -41,9 +43,12 @@ export function QueryContentComponent() {
         {isQuerySearchContentVisible && (
           <QuerySearchSqlEditor
             databaseId={databaseId}
+            variables={variables}
             setQueryResult={setQueryResult}
             setQueryError={setQueryError}
             setVariables={setVariables}
+            setSqlContent={setSqlContent}
+            sqlContent={sqlContent}
             className='
               bg-gray-50/50
               dark:bg-gray-900/50
