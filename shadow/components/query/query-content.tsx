@@ -5,6 +5,7 @@ import { QuerySearchHeaderComponent } from "./query-search-header";
 import { QuerySearchSqlEditor } from "./query-search-sql";
 import { QueryViewComponent } from "./query-view";
 import { Variable } from "@/types/base";
+import { QueryFooterHeader } from "./query-search-footer";
 
 export function QueryContentComponent() {
   const [queryResult, setQueryResult] = useState<any>(null);
@@ -60,7 +61,12 @@ export function QueryContentComponent() {
       <div className='flex-1 min-h-0 overflow-hidden mt-4'>
         <QueryViewComponent data={queryResult} error={queryError} />
       </div>
-      <div className='h-16'>query footer</div>
+      <div className='h-16'>
+        <QueryFooterHeader
+          rowCount={queryResult?.rowCount}
+          executionTime={queryResult?.executionTime}
+        />
+      </div>
     </div>
   );
 }
