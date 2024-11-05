@@ -63,9 +63,10 @@ export function QuerySearchSqlEditor({
       return;
     }
     setIsExecuting(true);
+    setQueryResult(null);
+    setQueryError("");
     try {
-      const result = await executeQuery(databaseId, sql);
-      console.log(result);
+      const result = await executeQuery(databaseId, sqlContent);
       if (result.success) {
         setQueryResult(result.data);
       } else {
@@ -96,7 +97,6 @@ export function QuerySearchSqlEditor({
         });
       }
     }
-    console.log(variables);
     return variables;
   };
   // 在SQL改变时更新变量

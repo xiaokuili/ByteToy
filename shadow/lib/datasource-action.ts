@@ -5,6 +5,9 @@ import { Datasource  } from "@/types/base";
 import { revalidatePath } from "next/cache";
 import { PrismaClient } from "@prisma/client";
 import {Schema} from "@/types/base"
+
+
+
 interface ConnectionResult {
 
   success: boolean;
@@ -48,19 +51,52 @@ export async function executeQuery(datasourceId: string, sql: string) {
     try {
       // 3. 执行查询
       const result = await queryClient.$queryRawUnsafe(sql);
-      
+      // 改进格式化逻辑
+      const formattedRows = result.map((row: any) => {
+        const formattedRow: any = {};
+        for (const [key, value] of Object.entries(row)) {
+          // 更严谨的类型检查
+          if (value === null || value === undefined) {
+            formattedRow[key] = value;
+          }
+          // 检查是否为 Prisma.Decimal
+          else if (typeof value === 'object' && 'toFixed' in value) {
+            formattedRow[key] = value.toString();
+          }
+          // Date 对象
+          else if (value instanceof Date) {
+            formattedRow[key] = value.toISOString();
+          }
+          // 其他类型直接赋值
+          else {
+            formattedRow[key] = value;
+          }
+        }
+        return formattedRow;
+      });
+      // 改进列类型检测
+      const columns = result && result.length > 0 
+        ? Object.entries(result[0]).map(([key, value]) => {
+            let type = 'unknown';
+            if (typeof value === 'object' && 'toFixed' in value) {
+              type = 'decimal';
+            } else if (value instanceof Date) {
+              type = 'datetime';
+            } else {
+              type = typeof value;
+            }
+            return {
+              name: key,
+              type
+            };
+          })
+        : [];
       // 4. 格式化结果
       return {
         success: true,
         data: {
-          rows: result,
-          // 如果是 SELECT 查询，获取列信息
-          columns: result && result.length > 0 
-            ? Object.keys(result[0]).map(key => ({
-                name: key,
-                type: typeof result[0][key]
-              }))
-            : [],
+          rows: formattedRows,
+          columns,
           rowCount: result?.length || 0,
         }
       };
