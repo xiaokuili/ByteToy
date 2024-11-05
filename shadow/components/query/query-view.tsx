@@ -63,20 +63,29 @@ export function QueryViewComponent({
 
   return (
     <Card className='h-full flex flex-col'>
-      <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-4'>
+      <CardHeader className='flex-none flex flex-row items-center justify-between space-y-0 py-3'>
+        {" "}
+        {/* 减小头部高度 */}
         <CardTitle className='text-sm font-medium'>Query Results</CardTitle>
-        <Badge variant='secondary'>{rowCount} rows</Badge>
+        <Badge variant='secondary' className='text-xs'>
+          {rowCount} rows
+        </Badge>
       </CardHeader>
       <CardContent className='flex-1 min-h-0 p-0'>
         <ScrollArea className='h-full w-full rounded-md border'>
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className='hover:bg-transparent'>
+                {" "}
+                {/* 禁用hover效果 */}
                 {columns.map((column) => (
-                  <TableHead key={column.name} className='bg-muted/50'>
-                    <div className='flex flex-col'>
-                      <span>{column.name}</span>
-                      <span className='text-xs text-muted-foreground'>
+                  <TableHead
+                    key={column.name}
+                    className='bg-muted/50 py-2 h-8' // 减小表头高度
+                  >
+                    <div className='flex flex-col gap-0.5'>
+                      <span className='text-xs font-medium'>{column.name}</span>
+                      <span className='text-[10px] text-muted-foreground font-normal'>
                         {column.type}
                       </span>
                     </div>
@@ -86,9 +95,15 @@ export function QueryViewComponent({
             </TableHeader>
             <TableBody>
               {rows.map((row, rowIndex) => (
-                <TableRow key={rowIndex}>
+                <TableRow
+                  key={rowIndex}
+                  className='hover:bg-muted/30 transition-colors'
+                >
                   {columns.map((column) => (
-                    <TableCell key={`${rowIndex}-${column.name}`}>
+                    <TableCell
+                      key={`${rowIndex}-${column.name}`}
+                      className='py-1.5 px-3 text-xs' // 减小单元格内边距
+                    >
                       {formatCellValue(row[column.name])}
                     </TableCell>
                   ))}
@@ -102,10 +117,37 @@ export function QueryViewComponent({
   );
 }
 
-// 格式化单元格值的辅助函数
+// 优化格式化函数
 function formatCellValue(value: any): string {
-  if (value === null) return "NULL";
+  if (value === null) return "null"; // 小写的 null
   if (value === undefined) return "";
-  if (typeof value === "object") return JSON.stringify(value);
+
+  // 处理数字
+  if (typeof value === "number") {
+    if (Number.isInteger(value)) {
+      return value.toString();
+    }
+    return value.toFixed(2); // 限制小数位数
+  }
+
+  // 处理布尔值
+  if (typeof value === "boolean") {
+    return value ? "true" : "false"; // 小写的布尔值
+  }
+
+  // 处理日期
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  // 处理对象
+  if (typeof value === "object") {
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return "[Object]";
+    }
+  }
+
   return String(value);
 }

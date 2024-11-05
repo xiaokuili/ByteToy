@@ -4,10 +4,13 @@ import { useState } from "react";
 import { QuerySearchHeaderComponent } from "./query-search-header";
 import { QuerySearchSqlEditor } from "./query-search-sql";
 import { QueryViewComponent } from "./query-view";
+import { Variable } from "./tpyes";
 
 export function QueryContentComponent() {
   const [queryResult, setQueryResult] = useState<any>(null);
   const [queryError, setQueryError] = useState<string>("");
+  const [variables, setVariables] = useState<Variable[]>([]);
+
   const [isQuerySearchContentVisible, setIsQuerySearchContentVisible] =
     useState(true);
   const [databaseId, setDatabaseId] = useState<string>("");
@@ -27,6 +30,7 @@ export function QueryContentComponent() {
         <QuerySearchHeaderComponent
           onTonggleQuerySearchContent={onTonggleQuerySearchContent}
           onSelectDatabase={handleSelectDatabase}
+          variables={variables}
           className='
             border-b 
             border-gray-200 
@@ -39,6 +43,7 @@ export function QueryContentComponent() {
             databaseId={databaseId}
             setQueryResult={setQueryResult}
             setQueryError={setQueryError}
+            setVariables={setVariables}
             className='
               bg-gray-50/50
               dark:bg-gray-900/50
