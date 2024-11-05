@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { MainNavComponent } from "@/components/nav/main-nav";
 import { Toaster } from "sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,12 +27,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang='en'>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <MainNavComponent children={children} />
-        <Toaster />
+        <TooltipProvider>
+          <MainNavComponent children={children} />
+          <Toaster />
+        </TooltipProvider>
       </body>
     </html>
   );

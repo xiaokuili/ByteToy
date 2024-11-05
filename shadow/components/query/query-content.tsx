@@ -4,7 +4,7 @@ import { useState } from "react";
 import { QuerySearchHeaderComponent } from "./query-search-header";
 import { QuerySearchSqlEditor } from "./query-search-sql";
 import { QueryViewComponent } from "./query-view";
-import { Variable } from "./tpyes";
+import { Variable } from "@/types/base";
 
 export function QueryContentComponent() {
   const [queryResult, setQueryResult] = useState<any>(null);

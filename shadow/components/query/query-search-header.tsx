@@ -9,7 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Variable } from "./tpyes";
+import { cn } from "@/lib/utils";
+import { Database, Server, ChevronDown } from "lucide-react";
+
+import { Variable } from "@/types/base";
 import { getMetadatas } from "@/lib/datasource-action";
 import { Maximize2 } from "lucide-react";
 import { toast } from "sonner";
@@ -71,18 +74,32 @@ export function QuerySearchHeaderComponent({
               defaultValue={databases[0]?.id}
               onValueChange={onSelectDatabase}
             >
-              <SelectTrigger className='w-[200px] bg-background'>
-                <SelectValue placeholder='Select database' />
+              <SelectTrigger
+                className={cn(
+                  "w-[250px]",
+                  "bg-background",
+                  "border-muted",
+                  "hover:bg-muted/50",
+                  "transition-colors"
+                )}
+              >
+                <div className='flex items-center gap-2'>
+                  <Database className='h-4 w-4 text-muted-foreground' />
+                  <SelectValue placeholder='选择数据库' />
+                </div>
+                <ChevronDown className='h-4 w-4 text-muted-foreground' />
               </SelectTrigger>
               <SelectContent>
                 {databases.map((db) => (
-                  <SelectItem key={db.id} value={db.id}>
-                    {db.name}
+                  <SelectItem key={db.id} value={db.id} className='group'>
+                    <div className='flex items-center gap-2'>
+                      <Server className='h-4 w-4 text-muted-foreground group-hover:text-primary' />
+                      <span>{db.name}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-
             {/* 可以添加其他工具按钮 */}
             <div className='flex items-center gap-2'>{/* 其他控件 */}</div>
           </div>

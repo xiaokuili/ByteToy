@@ -7,7 +7,7 @@ import { Play, Copy } from "lucide-react";
 import { executeQuery } from "@/lib/datasource-action";
 import { AlertTitle } from "../ui/alert";
 import { Loader2 } from "lucide-react";
-import { Variable } from "./tpyes";
+import { Variable } from "@/types/base";
 import {
   Dialog,
   DialogContent,
@@ -119,6 +119,7 @@ export function QuerySearchSqlEditor({
           size='icon'
           onClick={handleExecute}
           disabled={isExecuting}
+          className='text-blue-600 hover:text-blue-600 hover:bg-blue-50'
         >
           {isExecuting ? (
             <Loader2 className='h-4 w-4 animate-spin' />

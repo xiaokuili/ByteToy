@@ -32,3 +32,25 @@ export interface Schema {
   name: string;
   tables: Table[];
 }
+export type SectionType = "LLM" | "PIE" | "CHART" | "TABLE";
+
+export interface Variable {
+  id: string;
+  name: string;
+  value: string;
+  type: "string" | "number" | "boolean" | "date";
+}
+
+export interface DatabaseSource {
+  id: string ;
+  sql: string;
+}
+
+export interface Section {
+  id: string;
+  name: string;
+
+  
+  sectionType: SectionType
+
+}
