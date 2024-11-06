@@ -85,21 +85,6 @@ export function QueryViewComponent({
 
   return (
     <Card className='h-full flex flex-col'>
-      <CardHeader className='flex-none flex flex-row items-center justify-between space-y-0 py-3'>
-        <div className='flex items-center gap-2'>
-          <CardTitle className='text-sm font-medium'>Query Results</CardTitle>
-          <Badge variant='secondary' className='text-xs'>
-            {rowCount} {rowCount === 1 ? "row" : "rows"}
-          </Badge>
-        </div>
-
-        {/* 3. 添加执行时间和其他元数据 */}
-        <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-          <span>{columns.length} columns</span>
-          {data.executionTime && <span>· {data.executionTime}ms</span>}
-        </div>
-      </CardHeader>
-
       <CardContent className='flex-1 min-h-0 p-0'>
         <ScrollArea className='h-full w-full rounded-md border'>
           <Table>

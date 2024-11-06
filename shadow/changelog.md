@@ -11,3 +11,5 @@ v 0.0.1
 - 优化变量展示
 - 实现query footer
 - 测试数据展示
+- table 去掉表头
+- 实现variable 查询

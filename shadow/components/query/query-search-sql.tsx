@@ -66,11 +66,29 @@ export function QuerySearchSqlEditor({
     setQueryResult(null);
     setQueryError("");
     try {
-      const result = await executeQuery(databaseId, sqlContent);
+      // 处理 SQL 变量
+      let finalSql = sqlContent;
+      if (variables && variables.length > 0) {
+        variables.forEach((variable: Variable) => {
+          // 替换所有匹配的变量
+          const regex = new RegExp(`{{${variable.name}}}`, "g");
+
+          // 根据值类型处理
+          const value =
+            typeof variable.value === "string"
+              ? `'${variable.value}'` // 字符串加引号
+              : variable.value; // 数字直接使用
+
+          finalSql = finalSql.replace(regex, value.toString());
+        });
+      }
+      console.log(finalSql);
+
+      const result = await executeQuery(databaseId, finalSql);
       if (result.success) {
         setQueryResult(result.data);
       } else {
-        setSqlError(result.error);
+        setQueryError(result.error);
       }
     } catch (error) {
       console.error("Error executing SQL:", error);
