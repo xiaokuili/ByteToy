@@ -11,11 +11,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useVisualization } from "@/hook/use-visualization";
 
 interface QueryResultHeaderProps {
   rowCount?: number;
   executionTime?: number;
-  onRefresh?: () => void;
+  isTableVisible: boolean;
+  onToggleTable: (visible: boolean) => void;
+  isVisualizationVisible: boolean;
+  onToggleVisualization: (visible: boolean) => void;
 }
 interface ViewToggleProps {
   view: "table" | "chart";
@@ -69,10 +73,13 @@ export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
 export function QueryFooterHeader({
   rowCount = 0,
   executionTime = 0,
-  onRefresh,
+  isTableVisible,
+  isVisualizationVisible,
+  onToggleTable,
+  onToggleVisualization,
 }: QueryResultHeaderProps) {
   const [view, setView] = useState<"table" | "chart">("table");
-
+  const { isOpen, setIsOpen } = useVisualization();
   return (
     <div
       className={cn(
@@ -86,6 +93,7 @@ export function QueryFooterHeader({
       {/* 左侧 */}
       <div className='flex items-center'>
         <Button
+          onClick={() => setIsOpen(!isOpen)}
           variant='ghost'
           size='sm'
           className='text-sm font-medium hover:bg-primary/10 hover:text-primary flex items-center gap-2 transition-colors'

@@ -12,6 +12,8 @@ export function QueryContentComponent() {
   const [queryError, setQueryError] = useState<string>("");
   const [variables, setVariables] = useState<Variable[]>([]);
   const [sqlContent, setSqlContent] = useState<string>("");
+  const [isTableVisible, setIsTableVisible] = useState(false);
+  const [isVisualizationVisible, setIsVisualizationVisible] = useState(false);
 
   const [isQuerySearchContentVisible, setIsQuerySearchContentVisible] =
     useState(true);
@@ -65,6 +67,10 @@ export function QueryContentComponent() {
         <QueryFooterHeader
           rowCount={queryResult?.rowCount}
           executionTime={queryResult?.executionTime}
+          isTableVisible={isTableVisible}
+          onToggleTable={setIsTableVisible}
+          isVisualizationVisible={isVisualizationVisible}
+          onToggleVisualization={setIsVisualizationVisible}
         />
       </div>
     </div>
