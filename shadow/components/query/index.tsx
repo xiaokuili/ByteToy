@@ -1,10 +1,11 @@
 "use client";
 
-import { QuestionHeaderComponent } from "./query-header";
-import { QueryContentComponent } from "@/components/query/query-content";
+import { QuestionHeaderComponent } from "./header";
+import { SQLWorkbench } from "@/components/query/sql-workbench";
 import { useVisualization } from "@/hook/use-visualization";
 import { cn } from "@/lib/utils";
-import { VisualizationPanel } from "./visualization-panel";
+import { VisualizationPanel } from "./visualization";
+
 export default function Query() {
   const { isOpen } = useVisualization();
 
@@ -17,7 +18,7 @@ export default function Query() {
         <div
           className={cn("flex-1 transition-all", isOpen ? "w-[60%]" : "w-full")}
         >
-          <QueryContentComponent />
+          <SQLWorkbench />
         </div>
 
         {isOpen && (

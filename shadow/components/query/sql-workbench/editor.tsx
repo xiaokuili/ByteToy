@@ -5,7 +5,7 @@ import SQLEditor from "@/components/ui/sql-editor/sql-editor";
 import { Button } from "@/components/ui/button";
 import { Play, Copy } from "lucide-react";
 import { executeQuery } from "@/lib/datasource-action";
-import { AlertTitle } from "../ui/alert";
+import { AlertTitle } from "../../ui/alert";
 import { Loader2 } from "lucide-react";
 import { Variable } from "@/types/base";
 import {
@@ -16,6 +16,25 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Eye } from "lucide-react";
+
+
+interface DatabaseProps {
+  databaseId: string;
+}
+
+interface QueryState {
+  sqlContent: string;
+  variables: Variable[];
+}
+interface SQLEditorProps extends DatabaseProps, QueryState, QueryActions {}
+
+
+interface QueryActions {
+  setQueryResult: (result: any) => void;
+  setQueryError: (error: string) => void;
+  setVariables: (variables: Variable[]) => void;
+  setSqlContent: (sqlContent: string) => void;
+}
 
 export function QuerySearchSqlEditor({
   databaseId,

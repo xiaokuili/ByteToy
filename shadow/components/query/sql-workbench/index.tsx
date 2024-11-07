@@ -1,13 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { QuerySearchHeaderComponent } from "./query-search-header";
-import { QuerySearchSqlEditor } from "./query-search-sql";
-import { QueryViewComponent } from "./query-view";
+import { QuerySearchHeaderComponent } from "./header";
+import { QuerySearchSqlEditor } from "./editor";
+import { QueryViewComponent } from "./result";
 import { Variable } from "@/types/base";
-import { QueryFooterHeader } from "./query-search-footer";
+import { QueryFooterHeader } from "./footer";
 
-export function QueryContentComponent() {
+interface QueryState {
+  sqlContent: string;
+  variables: Variable[];
+  queryResult: any;
+  queryError: string;
+  isEditorVisible: boolean;
+}
+interface DatabaseState {
+  databaseId: string;
+}
+interface QueryActions {
+  setQueryResult: (result: any) => void;
+  setQueryError: (error: string) => void;
+  setVariables: (variables: Variable[]) => void;
+  setSqlContent: (sqlContent: string) => void;
+}
+
+
+
+export function SQLWorkbench() {
   const [queryResult, setQueryResult] = useState<any>(null);
   const [queryError, setQueryError] = useState<string>("");
   const [variables, setVariables] = useState<Variable[]>([]);
@@ -15,8 +34,7 @@ export function QueryContentComponent() {
   const [isTableVisible, setIsTableVisible] = useState(false);
   const [isVisualizationVisible, setIsVisualizationVisible] = useState(false);
 
-  const [isQuerySearchContentVisible, setIsQuerySearchContentVisible] =
-    useState(true);
+  const [isEditorVisible, setIsEditorVisible] = useState(true);
   const [databaseId, setDatabaseId] = useState<string>("");
 
   const onTonggleQuerySearchContent = () => {
@@ -43,7 +61,7 @@ export function QueryContentComponent() {
             dark:bg-gray-800
           '
         />
-        {isQuerySearchContentVisible && (
+        {isEditorVisible && (
           <QuerySearchSqlEditor
             databaseId={databaseId}
             variables={variables}

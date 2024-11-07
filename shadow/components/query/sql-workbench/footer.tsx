@@ -16,10 +16,6 @@ import { useVisualization } from "@/hook/use-visualization";
 interface QueryResultHeaderProps {
   rowCount?: number;
   executionTime?: number;
-  isTableVisible: boolean;
-  onToggleTable: (visible: boolean) => void;
-  isVisualizationVisible: boolean;
-  onToggleVisualization: (visible: boolean) => void;
 }
 interface ViewToggleProps {
   view: "table" | "chart";
@@ -73,13 +69,9 @@ export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
 export function QueryFooterHeader({
   rowCount = 0,
   executionTime = 0,
-  isTableVisible,
-  isVisualizationVisible,
-  onToggleTable,
-  onToggleVisualization,
 }: QueryResultHeaderProps) {
   const [view, setView] = useState<"table" | "chart">("table");
-  const { isOpen, setIsOpen } = useVisualization();
+  const { isOpen, setIsOpen, viewMode, setViewMode } = useVisualization();
   return (
     <div
       className={cn(
@@ -106,7 +98,7 @@ export function QueryFooterHeader({
       </div>
       {/* 中间 */}
       <div className='flex items-center justify-center'>
-        <ViewToggle view={view} onViewChange={setView} />
+        <ViewToggle view={viewMode} onViewChange={setViewMode} />
       </div>
       {/* 右侧 */}
       <div className='flex items-center justify-end'>
