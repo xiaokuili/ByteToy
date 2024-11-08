@@ -155,7 +155,7 @@ function buildConnectionString(datasource: Datasource): string {
 
   switch (type.toLowerCase()) {
     case "postgresql":
-      return `postgresql://${username}:${password}@${host}:${port}/${databaseName}?sslmode=disable`;
+      return `postgresql://${username}:${password}@${host}:${port}/${databaseName}?sslmode=require`;
 
     // 可以添加其他数据库类型
     default:

@@ -15,3 +15,4 @@ v 0.0.1
 - 实现variable 查询
 - 点击footer visiable，展示一个面板在右边
 - 底部滚动直接可以看到，而不是移动到底部才看到
+- QueryViewComponent 有最小的值 ，占据当前所有的窗口

@@ -15,18 +15,19 @@ datasource db {
 
 
 
-
-model Metadata {
+model metadata {
   id           String   @id @default(cuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  type         String
-  displayName  String
-  host         String
-  port         Int
-  databaseName String
-  username     String
-  password     String
-  schemas      Json     // 存储 'All' 或 string[]
-  useSSL       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  type         String   @db.VarChar(20)
+  displayName  String   @db.VarChar(50)      @map("display_name")
+  host         String   @db.VarChar(100)
+  port         Int      @db.SmallInt
+  databaseName String   @db.VarChar(50)      @map("database_name")
+  username     String   @db.VarChar(50)
+  password     String   @db.VarChar(100)
+  schemas      Json
+  useSSL       Boolean  @default(true)       @map("use_ssl")
+
+  @@map("metadata")
 }

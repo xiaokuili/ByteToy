@@ -15,48 +15,44 @@ export class TableView implements QueryResultView {
     const { rows, columns } = data;
 
     return (
-      <Card className='h-full flex flex-col'>
-        <CardContent className='flex-1 p-0'>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHead
-                    key={column.name}
-                    className='bg-muted/50 py-2 h-8 whitespace-nowrap'
-                  >
-                    <div className='flex flex-col gap-0.5'>
-                      <span className='text-xs font-medium'>{column.name}</span>
-                      <span className='text-[10px] text-muted-foreground font-normal'>
-                        {column.type}
-                      </span>
-                    </div>
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((row, rowIndex) => (
-                <TableRow
-                  key={rowIndex}
-                  className='hover:bg-muted/30 transition-colors'
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {columns.map((column) => (
+              <TableHead
+                key={column.name}
+                className='bg-muted/50 py-2 h-8 whitespace-nowrap'
+              >
+                <div className='flex flex-col gap-0.5'>
+                  <span className='text-xs font-medium'>{column.name}</span>
+                  <span className='text-[10px] text-muted-foreground font-normal'>
+                    {column.type}
+                  </span>
+                </div>
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row, rowIndex) => (
+            <TableRow
+              key={rowIndex}
+              className='hover:bg-muted/30 transition-colors'
+            >
+              {columns.map((column) => (
+                <TableCell
+                  key={`${rowIndex}-${column.name}`}
+                  className='py-1.5 px-3 text-xs'
                 >
-                  {columns.map((column) => (
-                    <TableCell
-                      key={`${rowIndex}-${column.name}`}
-                      className='py-1.5 px-3 text-xs'
-                    >
-                      <div className='max-w-[300px] truncate'>
-                        {formatCellValue(row[column.name])}
-                      </div>
-                    </TableCell>
-                  ))}
-                </TableRow>
+                  <div className='max-w-[300px] truncate'>
+                    {formatCellValue(row[column.name])}
+                  </div>
+                </TableCell>
               ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     );
   };
 }

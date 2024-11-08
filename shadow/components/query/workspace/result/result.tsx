@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle } from "lucide-react";
@@ -16,6 +16,31 @@ import {
   QueryViewFactory,
   QueryResult,
 } from "@/components/query/display/view-factory";
+import { cn } from "@/lib/utils";
+
+export function ScrollCard({
+  children,
+  className,
+  contentClassName,
+  minWidth = "min-w-full",
+}: ScrollCardProps) {
+  return (
+    <ScrollArea className='flex-1 h-full'>
+      <div className={cn("min-h-0", minWidth, className)}>
+        <div
+          className={cn(
+            "w-full h-full border rounded-lg bg-white",
+            contentClassName
+          )}
+        >
+          {children}
+        </div>
+      </div>
+      <ScrollBar orientation='horizontal' />
+      <ScrollBar orientation='vertical' />
+    </ScrollArea>
+  );
+}
 
 function QueryErrorView({ error, title = "Query Error" }: QueryErrorViewProps) {
   return (
@@ -39,6 +64,17 @@ function QueryErrorView({ error, title = "Query Error" }: QueryErrorViewProps) {
   );
 }
 
+export function EmptyViewComponet() {
+  return (
+    <Card className='h-full w-full flex items-center justify-center text-muted-foreground'>
+      <div className='text-center'>
+        <p className='text-sm'>No query results to display</p>
+        <p className='text-xs mt-1'>Execute a query to see results</p>
+      </div>
+    </Card>
+  );
+}
+
 export function QueryViewComponent({
   data,
   error,
@@ -48,14 +84,7 @@ export function QueryViewComponent({
 }) {
   // 1. 添加空状态处理
   if (!data && !error) {
-    return (
-      <Card className='h-full flex items-center justify-center text-muted-foreground'>
-        <div className='text-center'>
-          <p className='text-sm'>No query results to display</p>
-          <p className='text-xs mt-1'>Execute a query to see results</p>
-        </div>
-      </Card>
-    );
+    return <EmptyViewComponet />;
   }
 
   if (error) {
@@ -76,5 +105,9 @@ export function QueryViewComponent({
 
   const viewFactory = new QueryViewFactory();
   const TableView = viewFactory.getView("table");
-  return <TableView data={data} />;
+  return (
+    <ScrollCard>
+      <TableView className='min-h-full min-w-full' data={data} />
+    </ScrollCard>
+  );
 }

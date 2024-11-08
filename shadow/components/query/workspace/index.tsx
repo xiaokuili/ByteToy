@@ -6,6 +6,8 @@ import { QuerySearchSqlEditor } from "./editor";
 import { QueryViewComponent } from "./result/result";
 import { Variable } from "@/types/base";
 import { QueryFooterHeader } from "./footer";
+import { cn } from "@/lib/utils";
+import { ScrollCard } from "@/components/query/workspace/result/result";
 
 export function SQLWorkbench() {
   // 数据库
@@ -58,12 +60,8 @@ export function SQLWorkbench() {
         )}
       </div>
 
-      <div className='flex-1 min-h-0 overflow-x-auto overflow-y-auto'>
-        <div className='min-h-full flex items-center justify-center'>
-          <div className='w-fit'>
-            <QueryViewComponent data={queryResult} error={queryError} />
-          </div>
-        </div>
+      <div className='flex-1 min-h-0'>
+        <QueryViewComponent data={queryResult} error={queryError} />
       </div>
 
       <div className='h-16'>
