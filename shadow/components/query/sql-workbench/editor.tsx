@@ -1,23 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import SQLEditor from "@/components/ui/sql-editor/sql-editor";
-import { Button } from "@/components/ui/button";
-import { Play, Copy } from "lucide-react";
-import { executeQuery } from "@/lib/datasource-action";
-import { AlertTitle } from "../../ui/alert";
-import { Loader2 } from "lucide-react";
 import { Variable } from "@/types/base";
+import { executeQuery } from "@/lib/datasource-action";
+import { Button } from "@/components/ui/button";
+import { Play, Eye, Loader2 } from "lucide-react";
+import { parseVariables, getFinalSql } from "@/utils/variable-utils";
+import { SQLEditor } from "@/components/ui/sql-editor";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { Eye } from "lucide-react";
+import { Copy } from "lucide-react";
+import { toast } from "sonner";
 
-
+// Types
 interface DatabaseProps {
   databaseId: string;
 }
@@ -26,8 +27,6 @@ interface QueryState {
   sqlContent: string;
   variables: Variable[];
 }
-interface SQLEditorProps extends DatabaseProps, QueryState, QueryActions {}
-
 
 interface QueryActions {
   setQueryResult: (result: any) => void;
@@ -36,125 +35,116 @@ interface QueryActions {
   setSqlContent: (sqlContent: string) => void;
 }
 
+interface SQLEditorProps extends DatabaseProps, QueryState, QueryActions {}
+
+// Main Component
 export function QuerySearchSqlEditor({
   databaseId,
   variables,
+  sqlContent,
   setQueryResult,
   setQueryError,
   setVariables,
   setSqlContent,
-  sqlContent,
-}: {
-  databaseId: string;
-  variables: Variable[];
-  setQueryResult: (result: any) => void;
-  setQueryError: (error: string) => void;
-  setVariables: (variables: Variable[]) => void;
-  setSqlContent: (sqlContent: string) => void;
-  sqlContent: string;
-}) {
+}: SQLEditorProps) {
+  // UI States
   const [isExecuting, setIsExecuting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  useEffect(() => {
-    const fetchDatabaseStructure = async () => {
-      if (!databaseId) return;
-    };
-
-    if (databaseId) {
-      fetchDatabaseStructure();
-    }
-  }, [databaseId]);
-  const getPreviewSql = () => {
-    let previewSql = sqlContent;
-    variables.forEach((variable) => {
-      const regex = new RegExp(`\\{\\{${variable.name}\\}\\}`, "g");
-      const value = variable.value ? `'${variable.value}'` : "NULL";
-      previewSql = previewSql.replace(regex, value);
-    });
-    return previewSql;
-  };
-
-  const handleExecute = async () => {
-    if (!sqlContent.trim()) return;
-    if (!databaseId) {
-      setQueryError("Please select a database first.");
-      return;
-    }
-    setIsExecuting(true);
-    setQueryResult(null);
-    setQueryError("");
-    try {
-      // 处理 SQL 变量
-      let finalSql = sqlContent;
-      if (variables && variables.length > 0) {
-        variables.forEach((variable: Variable) => {
-          // 替换所有匹配的变量
-          const regex = new RegExp(`{{${variable.name}}}`, "g");
-
-          // 根据值类型处理
-          const value =
-            typeof variable.value === "string"
-              ? `'${variable.value}'` // 字符串加引号
-              : variable.value; // 数字直接使用
-
-          finalSql = finalSql.replace(regex, value.toString());
-        });
-      }
-      console.log(finalSql);
-
-      const result = await executeQuery(databaseId, finalSql);
-      if (result.success) {
-        setQueryResult(result.data);
-      } else {
-        setQueryError(result.error);
-      }
-    } catch (error) {
-      console.error("Error executing SQL:", error);
-    } finally {
-      setIsExecuting(false);
-    }
-  };
-  const parseVariables = (sql: string) => {
-    // 匹配 {{变量名}} 格式
-    const regex = /\{\{([^}]+)\}\}/g;
-    const variables: Variable[] = [];
-    let match;
-
-    // 查找所有匹配项
-    while ((match = regex.exec(sql)) !== null) {
-      const varName = match[1].trim();
-      // 避免重复添加
-      if (!variables.find((v) => v.name === varName)) {
-        variables.push({
-          id: crypto.randomUUID(),
-          name: varName,
-          value: "",
-          type: "string", // 默认类型
-        });
-      }
-    }
-    return variables;
-  };
-  // 在SQL改变时更新变量
+  // SQL Content Handlers
   const handleSqlChange = (value: string) => {
     setSqlContent(value);
     const newVariables = parseVariables(value);
-    if (newVariables.length > 0) {
-      setVariables(newVariables);
-    } else {
-      setVariables([]);
+    setVariables(newVariables.length > 0 ? newVariables : []);
+  };
+
+  // Query Execution
+  const handleExecute = async () => {
+    if (!validateQuery()) return;
+
+    try {
+      await executeQueryWithVariables();
+    } catch (error) {
+      handleQueryError(error);
     }
   };
 
-  const handleCopy = () => {};
+  // Query Validation
+  const validateQuery = (): boolean => {
+    if (!sqlContent.trim()) return false;
+    if (!databaseId) {
+      setQueryError("Please select a database first.");
+      return false;
+    }
+    return true;
+  };
+
+  // Query Execution Logic
+  const executeQueryWithVariables = async () => {
+    setIsExecuting(true);
+    setQueryResult(null);
+    setQueryError("");
+
+    const finalSql = getFinalSql(sqlContent, variables);
+    const result = await executeQuery(databaseId, finalSql);
+
+    if (result.success) {
+      setQueryResult(result.data);
+    } else {
+      setQueryError(result.error);
+    }
+
+    setIsExecuting(false);
+  };
+
+  const handleQueryError = (error: any) => {
+    console.error("Error executing SQL:", error);
+    setIsExecuting(false);
+  };
+
+  // Preview Logic
+  const getPreviewSql = () => getFinalSql(sqlContent, variables);
   return (
-    <div className='flex '>
-      <div className='flex flex-col gap-2 '>
+    <div className='flex'>
+      <SQLEditorUI
+        isExecuting={isExecuting}
+        onExecute={handleExecute}
+        onShowPreview={() => setShowPreview(true)}
+        sqlContent={sqlContent}
+        onSqlChange={handleSqlChange}
+      />
+
+      <PreviewDialog
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        content={getPreviewSql()}
+      />
+    </div>
+  );
+}
+
+interface SQLEditorUIProps {
+  isExecuting: boolean;
+  onExecute: () => void;
+  onShowPreview: () => void;
+  sqlContent: string;
+  onSqlChange: (value: string) => void;
+}
+
+export function SQLEditorUI({
+  isExecuting,
+  onExecute,
+  onShowPreview,
+  sqlContent,
+  onSqlChange,
+}: SQLEditorUIProps) {
+  return (
+    <>
+      <div className='flex flex-col gap-2'>
         <Button
           variant='ghost'
           size='icon'
-          onClick={handleExecute}
+          onClick={onExecute}
           disabled={isExecuting}
           className='text-blue-600 hover:text-blue-600 hover:bg-blue-50'
         >
@@ -165,40 +155,52 @@ export function QuerySearchSqlEditor({
           )}
         </Button>
 
-        <Button
-          variant='ghost'
-          size='icon'
-          onClick={() => setShowPreview(true)}
-        >
+        <Button variant='ghost' size='icon' onClick={onShowPreview}>
           <Eye className='h-4 w-4' />
         </Button>
-        <Dialog open={showPreview} onOpenChange={setShowPreview}>
-          <DialogContent className='sm:max-w-[600px]'>
-            <DialogHeader>
-              <DialogTitle className='flex items-center gap-2'>
-                <Eye className='h-4 w-4' />
-                SQL Preview
-              </DialogTitle>
-              <DialogDescription>
-                Preview of SQL query with variable values replaced.
-              </DialogDescription>
-            </DialogHeader>
-            <div className='mt-2'>
-              <pre className='p-4 rounded-lg bg-muted text-sm overflow-auto max-h-[400px]'>
-                <code>{getPreviewSql()}</code>
-              </pre>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
+
       <div className='flex-1'>
         <SQLEditor
           value={sqlContent}
-          onChange={handleSqlChange}
+          onChange={onSqlChange}
           height='200px'
           placeholder='SELECT * FROM users WHERE...'
         />
       </div>
-    </div>
+    </>
+  );
+}
+
+interface PreviewDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  content: string;
+  icon?: React.ReactNode;
+}
+
+export function PreviewDialog({
+  open,
+  onOpenChange,
+  content,
+  icon = <Eye className='h-4 w-4' />, // 默认图标
+}: PreviewDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className='sm:max-w-[600px]'>
+        <DialogHeader>
+          <DialogTitle className='flex items-center gap-2'>
+            {icon}
+            Preview
+          </DialogTitle>
+          <DialogDescription>Preview content with formatting</DialogDescription>
+        </DialogHeader>
+        <div className='relative'>
+          <pre className='p-4 rounded-lg bg-muted text-sm overflow-auto max-h-[400px] font-mono'>
+            <code className='text-foreground'>{content}</code>
+          </pre>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

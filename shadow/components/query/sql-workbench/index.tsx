@@ -1,56 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import { QuerySearchHeaderComponent } from "./header";
+import { SQLWorkbenchHeader } from "./header/index";
 import { QuerySearchSqlEditor } from "./editor";
 import { QueryViewComponent } from "./result";
 import { Variable } from "@/types/base";
 import { QueryFooterHeader } from "./footer";
 
-interface QueryState {
-  sqlContent: string;
-  variables: Variable[];
-  queryResult: any;
-  queryError: string;
-  isEditorVisible: boolean;
-}
-interface DatabaseState {
-  databaseId: string;
-}
-interface QueryActions {
-  setQueryResult: (result: any) => void;
-  setQueryError: (error: string) => void;
-  setVariables: (variables: Variable[]) => void;
-  setSqlContent: (sqlContent: string) => void;
-}
-
-
-
 export function SQLWorkbench() {
-  const [queryResult, setQueryResult] = useState<any>(null);
-  const [queryError, setQueryError] = useState<string>("");
-  const [variables, setVariables] = useState<Variable[]>([]);
-  const [sqlContent, setSqlContent] = useState<string>("");
-  const [isTableVisible, setIsTableVisible] = useState(false);
-  const [isVisualizationVisible, setIsVisualizationVisible] = useState(false);
-
-  const [isEditorVisible, setIsEditorVisible] = useState(true);
+  // 数据库
   const [databaseId, setDatabaseId] = useState<string>("");
 
-  const onTonggleQuerySearchContent = () => {
-    setIsQuerySearchContentVisible(!isQuerySearchContentVisible);
-  };
+  // sql editor
+  const [variables, setVariables] = useState<Variable[]>([]);
+  const [sqlContent, setSqlContent] = useState<string>("");
+
+  // result
+  const [queryResult, setQueryResult] = useState<any>(null);
+  const [queryError, setQueryError] = useState<string>("");
+
+  const [isEditorVisible, setIsEditorVisible] = useState(true);
 
   const handleSelectDatabase = (databaseId: string) => {
     setDatabaseId(databaseId);
-    console.log(databaseId);
   };
 
   return (
     <div className='flex flex-col h-full w-full '>
       <div className='flex-none border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900'>
-        <QuerySearchHeaderComponent
-          onTonggleQuerySearchContent={onTonggleQuerySearchContent}
+        <SQLWorkbenchHeader
+          onToggleEditor={() => setIsEditorVisible(!isEditorVisible)}
           onSelectDatabase={handleSelectDatabase}
           onUpdateVariable={setVariables}
           variables={variables}
@@ -65,11 +44,11 @@ export function SQLWorkbench() {
           <QuerySearchSqlEditor
             databaseId={databaseId}
             variables={variables}
+            sqlContent={sqlContent}
             setQueryResult={setQueryResult}
             setQueryError={setQueryError}
             setVariables={setVariables}
             setSqlContent={setSqlContent}
-            sqlContent={sqlContent}
             className='
               bg-gray-50/50
               dark:bg-gray-900/50
@@ -85,10 +64,6 @@ export function SQLWorkbench() {
         <QueryFooterHeader
           rowCount={queryResult?.rowCount}
           executionTime={queryResult?.executionTime}
-          isTableVisible={isTableVisible}
-          onToggleTable={setIsTableVisible}
-          isVisualizationVisible={isVisualizationVisible}
-          onToggleVisualization={setIsVisualizationVisible}
         />
       </div>
     </div>
