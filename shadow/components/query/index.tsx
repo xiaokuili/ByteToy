@@ -1,10 +1,10 @@
 "use client";
 
-import { QuestionHeaderComponent } from "./header";
-import { SQLWorkbench } from "@/components/query/sql-workbench";
+import { QuestionHeaderComponent } from "./title-bar";
+import { SQLWorkbench } from "@/components/query/workspace";
 import { useVisualization } from "@/hook/use-visualization";
 import { cn } from "@/lib/utils";
-import { VisualizationPanel } from "./visualization";
+import { VisualizationPanel } from "./display";
 
 export default function Query() {
   const { isOpen } = useVisualization();

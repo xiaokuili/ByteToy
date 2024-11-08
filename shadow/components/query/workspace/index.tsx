@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { SQLWorkbenchHeader } from "./header/index";
 import { QuerySearchSqlEditor } from "./editor";
-import { QueryViewComponent } from "./result";
+import { QueryViewComponent } from "./result/result";
 import { Variable } from "@/types/base";
 import { QueryFooterHeader } from "./footer";
 
