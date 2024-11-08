@@ -12,17 +12,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-
-interface QueryViewProps {
-  data: {
-    rows: any[];
-    columns: Array<{
-      name: string;
-      type: string;
-    }>;
-    rowCount: number;
-  };
-}
+import {
+  QueryViewFactory,
+  QueryResult,
+} from "@/components/query/display/view-factory";
 
 function QueryErrorView({ error, title = "Query Error" }: QueryErrorViewProps) {
   return (
@@ -50,7 +43,7 @@ export function QueryViewComponent({
   data,
   error,
 }: {
-  data: QueryViewProps;
+  data: QueryResult;
   error: string;
 }) {
   // 1. 添加空状态处理
@@ -68,9 +61,7 @@ export function QueryViewComponent({
   if (error) {
     return <QueryErrorView error={error} />;
   }
-
-  const { rows, columns, rowCount } = data;
-
+  const { rows } = data;
   // 2. 添加空结果处理
   if (rows.length === 0) {
     return (
@@ -83,81 +74,7 @@ export function QueryViewComponent({
     );
   }
 
-  return (
-    <Card className='h-full flex flex-col'>
-      <CardContent className='flex-1 min-h-0 p-0'>
-        <ScrollArea className='h-full w-full rounded-md border'>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHead
-                    key={column.name}
-                    className='bg-muted/50 py-2 h-8 whitespace-nowrap'
-                  >
-                    <div className='flex flex-col gap-0.5'>
-                      <span className='text-xs font-medium'>{column.name}</span>
-                      <span className='text-[10px] text-muted-foreground font-normal'>
-                        {column.type}
-                      </span>
-                    </div>
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((row, rowIndex) => (
-                <TableRow
-                  key={rowIndex}
-                  className='hover:bg-muted/30 transition-colors'
-                >
-                  {columns.map((column) => (
-                    <TableCell
-                      key={`${rowIndex}-${column.name}`}
-                      className='py-1.5 px-3 text-xs'
-                    >
-                      <div className='max-w-[300px] truncate'>
-                        {formatCellValue(row[column.name])}
-                      </div>
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-      </CardContent>
-    </Card>
-  );
-}
-
-// 4. 改进格式化函数
-function formatCellValue(value: any): string {
-  if (value === null) return "null";
-  if (value === undefined) return "—"; // 使用破折号表示空值
-
-  if (typeof value === "number") {
-    if (Number.isInteger(value)) return value.toString();
-    // 根据数值大小动态调整精度
-    return Math.abs(value) < 0.01 ? value.toExponential(2) : value.toFixed(2);
-  }
-
-  if (typeof value === "boolean") return value ? "true" : "false";
-
-  if (value instanceof Date) {
-    return new Intl.DateTimeFormat("default", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(value);
-  }
-
-  if (typeof value === "object") {
-    try {
-      return JSON.stringify(value);
-    } catch {
-      return "[Object]";
-    }
-  }
-
-  return String(value);
+  const viewFactory = new QueryViewFactory();
+  const TableView = viewFactory.getView("table");
+  return <TableView data={data} />;
 }

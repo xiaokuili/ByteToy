@@ -57,8 +57,10 @@ export function SQLWorkbench() {
           />
         )}
       </div>
-      <div className='flex-1 min-h-0 overflow-hidden '>
-        <QueryViewComponent data={queryResult} error={queryError} />
+      <div className='flex-1 overflow-hidden'>
+        <div className='h-full overflow-auto'>
+          <QueryViewComponent data={queryResult} error={queryError} />
+        </div>
       </div>
       <div className='h-16'>
         <QueryFooterHeader

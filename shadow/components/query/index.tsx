@@ -4,7 +4,7 @@ import { QuestionHeaderComponent } from "./title-bar";
 import { SQLWorkbench } from "@/components/query/workspace";
 import { useVisualization } from "@/hook/use-visualization";
 import { cn } from "@/lib/utils";
-import { VisualizationPanel } from "./display";
+import { VisualizationPanel } from "./display/view-mode-selector";
 
 export default function Query() {
   const { isOpen } = useVisualization();
