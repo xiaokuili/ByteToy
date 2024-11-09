@@ -19,3 +19,4 @@ v 0.0.1
 - 实现view-mode-selector
 - 添加不同的实现方式，并且可以基于点击进行切换
 - 添加切换table 和 view
+- 调整footer布局，如果没有sql执行，footer不展示
