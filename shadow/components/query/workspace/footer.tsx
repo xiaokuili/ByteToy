@@ -47,18 +47,18 @@ export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
       <Button
         variant='ghost'
         size='sm'
-        onClick={() => onViewChange("chart")}
+        onClick={() => onViewChange("bar")}
         className={cn(
           "px-3",
           "transition-colors duration-200",
           "hover:bg-transparent", // 移除默认的悬停效果
-          view === "chart" && "bg-background shadow-sm"
+          view === "bar" && "bg-background shadow-sm"
         )}
       >
         <BarChart3
           className={cn(
             "h-4 w-4",
-            view === "chart" ? "text-primary" : "text-muted-foreground"
+            view === "bar" ? "text-primary" : "text-muted-foreground"
           )}
         />
       </Button>

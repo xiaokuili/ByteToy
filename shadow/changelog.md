@@ -18,3 +18,4 @@ v 0.0.1
 - QueryViewComponent 有最小的值 ，占据当前所有的窗口
 - 实现view-mode-selector
 - 添加不同的实现方式，并且可以基于点击进行切换
+- 添加切换table 和 view
