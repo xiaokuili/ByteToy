@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useVisualization } from "@/hook/use-visualization";
 import { queryViewFactory } from "./view-factory";
+import { ViewTooltip } from "./view-tooltip";
 
 export function ViewModeSelector() {
   const { viewMode, setViewMode, showTable, setShowTable } = useVisualization();
@@ -17,12 +18,12 @@ export function ViewModeSelector() {
         <CardTitle className='text-sm font-medium'>Select View Mode</CardTitle>
       </CardHeader>
       <CardContent className='p-0'>
-        <Tabs defaultValue='basic' className='w-full'>
+        <Tabs defaultValue='basic' className='w-full h-full'>
           <TabsList className='grid w-full grid-cols-2'>
             <TabsTrigger value='basic'>Basic Charts</TabsTrigger>
             <TabsTrigger value='other'>Other Charts</TabsTrigger>
           </TabsList>
-          <ScrollArea className='h-[400px] px-4'>
+          <ScrollArea className='h-full px-4'>
             <TabsContent value='basic' className='mt-0 border-0 p-0'>
               <div className='grid grid-cols-3 gap-2 py-4'>
                 {basicViews.map((mode) => (
@@ -74,20 +75,22 @@ function ViewModeButton({
   const Icon = mode.icon;
 
   return (
-    <Button
-      variant={isSelected ? "secondary" : "ghost"}
-      className='flex flex-col items-center justify-center h-24 p-2 gap-2'
-      onClick={onClick}
-    >
-      <div
-        className={cn(
-          "rounded-full p-2",
-          isSelected ? "bg-primary/10" : "bg-muted"
-        )}
+    <ViewTooltip viewId={mode.id}>
+      <Button
+        variant={isSelected ? "secondary" : "ghost"}
+        className='flex flex-col items-center justify-center h-24 p-2 gap-2'
+        onClick={onClick}
       >
-        <Icon className='h-4 w-4' />
-      </div>
-      <span className='text-xs font-medium'>{mode.name}</span>
-    </Button>
+        <div
+          className={cn(
+            "rounded-full p-2",
+            isSelected ? "bg-primary/10" : "bg-muted"
+          )}
+        >
+          <Icon className='h-4 w-4' />
+        </div>
+        <span className='text-xs font-medium'>{mode.name}</span>
+      </Button>
+    </ViewTooltip>
   );
 }
