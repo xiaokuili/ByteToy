@@ -30,13 +30,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// 导入新的 hook
+import { useSidebar } from "@/hook/use-sidebar";
+
 export function SidebarComponent() {
   const [openCollections, setOpenCollections] = useState(true);
   const [openBrowse, setOpenBrowse] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  // 删除本地的 isSidebarCollapsed 状态，改用 hook
+  const { isCollapsed, toggle } = useSidebar();
   const router = useRouter();
 
-  const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
+  // 更新 toggleSidebar 函数
+  const toggleSidebar = () => toggle();
 
   const handleAddDatabase = () => {
     router.push("/metadata/new"); // 跳转到新建页面
@@ -46,16 +51,16 @@ export function SidebarComponent() {
     <aside
       className={cn(
         "bg-gray-50 border-r border-gray-200 flex flex-col h-full sticky left-0 top-16 bottom-0 overflow-hidden flex-shrink-0 transition-all duration-300 ease-in-out",
-        isSidebarCollapsed ? "w-16" : "w-64"
+        isCollapsed ? "w-16" : "w-64"
       )}
     >
       <div
         className={cn(
           "flex items-center p-4 border-gray-200",
-          isSidebarCollapsed ? "justify-center" : "justify-between"
+          isCollapsed ? "justify-center" : "justify-between"
         )}
       >
-        {!isSidebarCollapsed && (
+        {!isCollapsed && (
           <div className='flex items-center'>
             <FolderOpen className='h-6 w-6 text-blue-500' />
             <span className='ml-2 font-semibold'>shadow</span>
@@ -67,7 +72,7 @@ export function SidebarComponent() {
           className='hover:bg-gray-200 transition-colors'
           onClick={toggleSidebar}
         >
-          {isSidebarCollapsed ? (
+          {isCollapsed ? (
             <ChevronsRight className='h-5 w-5' />
           ) : (
             <AlignJustify className='h-5 w-5' />
@@ -79,13 +84,13 @@ export function SidebarComponent() {
           variant='ghost'
           className={cn(
             "w-full justify-start",
-            isSidebarCollapsed && "justify-center px-0"
+            isCollapsed && "justify-center px-0"
           )}
           asChild
         >
           <Link href='/'>
             <Home className='h-5 w-5' />
-            {!isSidebarCollapsed && <span className='ml-2'>首页</span>}
+            {!isCollapsed && <span className='ml-2'>首页</span>}
           </Link>
         </Button>
 
@@ -95,22 +100,22 @@ export function SidebarComponent() {
               variant='ghost'
               className={cn(
                 "w-full justify-between",
-                isSidebarCollapsed && "justify-center px-0"
+                isCollapsed && "justify-center px-0"
               )}
             >
               <span className='flex items-center'>
                 <FolderOpen className='h-5 w-5' />
-                {!isSidebarCollapsed && (
+                {!isCollapsed && (
                   <span className='ml-2 text-sm font-medium'>报告</span>
                 )}
               </span>
-              {!isSidebarCollapsed && (
+              {!isCollapsed && (
                 <ChevronDown className='h-4 w-4 transition-transform duration-200' />
               )}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className='space-y-1'>
-            {!isSidebarCollapsed && (
+            {!isCollapsed && (
               <>
                 <Button
                   variant='ghost'
@@ -141,22 +146,22 @@ export function SidebarComponent() {
               variant='ghost'
               className={cn(
                 "w-full justify-between",
-                isSidebarCollapsed && "justify-center px-0"
+                isCollapsed && "justify-center px-0"
               )}
             >
               <span className='flex items-center'>
                 <Box className='h-5 w-5' />
-                {!isSidebarCollapsed && (
+                {!isCollapsed && (
                   <span className='ml-2 text-sm font-medium'>浏览</span>
                 )}
               </span>
-              {!isSidebarCollapsed && (
+              {!isCollapsed && (
                 <ChevronDown className='h-4 w-4 transition-transform duration-200' />
               )}
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className='space-y-1'>
-            {!isSidebarCollapsed && (
+            {!isCollapsed && (
               <>
                 <Button
                   variant='ghost'
@@ -190,16 +195,16 @@ export function SidebarComponent() {
           variant='ghost'
           className={cn(
             "w-full justify-start",
-            isSidebarCollapsed && "justify-center px-0"
+            isCollapsed && "justify-center px-0"
           )}
         >
           <Trash2 className='h-5 w-5' />
-          {!isSidebarCollapsed && <span className='ml-2'>回收站</span>}
+          {!isCollapsed && <span className='ml-2'>回收站</span>}
         </Button>
       </div>
 
       <div className='p-4 border-t border-gray-200'>
-        {!isSidebarCollapsed && (
+        {!isCollapsed && (
           <div className='text-sm text-gray-600 mb-2'>
             开始连接您的数据库或添加csv文件
           </div>
@@ -208,7 +213,7 @@ export function SidebarComponent() {
           <DropdownMenuTrigger asChild>
             <Button className='w-full'>
               <Plus className='h-4 w-4' />
-              {!isSidebarCollapsed && <span className='ml-2'>添加数据</span>}
+              {!isCollapsed && <span className='ml-2'>添加数据</span>}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className='w-56'>

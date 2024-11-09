@@ -6,7 +6,6 @@ interface VisualizationStore {
 
   viewMode: "table" | "chart";
   setViewMode: (mode: "table" | "chart") => void;
-
 }
 
 export const useVisualization = create<VisualizationStore>((set) => ({
@@ -14,5 +13,4 @@ export const useVisualization = create<VisualizationStore>((set) => ({
   setIsOpen: (open) => set({ isOpen: open }),
   viewMode: "table",
   setViewMode: (mode) => set({ viewMode: mode }),
-
 }));
