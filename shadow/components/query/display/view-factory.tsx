@@ -2,6 +2,7 @@ import { VIEW_MODES, QueryResultView } from "./types";
 import { createTableView } from "./views/table-view";
 import { createBarView } from "./views/bar-view";
 import { QueryErrorView } from "./views/error-view";
+import { createLineView } from "./views/line-view";
 
 export class QueryViewFactory {
   private views: Map<string, QueryResultView>;
@@ -13,12 +14,15 @@ export class QueryViewFactory {
   private registerDefaultViews() {
     const tableDefinition = VIEW_MODES.find((m) => m.id === "table")!;
     const barDefinition = VIEW_MODES.find((m) => m.id === "bar")!;
+    const lineDefinition = VIEW_MODES.find((m) => m.id === "line")!;
 
     const tableView = createTableView(tableDefinition);
     const barView = createBarView(barDefinition);
+    const lineView = createLineView(lineDefinition);
 
     this.registerView("table", tableView);
     this.registerView("bar", barView);
+    this.registerView("line", lineView);
   }
 
   private registerView(id: string, view: QueryResultView) {

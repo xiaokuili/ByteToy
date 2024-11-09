@@ -23,8 +23,7 @@ export function QueryFooterHeader({
   executionTime = 0,
 }: QueryResultHeaderProps) {
   const [view, setView] = useState<"table" | "chart">("table");
-  const { isOpen, setIsOpen, viewMode, setViewMode, showTable, setShowTable } =
-    useVisualization();
+  const { isOpen, setIsOpen, viewMode, setViewMode } = useVisualization();
   return (
     <div
       className={cn(

@@ -84,8 +84,11 @@ export const VIEW_MODES: ViewModeDefinition[] = [
     category: "basic",
     tooltip: {
       description:
-        "Display data as a series of points connected by straight lines",
-      examples: ["Time series analysis", "Trend analysis"],
+        "展示数据随时间变化的趋势。需要返回: label列(时间/类别)和value列(数值)。例如: SELECT 日期 as label, 销售额 as value FROM 销售表",
+      examples: [
+        "WITH months AS (SELECT unnest(ARRAY['Jan','Feb','Mar','Apr','May']) as month) SELECT month as label, (RANDOM() * 100)::int as value FROM months",
+        "WITH dates AS (SELECT generate_series('2023-01-01'::date, '2023-01-05'::date, '1 day'::interval) as date) SELECT date::text as label, (RANDOM() * 1000)::int as value FROM dates",
+      ],
     },
   },
   {

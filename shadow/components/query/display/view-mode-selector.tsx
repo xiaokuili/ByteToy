@@ -8,7 +8,7 @@ import { queryViewFactory } from "./view-factory";
 import { ViewTooltip } from "./view-tooltip";
 
 export function ViewModeSelector() {
-  const { viewMode, setViewMode, showTable, setShowTable } = useVisualization();
+  const { viewMode, setViewMode } = useVisualization();
   const basicViews = queryViewFactory.getViewsByCategory("basic");
   const otherViews = queryViewFactory.getViewsByCategory("other");
 
@@ -33,11 +33,6 @@ export function ViewModeSelector() {
                     isSelected={viewMode === mode.id}
                     onClick={() => {
                       setViewMode(mode.id);
-                      if (mode.id !== "table") {
-                        setShowTable(false);
-                      } else {
-                        setShowTable(true);
-                      }
                     }}
                   />
                 ))}
