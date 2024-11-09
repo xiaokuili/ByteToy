@@ -17,17 +17,13 @@ interface QueryResultHeaderProps {
   rowCount?: number;
   executionTime?: number;
 }
-interface ViewToggleProps {
-  view: "table" | "chart";
-  onViewChange: (view: "table" | "chart") => void;
-}
 
 export function QueryFooterHeader({
   rowCount = 0,
   executionTime = 0,
 }: QueryResultHeaderProps) {
   const [view, setView] = useState<"table" | "chart">("table");
-  const { isOpen, setIsOpen, viewMode, setViewMode, chartType, setChartType } =
+  const { isOpen, setIsOpen, viewMode, setViewMode, showTable, setShowTable } =
     useVisualization();
   return (
     <div
@@ -55,7 +51,12 @@ export function QueryFooterHeader({
       </div>
       {/* 中间 */}
       <div className='flex items-center justify-center'>
-        <ViewToggle view={viewMode} onViewChange={setViewMode} />
+        <DataDisplayToggle
+          showTable={showTable}
+          onShowTableChange={setShowTable}
+          setViewMode={setViewMode}
+          viewMode={viewMode}
+        />
       </div>
 
       {/* 右侧 */}
@@ -84,43 +85,53 @@ export function QueryFooterHeader({
   );
 }
 
-export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
+export function DataDisplayToggle({
+  showTable,
+  onShowTableChange,
+  setViewMode,
+  viewMode,
+}) {
   return (
     <div className='flex bg-muted rounded-md p-1'>
       <Button
         variant='ghost'
         size='sm'
-        onClick={() => onViewChange("table")}
+        onClick={() => {
+          onShowTableChange(true);
+          setViewMode("table");
+        }}
         className={cn(
           "px-3",
           "transition-colors duration-200",
           "hover:bg-transparent", // 移除默认的悬停效果
-          view === "table" && "bg-background shadow-sm"
+          showTable && "bg-background shadow-sm"
         )}
       >
         <Table
           className={cn(
             "h-4 w-4",
-            view === "table" ? "text-primary" : "text-muted-foreground"
+            showTable ? "text-primary" : "text-muted-foreground"
           )}
         />
       </Button>
-
       <Button
         variant='ghost'
         size='sm'
-        onClick={() => onViewChange("bar")}
+        onClick={() => {
+          onShowTableChange(false);
+          setViewMode(viewMode);
+        }}
         className={cn(
           "px-3",
           "transition-colors duration-200",
-          "hover:bg-transparent", // 移除默认的悬停效果
-          view === "bar" && "bg-background shadow-sm"
+          "hover:bg-transparent",
+          !showTable && "bg-background shadow-sm"
         )}
       >
         <BarChart3
           className={cn(
             "h-4 w-4",
-            view === "bar" ? "text-primary" : "text-muted-foreground"
+            !showTable ? "text-primary" : "text-muted-foreground"
           )}
         />
       </Button>

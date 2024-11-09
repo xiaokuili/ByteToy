@@ -4,48 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useVisualization } from "@/hook/use-visualization";
-import {
-  TableIcon,
-  BarChartIcon,
-  LineChartIcon,
-  PieChartIcon,
-  AlignLeftIcon,
-  AreaChartIcon,
-  TrendingUpIcon,
-  FileTextIcon,
-  BarChart2Icon,
-  GaugeIcon,
-  ActivityIcon,
-  MapIcon,
-  FilterIcon, // 用 FilterIcon 替代 FunnelIcon
-  HashIcon, // 用于 Number 视图
-  LayoutGridIcon, // 用于 Pivot Table
-} from "lucide-react";
-const VIEW_MODES = {
-  basic: [
-    { id: "table", name: "Table", icon: TableIcon },
-    { id: "bar", name: "Bar", icon: BarChartIcon },
-    { id: "line", name: "Line", icon: LineChartIcon },
-    { id: "pie", name: "Pie", icon: PieChartIcon },
-    { id: "row", name: "Row", icon: AlignLeftIcon },
-    { id: "area", name: "Area", icon: AreaChartIcon },
-    { id: "combo", name: "Combo", icon: TrendingUpIcon },
-    { id: "pivot", name: "Pivot Table", icon: LayoutGridIcon },
-    { id: "trend", name: "Trend", icon: TrendingUpIcon },
-    { id: "funnel", name: "Funnel", icon: FilterIcon },
-    { id: "detail", name: "Detail", icon: FileTextIcon },
-    { id: "waterfall", name: "Waterfall", icon: BarChart2Icon },
-  ],
-  other: [
-    { id: "number", name: "Number", icon: HashIcon },
-    { id: "gauge", name: "Gauge", icon: GaugeIcon },
-    { id: "progress", name: "Progress", icon: ActivityIcon },
-    { id: "map", name: "Map", icon: MapIcon },
-  ],
-};
+import { queryViewFactory } from "./view-factory";
 
 export function ViewModeSelector() {
-  const { viewMode, setViewMode } = useVisualization();
+  const { viewMode, setViewMode, showTable, setShowTable } = useVisualization();
+  const basicViews = queryViewFactory.getViewsByCategory("basic");
+  const otherViews = queryViewFactory.getViewsByCategory("other");
+
   return (
     <Card className='h-full'>
       <CardHeader className='pb-3'>
@@ -60,19 +25,26 @@ export function ViewModeSelector() {
           <ScrollArea className='h-[400px] px-4'>
             <TabsContent value='basic' className='mt-0 border-0 p-0'>
               <div className='grid grid-cols-3 gap-2 py-4'>
-                {VIEW_MODES.basic.map((mode) => (
+                {basicViews.map((mode) => (
                   <ViewModeButton
                     key={mode.id}
                     mode={mode}
                     isSelected={viewMode === mode.id}
-                    onClick={() => setViewMode(mode.id)}
+                    onClick={() => {
+                      setViewMode(mode.id);
+                      if (mode.id !== "table") {
+                        setShowTable(false);
+                      } else {
+                        setShowTable(true);
+                      }
+                    }}
                   />
                 ))}
               </div>
             </TabsContent>
             <TabsContent value='other' className='mt-0 border-0 p-0'>
               <div className='grid grid-cols-3 gap-2 py-4'>
-                {VIEW_MODES.other.map((mode) => (
+                {otherViews.map((mode) => (
                   <ViewModeButton
                     key={mode.id}
                     mode={mode}
