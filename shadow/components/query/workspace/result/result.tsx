@@ -17,6 +17,8 @@ import {
   QueryResult,
 } from "@/components/query/display/view-factory";
 import { cn } from "@/lib/utils";
+import { queryViewFactory } from "@/components/query/display/view-factory";
+import { useVisualization } from "@/hook/use-visualization";
 
 export function ScrollCard({
   children,
@@ -82,6 +84,7 @@ export function QueryViewComponent({
   data: QueryResult;
   error: string;
 }) {
+  const { chartType, viewMode } = useVisualization();
   // 1. 添加空状态处理
   if (!data && !error) {
     return <EmptyViewComponet />;
@@ -102,12 +105,11 @@ export function QueryViewComponent({
       </Card>
     );
   }
+  const View = queryViewFactory.getView(viewMode);
 
-  const viewFactory = new QueryViewFactory();
-  const TableView = viewFactory.getView("table");
   return (
     <ScrollCard>
-      <TableView className='min-h-full min-w-full' data={data} />
+      <View className='min-h-full min-w-full' data={data} />
     </ScrollCard>
   );
 }

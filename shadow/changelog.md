@@ -16,3 +16,5 @@ v 0.0.1
 - 点击footer visiable，展示一个面板在右边
 - 底部滚动直接可以看到，而不是移动到底部才看到
 - QueryViewComponent 有最小的值 ，占据当前所有的窗口
+- 实现view-mode-selector
+- 添加不同的实现方式，并且可以基于点击进行切换

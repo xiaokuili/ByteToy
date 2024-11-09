@@ -4,7 +4,7 @@ import { QuestionHeaderComponent } from "./title-bar";
 import { SQLWorkbench } from "@/components/query/workspace";
 import { useVisualization } from "@/hook/use-visualization";
 import { cn } from "@/lib/utils";
-import { VisualizationPanel } from "./display/view-mode-selector";
+import { ViewModeSelector } from "./display/view-mode-selector";
 
 export default function Query() {
   const { isOpen } = useVisualization();
@@ -16,14 +16,14 @@ export default function Query() {
       </div>
       <div className='flex-1 min-h-0 flex'>
         <div
-          className={cn("flex-1 transition-all", isOpen ? "w-[60%]" : "w-full")}
+          className={cn("flex-1 transition-all", isOpen ? "w-[80%]" : "w-full")}
         >
           <SQLWorkbench />
         </div>
 
         {isOpen && (
-          <div className='w-[40%] border-l'>
-            <VisualizationPanel />
+          <div className='w-[20%] border-l'>
+            <ViewModeSelector />
           </div>
         )}
       </div>

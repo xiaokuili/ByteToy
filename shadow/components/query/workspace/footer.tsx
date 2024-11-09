@@ -71,7 +71,8 @@ export function QueryFooterHeader({
   executionTime = 0,
 }: QueryResultHeaderProps) {
   const [view, setView] = useState<"table" | "chart">("table");
-  const { isOpen, setIsOpen, viewMode, setViewMode } = useVisualization();
+  const { isOpen, setIsOpen, viewMode, setViewMode, chartType, setChartType } =
+    useVisualization();
   return (
     <div
       className={cn(
@@ -97,9 +98,11 @@ export function QueryFooterHeader({
         </Button>
       </div>
       {/* 中间 */}
-      <div className='flex items-center justify-center'>
-        <ViewToggle view={viewMode} onViewChange={setViewMode} />
-      </div>
+      {rowCount ? (
+        <div className='flex items-center justify-center'>
+          <ViewToggle view={viewMode} onViewChange={setViewMode} />
+        </div>
+      ) : null}
       {/* 右侧 */}
       <div className='flex items-center justify-end'>
         {/* 行数统计 */}

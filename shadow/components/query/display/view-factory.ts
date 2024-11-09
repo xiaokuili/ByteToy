@@ -1,19 +1,18 @@
-import {TableView} from "@/components/query/display/views/table-view"
-
+import { TableView } from "@/components/query/display/views/table-view";
+import { BarViewResult } from "./views/bar-view";
 
 export interface QueryResult {
   rows: any[];
   columns: Array<{
-      name: string;
-      type: string;
-    }>;
+    name: string;
+    type: string;
+  }>;
 }
-
 
 interface QueryResultView {
   Component: React.ComponentType<QueryResult>;
 }
-  
+
 export class QueryViewFactory {
   private views: Map<string, QueryResultView>;
 
@@ -24,6 +23,7 @@ export class QueryViewFactory {
 
   private registerDefaultViews() {
     this.views.set("table", new TableView());
+    this.views.set("bar", new BarViewResult());
   }
 
   getView(type: string): React.ComponentType<ViewProps> {
@@ -31,3 +31,5 @@ export class QueryViewFactory {
     return view ? view.Component : this.views.get("table")!.Component;
   }
 }
+
+export const queryViewFactory = new QueryViewFactory();
