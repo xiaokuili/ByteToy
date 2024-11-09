@@ -24,3 +24,4 @@ v 0.0.1
 - 在view-select中，鼠标移动到icon进行提示
 - 完成bar example
 - 重构factory函数，添加数据验证功能， 添加errorview 功能
+- 更新生成图表高度

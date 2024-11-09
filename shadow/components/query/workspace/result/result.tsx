@@ -19,7 +19,6 @@ import {
 import { cn } from "@/lib/utils";
 import { queryViewFactory } from "@/components/query/display/view-factory";
 import { useVisualization } from "@/hook/use-visualization";
-
 export function ScrollCard({
   children,
   className,
@@ -28,15 +27,15 @@ export function ScrollCard({
 }: ScrollCardProps) {
   return (
     <ScrollArea className='flex-1 h-full'>
-      <div className={cn("min-h-0", minWidth, className)}>
-        <div
-          className={cn(
-            "w-full h-full border rounded-lg bg-white",
-            contentClassName
-          )}
-        >
-          {children}
-        </div>
+      <div
+        className={cn(
+          "min-h-0 w-full h-full border rounded-lg bg-white",
+          minWidth,
+          className,
+          contentClassName
+        )}
+      >
+        {children}
       </div>
       <ScrollBar orientation='horizontal' />
       <ScrollBar orientation='vertical' />

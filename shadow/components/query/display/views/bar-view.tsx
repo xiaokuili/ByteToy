@@ -106,10 +106,10 @@ function BarChart({ data }: { data: BarChartData }) {
   };
 
   return (
-    <div className='w-full h-full min-h-[400px]'>
+    <div className='w-full h-full flex-1 min-h-0'>
       <ReactECharts
         option={option}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "100%", minHeight: "100%" }}
         opts={{ renderer: "svg" }}
       />
     </div>

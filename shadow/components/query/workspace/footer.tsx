@@ -28,7 +28,7 @@ export function QueryFooterHeader({
   return (
     <div
       className={cn(
-        "grid grid-cols-3", // 改为三等分网格
+        "grid grid-cols-2", // 改为三等分网格
         "px-4 py-2",
         "bg-background/50",
         "border-t",
@@ -48,15 +48,6 @@ export function QueryFooterHeader({
           </div>
           Visualization
         </Button>
-      </div>
-      {/* 中间 */}
-      <div className='flex items-center justify-center'>
-        <DataDisplayToggle
-          showTable={showTable}
-          onShowTableChange={setShowTable}
-          setViewMode={setViewMode}
-          viewMode={viewMode}
-        />
       </div>
 
       {/* 右侧 */}
@@ -81,60 +72,6 @@ export function QueryFooterHeader({
           <Download className='h-4 w-4' />
         </Button>
       </div>
-    </div>
-  );
-}
-
-export function DataDisplayToggle({
-  showTable,
-  onShowTableChange,
-  setViewMode,
-  viewMode,
-}) {
-  return (
-    <div className='flex bg-muted rounded-md p-1'>
-      <Button
-        variant='ghost'
-        size='sm'
-        onClick={() => {
-          onShowTableChange(true);
-          setViewMode("table");
-        }}
-        className={cn(
-          "px-3",
-          "transition-colors duration-200",
-          "hover:bg-transparent", // 移除默认的悬停效果
-          showTable && "bg-background shadow-sm"
-        )}
-      >
-        <Table
-          className={cn(
-            "h-4 w-4",
-            showTable ? "text-primary" : "text-muted-foreground"
-          )}
-        />
-      </Button>
-      <Button
-        variant='ghost'
-        size='sm'
-        onClick={() => {
-          onShowTableChange(false);
-          setViewMode(viewMode);
-        }}
-        className={cn(
-          "px-3",
-          "transition-colors duration-200",
-          "hover:bg-transparent",
-          !showTable && "bg-background shadow-sm"
-        )}
-      >
-        <BarChart3
-          className={cn(
-            "h-4 w-4",
-            !showTable ? "text-primary" : "text-muted-foreground"
-          )}
-        />
-      </Button>
     </div>
   );
 }
