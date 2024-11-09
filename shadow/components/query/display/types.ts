@@ -1,5 +1,3 @@
-import { TableView } from "@/components/query/display/views/table-view";
-import { BarViewResult } from "./views/bar-view";
 import {
   TableIcon,
   BarChartIcon,
@@ -8,15 +6,17 @@ import {
   AlignLeftIcon,
   AreaChartIcon,
   TrendingUpIcon,
+  LayoutGridIcon,
   FileTextIcon,
+  FilterIcon,
   BarChart2Icon,
+  HashIcon,
   GaugeIcon,
   ActivityIcon,
   MapIcon,
-  FilterIcon,
-  HashIcon,
-  LayoutGridIcon,
 } from "lucide-react";
+import { ReactNode } from "react";
+import { ViewTooltipContent } from "@/components/ui/tooltip";
 
 export interface QueryResult {
   rows: any[];
@@ -25,11 +25,15 @@ export interface QueryResult {
     type: string;
   }>;
 }
+export interface ProcessedData {
+  isValid: boolean;
+  error?: string;
+  data?: any;
+}
 
-export interface ViewTooltipContent {
-  title?: string;
-  description: string;
-  examples?: string[];
+export interface ViewProcessor {
+  processData: (data: QueryResult) => ProcessedData;
+  validateData: (processedData: any) => { isValid: boolean; error?: string };
 }
 
 export interface ViewModeDefinition {
@@ -40,11 +44,13 @@ export interface ViewModeDefinition {
   tooltip: ViewTooltipContent;
 }
 
-interface QueryResultView {
+export interface QueryResultView {
   Component: React.ComponentType<QueryResult>;
   definition: ViewModeDefinition;
+  processor: ViewProcessor;
 }
 
+// ... VIEW_MODES definition ...
 export const VIEW_MODES: ViewModeDefinition[] = [
   {
     id: "table",
@@ -66,8 +72,8 @@ export const VIEW_MODES: ViewModeDefinition[] = [
       description:
         "Compare values across categories using rectangular bars. SQL should return label and value columns.",
       examples: [
-        "SELECT category as label, COUNT(*) as value FROM products GROUP BY category",
-        "SELECT department as label, SUM(salary) as value FROM employees GROUP BY department",
+        "WITH sample_data AS (SELECT 'A' as category UNION SELECT 'B' UNION SELECT 'C') SELECT category as label, (RANDOM() * 100)::int as value FROM sample_data",
+        "WITH months AS (SELECT unnest(ARRAY['Jan','Feb','Mar']) as month) SELECT month as label, (RANDOM() * 1000)::int as value FROM months",
       ],
     },
   },
@@ -216,51 +222,3 @@ export const VIEW_MODES: ViewModeDefinition[] = [
     },
   },
 ];
-
-export class QueryViewFactory {
-  private views: Map<string, QueryResultView>;
-
-  constructor() {
-    this.views = new Map();
-    this.registerDefaultViews();
-  }
-
-  private registerDefaultViews() {
-    this.registerView(
-      "table",
-      new TableView(),
-      VIEW_MODES.find((m) => m.id === "table")!
-    );
-    this.registerView(
-      "bar",
-      new BarViewResult(),
-      VIEW_MODES.find((m) => m.id === "bar")!
-    );
-  }
-
-  private registerView(id: string, view: any, definition: ViewModeDefinition) {
-    this.views.set(id, {
-      Component: view.Component,
-      definition,
-    });
-  }
-
-  getView(type: string): React.ComponentType<ViewProps> {
-    const view = this.views.get(type);
-    return view ? view.Component : this.views.get("table")!.Component;
-  }
-
-  getViewDefinition(type: string): ViewModeDefinition | undefined {
-    return this.views.get(type)?.definition;
-  }
-
-  getViewsByCategory(category: "basic" | "other"): ViewModeDefinition[] {
-    return VIEW_MODES.filter((mode) => mode.category === category);
-  }
-
-  getTooltipContent(viewId: string): ViewTooltipContent | undefined {
-    return VIEW_MODES.find((mode) => mode.id === viewId)?.tooltip;
-  }
-}
-
-export const queryViewFactory = new QueryViewFactory();

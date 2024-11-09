@@ -109,7 +109,7 @@ export function QueryViewComponent({
 
   return (
     <ScrollCard>
-      <View className='min-h-full min-w-full' data={data} />
+      <View className='min-h-full min-w-full' {...data} />
     </ScrollCard>
   );
 }

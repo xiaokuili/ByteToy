@@ -23,3 +23,4 @@ v 0.0.1
 - 抽取 VIEW_MODES 到factory ,从而支持footer toggle 可以进行动态的icon
 - 在view-select中，鼠标移动到icon进行提示
 - 完成bar example
+- 重构factory函数，添加数据验证功能， 添加errorview 功能

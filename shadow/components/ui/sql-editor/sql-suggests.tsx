@@ -98,9 +98,7 @@ export class BasicSQLCompletionProvider extends SQLCompletionProvider {
   }
 
   generateSuggestions(context: SQLContext): SQLSuggestion[] {
-    console.log("Generating suggestions for", context.statementType);
     if (context.statementType === "FROM") {
-      console.log("Generating suggestions for FROM");
       return this.tables.map((table) => ({
         label: table,
         kind: "table",
