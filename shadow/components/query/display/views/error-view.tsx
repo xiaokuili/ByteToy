@@ -6,7 +6,10 @@ interface QueryErrorViewProps {
   className?: string;
 }
 
-export function QueryErrorView({ error, className }: QueryErrorViewProps) {
+export function VisualizationErrorView({
+  error,
+  className,
+}: QueryErrorViewProps) {
   return (
     <div
       className={cn(

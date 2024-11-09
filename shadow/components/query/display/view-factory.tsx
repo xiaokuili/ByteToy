@@ -1,7 +1,7 @@
 import { VIEW_MODES, QueryResultView } from "./types";
 import { createTableView } from "./views/table-view";
 import { createBarView } from "./views/bar-view";
-import { QueryErrorView } from "./views/error-view";
+import { VisualizationErrorView } from "./views/error-view";
 import { createLineView } from "./views/line-view";
 
 export class QueryViewFactory {
@@ -41,7 +41,7 @@ export class QueryViewFactory {
       const processedData = processor.processData(props);
       if (!processedData.isValid) {
         return (
-          <QueryErrorView
+          <VisualizationErrorView
             error={processedData.error || "Failed to process data"}
           />
         );

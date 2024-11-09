@@ -25,3 +25,4 @@ v 0.0.1
 - 完成bar example
 - 重构factory函数，添加数据验证功能， 添加errorview 功能
 - 更新生成图表高度
+- sql执行后，必须切换到table 展示
