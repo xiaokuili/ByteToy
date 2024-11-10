@@ -223,6 +223,11 @@ export const VIEW_MODES: ViewModeDefinition[] = [
       examples: ["Geographical data visualization", "Data mapping"],
     },
   },
+  
+];
+
+
+export const LLM_VIEW_MODES: ViewModeDefinition[] = [
   {
     id: "llm",
     name: "AI分析",
@@ -238,4 +243,4 @@ export const VIEW_MODES: ViewModeDefinition[] = [
       ],
     },
   },
-];
+]

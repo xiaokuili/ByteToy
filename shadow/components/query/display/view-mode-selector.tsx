@@ -8,31 +8,24 @@ import { cn } from "@/lib/utils";
 import { useVisualization } from "@/hook/use-visualization";
 import { ViewTooltip } from "./view-tooltip";
 import { VIEW_MODES } from "./types";
+import { FileTextIcon } from "lucide-react";
+
 export function ViewModeSelector() {
   const { viewMode, setViewMode } = useVisualization();
+  const [showSettings, setShowSettings] = React.useState(false);
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-semibold">数据可视化</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <Tabs defaultValue="basic" className="w-full h-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="basic">图形展示</TabsTrigger>
-            <TabsTrigger value="ai">AI生成</TabsTrigger>
-          </TabsList>
-          <ScrollArea className="h-full px-4">
-            <TabsContent value="basic" className="mt-0 border-0 p-0">
-              <ChartVisualization 
-                viewMode={viewMode}
-                setViewMode={setViewMode}
-              />
-            </TabsContent>
-            <TabsContent value="ai" className="mt-0 border-0 p-0">
-              <AIGeneration />
-            </TabsContent>
-          </ScrollArea>
-        </Tabs>
+        <ScrollArea className="h-full px-4">
+          <ChartVisualization 
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+          />
+        </ScrollArea>
       </CardContent>
     </Card>
   );
@@ -57,54 +50,75 @@ function ChartVisualization({
           }}
         />
       ))}
+      <ViewModeButtonWithParams />
     </div>
+    
   );
 }
 
-function AIGeneration() {
-  const {setViewMode} = useVisualization();
-  const [analysisType, setAnalysisType] = React.useState<'imitate' | 'generate'>('imitate');
-  const [input, setInput] = React.useState('');
+function ViewModeButtonWithParams() {
+  const { viewMode, setViewMode, aiParams, setAiParams } = useVisualization();
+  const [isExpanded, setIsExpanded] = React.useState(false);
+
+  if (!isExpanded) {
+    return (
+      <Button
+        variant={viewMode === 'llm' ? "secondary" : "ghost"}
+        className="flex flex-col items-center justify-center h-24 p-2 gap-2"
+        onClick={() => setIsExpanded(true)}
+      >
+        <div className={cn("rounded-full p-2", viewMode === 'llm' ? "bg-primary/10" : "bg-muted")}>
+          <FileTextIcon className="h-4 w-4" />
+        </div>
+        <span className="text-xs font-medium">AI 分析</span>
+      </Button>
+    );
+  }
 
   return (
-    <div className="py-4 space-y-4">
+    <div className="col-span-4 space-y-4 p-4 border rounded-lg">
+      <div className="flex justify-between items-center">
+        <h3 className="font-medium">AI 分析参数</h3>
+        <Button size="sm" variant="ghost" onClick={() => setIsExpanded(false)}>
+          收起
+        </Button>
+      </div>
+      
       <div className="flex gap-2">
         <Button
-          variant={analysisType === 'imitate' ? 'secondary' : 'ghost'}
-          onClick={() => setAnalysisType('imitate')}
+          variant={aiParams.type === 'imitate' ? 'secondary' : 'ghost'}
+          onClick={() => setAiParams({ ...aiParams, type: 'imitate' })}
         >
           仿写
         </Button>
         <Button
-          variant={analysisType === 'generate' ? 'secondary' : 'ghost'} 
-          onClick={() => setAnalysisType('generate')}
+          variant={aiParams.type === 'generate' ? 'secondary' : 'ghost'}
+          onClick={() => setAiParams({ ...aiParams, type: 'generate' })}
         >
           自定义
         </Button>
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">
-          {analysisType === 'imitate' ? '历史文本' : '生成指令'}
-        </label>
-        <textarea
-          className="w-full h-32 p-2 border rounded-md"
-          placeholder={
-            analysisType === 'imitate' 
-              ? '请输入要仿照的历史文本...'
-              : '请输入生成指令...'
-          }
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-      </div>
+      <textarea
+        className="w-full h-32 p-2 border rounded-md"
+        placeholder={aiParams.type === 'imitate' ? '请输入要仿照的历史文本...' : '请输入生成指令...'}
+        value={aiParams.input}
+        onChange={(e) => setAiParams({ ...aiParams, input: e.target.value })}
+      />
 
-      <Button className="w-full" onClick={() => setViewMode('llm')}>
+      <Button 
+        className="w-full" 
+        onClick={() => {
+          setViewMode('llm');
+          setIsExpanded(false);
+        }}
+      >
         开始分析
       </Button>
     </div>
   );
 }
+
 
 // 视图模式按钮组件
 function ViewModeButton({

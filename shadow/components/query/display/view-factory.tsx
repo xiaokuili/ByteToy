@@ -1,4 +1,5 @@
 import {
+  LLM_VIEW_MODES,
   QueryResult,
   QueryResultView,
   ViewModeDefinition,
@@ -93,6 +94,6 @@ viewFactory.register(
 viewFactory.register(
   "llm",
   createLLMView(
-    VIEW_MODES.find((mode) => mode.id === "llm") as ViewModeDefinition,
+    LLM_VIEW_MODES.find((mode) => mode.id === "llm") as ViewModeDefinition,
   ),
 );
