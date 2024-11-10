@@ -1,4 +1,4 @@
-import { VIEW_MODES, QueryResultView } from "./types";
+import { VIEW_MODES, QueryResultView, ViewModeDefinition, QueryResult, ViewProcessor } from "./types";
 import { createTableView } from "./views/table-view";
 import { createBarView } from "./views/bar-view";
 import { VisualizationErrorView } from "./views/error-view";
@@ -51,7 +51,7 @@ export class QueryViewFactory {
       const validationResult = processor.validateData(processedData.data);
       if (!validationResult.isValid) {
         return (
-          <QueryErrorView error={validationResult.error || "Invalid data"} />
+          <VisualizationErrorView error={validationResult.error || "Invalid data"} />
         );
       }
 
@@ -73,7 +73,7 @@ export class QueryViewFactory {
     return VIEW_MODES.filter((mode) => mode.category === category);
   }
 
-  getTooltipContent(viewId: string): ViewTooltipContent | undefined {
+  getTooltipContent(viewId: string): any | undefined {
     return VIEW_MODES.find((mode) => mode.id === viewId)?.tooltip;
   }
 }

@@ -15,13 +15,13 @@ export function ViewModeSelector() {
   return (
     <Card className='h-full'>
       <CardHeader className='pb-3'>
-        <CardTitle className='text-sm font-medium'>Select View Mode</CardTitle>
+        <CardTitle className='text-base font-semibold'>数据可视化</CardTitle>
       </CardHeader>
       <CardContent className='p-0'>
         <Tabs defaultValue='basic' className='w-full h-full'>
           <TabsList className='grid w-full grid-cols-2'>
-            <TabsTrigger value='basic'>Basic Charts</TabsTrigger>
-            <TabsTrigger value='other'>Other Charts</TabsTrigger>
+            <TabsTrigger value='basic'>图形展示</TabsTrigger>
+            <TabsTrigger value='other'>AI分析</TabsTrigger>
           </TabsList>
           <ScrollArea className='h-full px-4'>
             <TabsContent value='basic' className='mt-0 border-0 p-0'>
@@ -32,7 +32,7 @@ export function ViewModeSelector() {
                     mode={mode}
                     isSelected={viewMode === mode.id}
                     onClick={() => {
-                      setViewMode(mode.id);
+                      setViewMode(mode.id );
                     }}
                   />
                 ))}

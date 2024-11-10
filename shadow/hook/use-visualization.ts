@@ -4,8 +4,8 @@ interface VisualizationStore {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 
-  viewMode: "table" | "chart";
-  setViewMode: (mode: "table" | "chart") => void;
+  viewMode: string;
+  setViewMode: (mode: string) => void;
 }
 
 export const useVisualization = create<VisualizationStore>((set) => ({

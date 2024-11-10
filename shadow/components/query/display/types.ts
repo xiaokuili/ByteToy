@@ -15,8 +15,6 @@ import {
   ActivityIcon,
   MapIcon,
 } from "lucide-react";
-import { ReactNode } from "react";
-import { ViewTooltipContent } from "@/components/ui/tooltip";
 
 export interface QueryResult {
   rows: any[];
@@ -40,8 +38,8 @@ export interface ViewModeDefinition {
   id: string;
   name: string;
   icon: any;
-  category: "basic" | "other";
-  tooltip: ViewTooltipContent;
+  category:string;
+  tooltip: any;
 }
 
 export interface QueryResultView {
@@ -188,7 +186,7 @@ export const VIEW_MODES: ViewModeDefinition[] = [
     id: "number",
     name: "Number",
     icon: HashIcon,
-    category: "other",
+    category: "basic",
     tooltip: {
       description: "Display data as a number",
       examples: ["Numerical data visualization", "Data representation"],
@@ -198,7 +196,7 @@ export const VIEW_MODES: ViewModeDefinition[] = [
     id: "gauge",
     name: "Gauge",
     icon: GaugeIcon,
-    category: "other",
+    category: "basic",
     tooltip: {
       description: "Display data as a gauge chart",
       examples: ["Performance monitoring", "Data visualization"],
@@ -208,7 +206,7 @@ export const VIEW_MODES: ViewModeDefinition[] = [
     id: "progress",
     name: "Progress",
     icon: ActivityIcon,
-    category: "other",
+    category: "basic",
     tooltip: {
       description: "Display data as a progress bar",
       examples: ["Task completion tracking", "Data visualization"],
@@ -218,7 +216,7 @@ export const VIEW_MODES: ViewModeDefinition[] = [
     id: "map",
     name: "Map",
     icon: MapIcon,
-    category: "other",
+    category: "basic",
     tooltip: {
       description: "Display data as a map",
       examples: ["Geographical data visualization", "Data mapping"],
