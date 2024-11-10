@@ -1,3 +1,5 @@
+"use client";
+import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { useVisualization } from "@/hook/use-visualization";
 import { ViewTooltip } from "./view-tooltip";
 import { VIEW_MODES } from "./types";
-
 export function ViewModeSelector() {
   const { viewMode, setViewMode } = useVisualization();
   return (
@@ -18,27 +19,89 @@ export function ViewModeSelector() {
         <Tabs defaultValue="basic" className="w-full h-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="basic">图形展示</TabsTrigger>
-            <TabsTrigger value="other">AI分析</TabsTrigger>
+            <TabsTrigger value="ai">AI生成</TabsTrigger>
           </TabsList>
           <ScrollArea className="h-full px-4">
             <TabsContent value="basic" className="mt-0 border-0 p-0">
-              <div className="grid grid-cols-3 gap-2 py-4">
-                {VIEW_MODES.map((mode) => (
-                  <ViewModeButton
-                    key={mode.id}
-                    mode={mode}
-                    isSelected={viewMode === mode.id}
-                    onClick={() => {
-                      setViewMode(mode.id);
-                    }}
-                  />
-                ))}
-              </div>
+              <ChartVisualization 
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+              />
+            </TabsContent>
+            <TabsContent value="ai" className="mt-0 border-0 p-0">
+              <AIGeneration />
             </TabsContent>
           </ScrollArea>
         </Tabs>
       </CardContent>
     </Card>
+  );
+}
+
+function ChartVisualization({
+  viewMode,
+  setViewMode
+}: {
+  viewMode: string;
+  setViewMode: (mode: string) => void;
+}) {
+  return (
+    <div className="grid grid-cols-3 gap-2 py-4">
+      {VIEW_MODES.map((mode) => (
+        <ViewModeButton
+          key={mode.id}
+          mode={mode}
+          isSelected={viewMode === mode.id}
+          onClick={() => {
+            setViewMode(mode.id);
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function AIGeneration() {
+  const [analysisType, setAnalysisType] = React.useState<'imitate' | 'generate'>('imitate');
+  const [input, setInput] = React.useState('');
+
+  return (
+    <div className="py-4 space-y-4">
+      <div className="flex gap-2">
+        <Button
+          variant={analysisType === 'imitate' ? 'secondary' : 'ghost'}
+          onClick={() => setAnalysisType('imitate')}
+        >
+          仿写
+        </Button>
+        <Button
+          variant={analysisType === 'generate' ? 'secondary' : 'ghost'} 
+          onClick={() => setAnalysisType('generate')}
+        >
+          自定义
+        </Button>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">
+          {analysisType === 'imitate' ? '历史文本' : '生成指令'}
+        </label>
+        <textarea
+          className="w-full h-32 p-2 border rounded-md"
+          placeholder={
+            analysisType === 'imitate' 
+              ? '请输入要仿照的历史文本...'
+              : '请输入生成指令...'
+          }
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+      </div>
+
+      <Button className="w-full">
+        开始分析
+      </Button>
+    </div>
   );
 }
 
