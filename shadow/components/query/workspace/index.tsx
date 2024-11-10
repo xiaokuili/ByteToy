@@ -61,7 +61,7 @@ export function SQLWorkbench() {
       </div>
 
       {/* result */}
-      {queryResult && (
+      {(queryResult || queryError) && (
         <div className='flex-1 min-h-0'>
           <QueryViewComponent data={queryResult} error={queryError} />
         </div>
