@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import {
   QueryResult,
   ViewProcessor,
@@ -6,9 +7,11 @@ import {
   QueryResultView,
   ProcessedData,
 } from "../types";
+import { generateQueryResult } from "@/lib/ai-service";
 
 interface LLMViewData {
   rows: Array<{ label: string; value: any }>;
+  queryResult: QueryResult;
   generatedContent?: string;
 }
 
@@ -19,8 +22,8 @@ const llmProcessor: ViewProcessor<LLMViewData> = {
         isValid: true,
         data: {
           rows: queryResult.rows,
-          // 这里可以添加生成的内容
-          generatedContent: "这里将是AI生成的内容..."
+          queryResult,
+          generatedContent: undefined
         },
       };
     } catch (error) {
@@ -43,14 +46,41 @@ const llmProcessor: ViewProcessor<LLMViewData> = {
 };
 
 const LLMView: React.FC<{ data: LLMViewData }> = ({ data }) => {
+  const [content, setContent] = useState<string | undefined>(data.generatedContent);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+
+  useEffect(() => {
+    const fetchAIAnalysis = async () => {
+      setLoading(true);
+      try {
+        const response = await generateQueryResult({
+          queryResult: data.queryResult,
+        });
+        setContent(response.content);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "分析失败");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!content) {
+      fetchAIAnalysis();
+    }
+  }, [data.queryResult, content]);
+
   return (
     <div className="w-full h-full p-4 overflow-auto">
       <div className="prose max-w-none">
-        {/* 这里展示生成的内容 */}
-        {data.generatedContent ? (
-          <div>{data.generatedContent}</div>
+        {loading ? (
+          <div>正在生成分析...</div>
+        ) : error ? (
+          <div className="text-red-500">{error}</div>
+        ) : content ? (
+          <div>{content}</div>
         ) : (
-          <div>正在生成内容...</div>
+          <div>等待分析...</div>
         )}
       </div>
     </div>
