@@ -1,18 +1,19 @@
 import { DatabaseSelector } from "./database-selector";
 import { VariablesSection } from "./variables-section";
 import { ToggleButton } from "./toggle-button";
+import { Variable } from "@/types/base";
 
 interface SQLWorkbenchHeaderProps {
   onToggleEditor: () => void; // 更清晰的命名
   onSelectDatabase: (databaseId: string) => void;
-  onUpdateVariable: (variable: Variable) => void;
+  onSetVariables: (variables: Variable[]) => void;
   variables: Variable[];
 }
 
 export function SQLWorkbenchHeader({
   onToggleEditor,
   onSelectDatabase,
-  onUpdateVariable,
+  onSetVariables,
   variables,
 }: SQLWorkbenchHeaderProps) {
   return (
@@ -26,7 +27,7 @@ export function SQLWorkbenchHeader({
         </div>
         <VariablesSection
           variables={variables}
-          onUpdateVariable={onUpdateVariable}
+          onSetVariables={onSetVariables}
         />
       </div>
     </div>

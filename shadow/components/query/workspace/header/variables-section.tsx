@@ -4,14 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 interface VariableCardProps {
-  variable: Variable[];
-  onUpdateVariable: (variables: Variable[]) => void;
+  variable: Variable;
+  onSetVariables: (variables: Variable[]) => void;
   variables: Variable[];
 }
 
 export function VariableCard({
   variable,
-  onUpdateVariable,
+  onSetVariables,
   variables,
 }: VariableCardProps) {
   const handleValueChange = (newValue: string) => {
@@ -19,7 +19,7 @@ export function VariableCard({
     const updatedVariables = variables.map((v) =>
       v.id === variable.id ? { ...v, value: newValue } : v,
     );
-    onUpdateVariable(updatedVariables);
+    onSetVariables(updatedVariables);
   };
 
   return (
@@ -47,36 +47,26 @@ export function VariableCard({
 
 interface VariablesSectionProps {
   variables: Variable[];
-  onUpdateVariable: (variable: Variable) => void;
+  onSetVariables: (variables: Variable[]) => void;
 }
-
 export function VariablesSection({
   variables = [], // 提供默认值
-  onUpdateVariable,
+  onSetVariables,
 }: VariablesSectionProps) {
   if (variables.length === 0) return null;
 
   return (
     <div className="flex flex-col space-y-2">
-      <VariablesGrid
-        variables={variables}
-        onUpdateVariable={onUpdateVariable}
-      />
-    </div>
-  );
-}
-
-function VariablesGrid({ variables, onUpdateVariable }: VariablesSectionProps) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-      {variables.map((variable) => (
-        <VariableCard
-          key={variable.id}
-          variable={variable}
-          onUpdateVariable={onUpdateVariable}
-          variables={variables}
-        />
-      ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {variables.map((variable) => (
+          <VariableCard
+            key={variable.id}
+            variable={variable}
+            onSetVariables={onSetVariables}
+            variables={variables}
+          />
+        ))}
+      </div>
     </div>
   );
 }

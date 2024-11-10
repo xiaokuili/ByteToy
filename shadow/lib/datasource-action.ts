@@ -47,10 +47,10 @@ export async function executeQuery(datasourceId: string, sql: string) {
 
     try {
       // 3. 执行查询
-      const result = await queryClient.$queryRawUnsafe(sql);
+      const result = await queryClient.$queryRawUnsafe<Record<string, unknown>[]>(sql);
       // 改进格式化逻辑
-      const formattedRows = result.map((row: any) => {
-        const formattedRow: any = {};
+      const formattedRows = result.map((row) => {
+        const formattedRow: Record<string, unknown> = {};
         for (const [key, value] of Object.entries(row)) {
           // 首先处理 null/undefined
           if (value === null || value === undefined) {
@@ -209,8 +209,8 @@ export async function introspectDatabase(
         // 构建 schema 过滤条件
         const schemaFilter =
           targetSchemas === "All"
-            ? "AND table_schema = 'public'"
-            : `AND table_schema IN (${targetSchemas.map((s) => `'${s}'`).join(",")})`;
+            ? "AND table_schema = 'public'" 
+            : `AND table_schema IN ('${targetSchemas}')`;
 
         const query = `
           SELECT 

@@ -31,7 +31,7 @@ export function SQLWorkbench() {
         <SQLWorkbenchHeader
           onToggleEditor={() => setIsEditorVisible(!isEditorVisible)}
           onSelectDatabase={handleSelectDatabase}
-          onUpdateVariable={setVariables}
+          onSetVariables={setVariables}
           variables={variables}
         />
         {isEditorVisible && (
