@@ -185,12 +185,12 @@ export const VIEW_MODES: ViewModeDefinition[] = [
   },
   {
     id: "number",
-    name: "Number",
+    name: "Number", 
     icon: HashIcon,
     category: "basic",
     tooltip: {
       description: "Display data as a number",
-      examples: ["Numerical data visualization", "Data representation"],
+      examples: ["SELECT 1 as value, 'Total' as label", "SELECT 100 as value, 'Score' as label"],
     },
   },
   {
@@ -221,6 +221,21 @@ export const VIEW_MODES: ViewModeDefinition[] = [
     tooltip: {
       description: "Display data as a map",
       examples: ["Geographical data visualization", "Data mapping"],
+    },
+  },
+  {
+    id: "llm",
+    name: "AI分析",
+    icon: FileTextIcon,
+    category: "basic",
+    tooltip: {
+      title: "AI Analysis View",
+      description: "基于数据的AI智能分析和内容生成",
+      examples: [
+        "数据趋势分析",
+        "数据洞察报告",
+        "自动化数据解读"
+      ],
     },
   },
 ];

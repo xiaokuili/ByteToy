@@ -62,6 +62,7 @@ function ChartVisualization({
 }
 
 function AIGeneration() {
+  const {setViewMode} = useVisualization();
   const [analysisType, setAnalysisType] = React.useState<'imitate' | 'generate'>('imitate');
   const [input, setInput] = React.useState('');
 
@@ -98,7 +99,7 @@ function AIGeneration() {
         />
       </div>
 
-      <Button className="w-full">
+      <Button className="w-full" onClick={() => setViewMode('llm')}>
         开始分析
       </Button>
     </div>

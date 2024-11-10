@@ -10,6 +10,7 @@ import { createTableView } from "./views/table-view";
 import { createLineView } from "./views/line-view";
 import { createPieChartView } from "./views/pie-view";
 import { createNumberView } from "./views/number-view";
+import { createLLMView } from "./views/llm-view";
 import React from "react";
 
 export class ViewFactory {
@@ -87,5 +88,11 @@ viewFactory.register(
   "number",
   createNumberView(
     VIEW_MODES.find((mode) => mode.id === "number") as ViewModeDefinition,
+  ),
+);
+viewFactory.register(
+  "llm",
+  createLLMView(
+    VIEW_MODES.find((mode) => mode.id === "llm") as ViewModeDefinition,
   ),
 );
