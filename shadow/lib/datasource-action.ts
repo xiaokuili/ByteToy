@@ -312,7 +312,7 @@ export async function getMetadatas() {
 
     return {
       success: true,
-      data: metadatas.map((meta: Datasource) => ({
+      data: metadatas.map((meta) => ({
         ...meta,
         schemas: JSON.parse(meta.schemas as string),
       })),
