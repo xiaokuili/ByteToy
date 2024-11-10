@@ -10,4 +10,4 @@ export const useSidebar = create<SidebarStore>((set) => ({
   isCollapsed: false,
   setIsCollapsed: (collapsed) => set({ isCollapsed: collapsed }),
   toggle: () => set((state) => ({ isCollapsed: !state.isCollapsed })),
-})); 
+}));

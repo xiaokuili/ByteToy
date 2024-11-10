@@ -16,10 +16,10 @@ export function SQLWorkbenchHeader({
   variables,
 }: SQLWorkbenchHeaderProps) {
   return (
-    <div className='border-y border-border bg-muted/5'>
-      <div className='flex flex-col space-y-3 p-4'>
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-3'>
+    <div className="border-y border-border bg-muted/5">
+      <div className="flex flex-col space-y-3 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <DatabaseSelector onSelect={onSelectDatabase} />
           </div>
           <ToggleButton onToggle={onToggleEditor} />

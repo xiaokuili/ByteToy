@@ -42,7 +42,7 @@ export interface Variable {
 }
 
 export interface DatabaseSource {
-  id: string ;
+  id: string;
   sql: string;
 }
 
@@ -50,7 +50,5 @@ export interface Section {
   id: string;
   name: string;
 
-  
-  sectionType: SectionType
-
+  sectionType: SectionType;
 }

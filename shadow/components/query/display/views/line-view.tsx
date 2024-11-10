@@ -63,7 +63,7 @@ const lineProcessor: ViewProcessor<LineChartData> = {
     }
 
     const hasValidValues = data.series.every((series) =>
-      series.data.every((value) => typeof value === "number" && !isNaN(value))
+      series.data.every((value) => typeof value === "number" && !isNaN(value)),
     );
 
     if (!hasValidValues) {
@@ -106,7 +106,7 @@ const LineChart: React.FC<{ data: LineChartData }> = ({ data }) => {
   };
 
   return (
-    <div className='w-full h-full flex-1 min-h-0'>
+    <div className="w-full h-full flex-1 min-h-0">
       <ReactECharts
         option={option}
         style={{ height: "100%", minHeight: "100%" }}
@@ -117,7 +117,7 @@ const LineChart: React.FC<{ data: LineChartData }> = ({ data }) => {
 };
 
 export function createLineView(
-  definition: ViewModeDefinition
+  definition: ViewModeDefinition,
 ): QueryResultView<LineChartData> {
   return {
     Component: LineChart,

@@ -6,8 +6,6 @@ import { QuerySearchSqlEditor } from "./editor";
 import { QueryViewComponent } from "./result/result";
 import { Variable } from "@/types/base";
 import { QueryFooterHeader } from "./footer";
-import { cn } from "@/lib/utils";
-import { ScrollCard } from "@/components/query/workspace/result/result";
 
 export function SQLWorkbench() {
   // 数据库
@@ -28,14 +26,13 @@ export function SQLWorkbench() {
   };
 
   return (
-    <div className='flex flex-col h-full w-full '>
-      <div className='flex-none border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900'>
+    <div className="flex flex-col h-full w-full ">
+      <div className="flex-none border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-50 dark:bg-gray-900">
         <SQLWorkbenchHeader
           onToggleEditor={() => setIsEditorVisible(!isEditorVisible)}
           onSelectDatabase={handleSelectDatabase}
           onUpdateVariable={setVariables}
           variables={variables}
-     
         />
         {isEditorVisible && (
           <QuerySearchSqlEditor
@@ -46,20 +43,19 @@ export function SQLWorkbench() {
             setQueryError={setQueryError}
             setVariables={setVariables}
             setSqlContent={setSqlContent}
-            
           />
         )}
       </div>
 
       {/* result */}
       {(queryResult || queryError) && (
-        <div className='flex-1 min-h-0'>
+        <div className="flex-1 min-h-0">
           <QueryViewComponent data={queryResult} error={queryError} />
         </div>
       )}
       {/* footer */}
       {queryResult && (
-        <div className='h-16'>
+        <div className="h-16">
           <QueryFooterHeader
             rowCount={queryResult?.rowCount}
             executionTime={queryResult?.executionTime}

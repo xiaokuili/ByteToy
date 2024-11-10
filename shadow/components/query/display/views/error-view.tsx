@@ -14,10 +14,10 @@ export function VisualizationErrorView({
     <div
       className={cn(
         "flex items-center gap-2 p-4 text-sm text-destructive bg-destructive/10 rounded-md",
-        className
+        className,
       )}
     >
-      <AlertCircle className='h-4 w-4' />
+      <AlertCircle className="h-4 w-4" />
       <span>{error}</span>
     </div>
   );

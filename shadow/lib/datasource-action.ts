@@ -135,19 +135,7 @@ export async function executeQuery(datasourceId: string, sql: string) {
   }
 }
 
-// 定义返回类型
-interface QueryResult {
-  success: boolean;
-  error?: string;
-  data?: {
-    rows: any[];
-    columns: Array<{
-      name: string;
-      type: string;
-    }>;
-    rowCount: number;
-  };
-}
+
 // 构建连接字符串
 function buildConnectionString(datasource: Datasource): string {
   const { type, host, port, databaseName, username, password, useSSL } =
@@ -155,7 +143,7 @@ function buildConnectionString(datasource: Datasource): string {
 
   switch (type.toLowerCase()) {
     case "postgresql":
-      return `postgresql://${username}:${password}@${host}:${port}/${databaseName}?sslmode=require`;
+      return `postgresql://${username}:${password}@${host}:${port}/${databaseName}?sslmode=${useSSL ? "require" : "disable"}`;
 
     // 可以添加其他数据库类型
     default:
@@ -164,7 +152,7 @@ function buildConnectionString(datasource: Datasource): string {
 }
 
 export async function checkConnection(
-  datasource: Datasource
+  datasource: Datasource,
 ): Promise<ConnectionResult> {
   // 构建连接字符串
   const connectionString = buildConnectionString(datasource);
@@ -211,7 +199,7 @@ interface PostgresColumn {
 }
 export async function introspectDatabase(
   client: PrismaClient,
-  datasource: Datasource
+  datasource: Datasource,
 ): Promise<Record<string, any>> {
   const type = "postgresql";
   const targetSchemas = "All";
@@ -239,7 +227,7 @@ export async function introspectDatabase(
 
         const tables = (await client.$queryRawUnsafe(
           query,
-          datasource.databaseName
+          datasource.databaseName,
         )) as PostgresColumn[];
 
         return formatPostgresStructure(tables);

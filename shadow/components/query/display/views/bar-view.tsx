@@ -17,30 +17,30 @@ interface BarChartData {
 const barProcessor: ViewProcessor<BarChartData> = {
   processData: (queryResult: QueryResult): ProcessedData<BarChartData> => {
     try {
-      const labels = queryResult.rows.map(row => row.label);
-      const values = queryResult.rows.map(row => row.value);
+      const labels = queryResult.rows.map((row) => row.label);
+      const values = queryResult.rows.map((row) => row.value);
 
       return {
         isValid: true,
-        data: { labels, values }
+        data: { labels, values },
       };
     } catch (error) {
       return {
         isValid: false,
-        error: "Failed to process data for bar chart"
+        error: "Failed to process data for bar chart",
       };
     }
   },
 
   validateData: (data: BarChartData) => {
     if (!data.labels.length || !data.values.length) {
-      return { 
-        isValid: false, 
-        error: "Bar chart requires non-empty labels and values" 
+      return {
+        isValid: false,
+        error: "Bar chart requires non-empty labels and values",
       };
     }
     return { isValid: true };
-  }
+  },
 };
 
 const BarChart: React.FC<{ data: BarChartData }> = ({ data }) => {
@@ -83,7 +83,7 @@ const BarChart: React.FC<{ data: BarChartData }> = ({ data }) => {
   };
 
   return (
-    <div className='w-full h-full flex-1 min-h-0'>
+    <div className="w-full h-full flex-1 min-h-0">
       <ReactECharts
         option={option}
         style={{ height: "100%", minHeight: "100%" }}
@@ -93,9 +93,8 @@ const BarChart: React.FC<{ data: BarChartData }> = ({ data }) => {
   );
 };
 
-
 export function createBarChartView(
-  definition: ViewModeDefinition
+  definition: ViewModeDefinition,
 ): QueryResultView {
   return {
     Component: BarChart,

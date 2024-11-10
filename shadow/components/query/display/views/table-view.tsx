@@ -9,14 +9,11 @@ import {
 import {
   QueryResult,
   QueryResultView,
-  VIEW_MODES,
   ViewModeDefinition,
   ViewProcessor,
 } from "../types";
 
 const tableProcessor: ViewProcessor = {
- 
-
   validateData(data: QueryResult) {
     // 表格视图的验证逻辑
     return { isValid: true };
@@ -31,11 +28,11 @@ function TableViewComponent({ data }: { data: QueryResult }) {
           {data.columns.map((column) => (
             <TableHead
               key={column.name}
-              className='bg-muted/50 py-2 h-8 whitespace-nowrap'
+              className="bg-muted/50 py-2 h-8 whitespace-nowrap"
             >
-              <div className='flex flex-col gap-0.5'>
-                <span className='text-xs font-medium'>{column.name}</span>
-                <span className='text-[10px] text-muted-foreground font-normal'>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-medium">{column.name}</span>
+                <span className="text-[10px] text-muted-foreground font-normal">
                   {column.type}
                 </span>
               </div>
@@ -47,14 +44,14 @@ function TableViewComponent({ data }: { data: QueryResult }) {
         {data.rows.map((row, rowIndex) => (
           <TableRow
             key={rowIndex}
-            className='hover:bg-muted/30 transition-colors'
+            className="hover:bg-muted/30 transition-colors"
           >
             {data.columns.map((column) => (
               <TableCell
                 key={`${rowIndex}-${column.name}`}
-                className='py-1.5 px-3 text-xs'
+                className="py-1.5 px-3 text-xs"
               >
-                <div className='max-w-[300px] truncate'>
+                <div className="max-w-[300px] truncate">
                   {formatCellValue(row[column.name])}
                 </div>
               </TableCell>
@@ -67,7 +64,7 @@ function TableViewComponent({ data }: { data: QueryResult }) {
 }
 
 export function createTableView(
-  definition: ViewModeDefinition
+  definition: ViewModeDefinition,
 ): QueryResultView {
   return {
     Component: TableViewComponent,

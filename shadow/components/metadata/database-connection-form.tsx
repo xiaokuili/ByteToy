@@ -86,18 +86,18 @@ export function DatabaseConnectionFormComponent() {
         toast.error(
           error instanceof Error
             ? `操作失败: ${error.message}`
-            : "操作失败，请重试"
+            : "操作失败，请重试",
         );
       }
     });
   }
   return (
-    <div className='max-w-2xl mx-auto py-6'>
+    <div className="max-w-2xl mx-auto py-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
-            name='type'
+            name="type"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>数据库类型</FormLabel>
@@ -107,13 +107,13 @@ export function DatabaseConnectionFormComponent() {
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder='Select database type' />
+                      <SelectValue placeholder="Select database type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value='PostgreSQL'>PostgreSQL</SelectItem>
-                    <SelectItem value='MySQL'>MySQL</SelectItem>
-                    <SelectItem value='Oracle'>Oracle</SelectItem>
+                    <SelectItem value="PostgreSQL">PostgreSQL</SelectItem>
+                    <SelectItem value="MySQL">MySQL</SelectItem>
+                    <SelectItem value="Oracle">Oracle</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -123,12 +123,12 @@ export function DatabaseConnectionFormComponent() {
 
           <FormField
             control={form.control}
-            name='displayName'
+            name="displayName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>展示名称</FormLabel>
                 <FormControl>
-                  <Input placeholder='Our PostgreSQL' {...field} />
+                  <Input placeholder="Our PostgreSQL" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -137,12 +137,12 @@ export function DatabaseConnectionFormComponent() {
 
           <FormField
             control={form.control}
-            name='host'
+            name="host"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>主机</FormLabel>
                 <FormControl>
-                  <Input placeholder='name.database.com' {...field} />
+                  <Input placeholder="name.database.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -151,13 +151,13 @@ export function DatabaseConnectionFormComponent() {
 
           <FormField
             control={form.control}
-            name='port'
+            name="port"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>端口</FormLabel>
                 <FormControl>
                   <Input
-                    type='number'
+                    type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseInt(e.target.value))}
                   />
@@ -169,12 +169,12 @@ export function DatabaseConnectionFormComponent() {
 
           <FormField
             control={form.control}
-            name='databaseName'
+            name="databaseName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>数据库名称</FormLabel>
                 <FormControl>
-                  <Input placeholder='birds_of_the_world' {...field} />
+                  <Input placeholder="birds_of_the_world" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -183,12 +183,12 @@ export function DatabaseConnectionFormComponent() {
 
           <FormField
             control={form.control}
-            name='username'
+            name="username"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>用户名</FormLabel>
                 <FormControl>
-                  <Input placeholder='username' {...field} />
+                  <Input placeholder="username" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -197,19 +197,19 @@ export function DatabaseConnectionFormComponent() {
 
           <FormField
             control={form.control}
-            name='password'
+            name="password"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>密码</FormLabel>
                 <FormControl>
-                  <Input type='password' placeholder='••••••••' {...field} />
+                  <Input type="password" placeholder="••••••••" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button type='submit' disabled={isPending}>
+          <Button type="submit" disabled={isPending}>
             {isPending ? "保存中..." : "保存"}
           </Button>
         </form>

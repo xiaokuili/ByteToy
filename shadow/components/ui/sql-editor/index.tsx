@@ -36,7 +36,7 @@ export function SQLEditor({
 
         const context = completionProvider.analyzeContext(
           textUntilPosition,
-          position
+          position,
         );
         const suggestions = completionProvider.generateSuggestions(context);
         const range = completionProvider.calculateRange(context);
@@ -57,9 +57,9 @@ export function SQLEditor({
     <div>
       <Editor
         height={height}
-        language='sql'
+        language="sql"
         value={value}
-        theme='vs-dark'
+        theme="vs-dark"
         onChange={onChange}
         options={{
           minimap: { enabled: false },

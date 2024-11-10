@@ -12,7 +12,7 @@ interface ViewTooltipProps {
   viewId: string;
 }
 export function ViewTooltip({ children, viewId }: ViewTooltipProps) {
-  const tooltipContent = VIEW_MODES.find(mode => mode.id === viewId)?.tooltip;
+  const tooltipContent = VIEW_MODES.find((mode) => mode.id === viewId)?.tooltip;
   if (!tooltipContent) {
     return <>{children}</>;
   }
@@ -35,9 +35,7 @@ export function ViewTooltip({ children, viewId }: ViewTooltipProps) {
 
             {tooltipContent.examples && tooltipContent.examples.length > 0 && (
               <div className="pt-2 border-t border-gray-200">
-                <span className="text-xs text-gray-500">
-                  Examples:{" "}
-                </span>
+                <span className="text-xs text-gray-500">Examples: </span>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {tooltipContent.examples.map((example: string, i: number) => (
                     <span

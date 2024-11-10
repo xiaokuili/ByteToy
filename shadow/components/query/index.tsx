@@ -20,11 +20,11 @@ export default function Query() {
   }, [setIsCollapsed]);
 
   return (
-    <div className='flex flex-col h-full overflow-hidden'>
-      <div className='h-16'>
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="h-16">
         <QuestionHeaderComponent />
       </div>
-      <div className='flex-1 min-h-0 flex'>
+      <div className="flex-1 min-h-0 flex">
         <div
           className={cn("flex-1 transition-all", isOpen ? "w-[80%]" : "w-full")}
         >
@@ -32,7 +32,7 @@ export default function Query() {
         </div>
 
         {isOpen && (
-          <div className='w-[20%] border-l'>
+          <div className="w-[20%] border-l">
             <ViewModeSelector />
           </div>
         )}

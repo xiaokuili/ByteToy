@@ -16,12 +16,12 @@ export function parseVariables(sql: string): Variable[] {
       });
     }
   }
-  
+
   return variables;
 }
 export function getFinalSql(sql: string, variables: Variable[]): string {
-  if (!sql) return '';
-  
+  if (!sql) return "";
+
   // 替换所有变量
   let finalSql = sql;
   variables.forEach((variable) => {

@@ -31,7 +31,7 @@ export interface ProcessedData<T = any> {
 }
 
 export interface ViewProcessor<T = any> {
-  processData?: (data: QueryResult) => ProcessedData<T>; 
+  processData?: (data: QueryResult) => ProcessedData<T>;
   validateData?: (processedData: T) => { isValid: boolean; error?: string };
 }
 
@@ -39,7 +39,7 @@ export interface ViewModeDefinition {
   id: string;
   name: string;
   icon: any;
-  category:string;
+  category: string;
   tooltip: any;
 }
 

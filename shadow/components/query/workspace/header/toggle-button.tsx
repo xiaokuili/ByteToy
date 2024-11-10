@@ -1,13 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Maximize2, Minimize2 } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ToggleButtonProps {
   onToggle: () => void;
-  isExpanded?: boolean;  // 可选属性，用于控制图标状态
+  isExpanded?: boolean; // 可选属性，用于控制图标状态
 }
 
-export function ToggleButton({ onToggle, isExpanded = false }: ToggleButtonProps) {
+export function ToggleButton({
+  onToggle,
+  isExpanded = false,
+}: ToggleButtonProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
