@@ -4,6 +4,7 @@ import {
   ViewProcessor,
   ViewModeDefinition,
   QueryResultView,
+  ProcessedData,
 } from "../types";
 import ReactECharts from "echarts-for-react";
 import { formatNumber } from "@/lib/utils";
@@ -22,11 +23,10 @@ interface LineChartData {
   }>;
 }
 
-const lineProcessor: ViewProcessor = {
-  processData(queryResult: QueryResult): ProcessedData {
-    const { rows, columns } = queryResult;
-
+const lineProcessor: ViewProcessor<LineChartData> = {
+  processData: (queryResult: QueryResult): ProcessedData<LineChartData> => {
     try {
+      const { rows, columns } = queryResult;
       const labelColumn = columns[0];
       const valueColumns = columns.slice(1);
 
@@ -54,7 +54,7 @@ const lineProcessor: ViewProcessor = {
     }
   },
 
-  validateData(data: LineChartData) {
+  validateData: (data: LineChartData) => {
     if (!data.labels || !data.series || data.series.length === 0) {
       return {
         isValid: false,
@@ -77,7 +77,7 @@ const lineProcessor: ViewProcessor = {
   },
 };
 
-function LineChart({ data }: { data: LineChartData }) {
+const LineChart: React.FC<{ data: LineChartData }> = ({ data }) => {
   const option = {
     tooltip: {
       trigger: "axis",
@@ -114,12 +114,14 @@ function LineChart({ data }: { data: LineChartData }) {
       />
     </div>
   );
-}
+};
 
-export function createLineView(definition: ViewModeDefinition): QueryResultView {
+export function createLineView(
+  definition: ViewModeDefinition
+): QueryResultView<LineChartData> {
   return {
     Component: LineChart,
     definition,
     processor: lineProcessor,
   };
-} 
+}

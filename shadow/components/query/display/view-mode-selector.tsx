@@ -4,14 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useVisualization } from "@/hook/use-visualization";
-import { queryViewFactory } from "./view-factory";
 import { ViewTooltip } from "./view-tooltip";
+import { VIEW_MODES } from "./types";
 
 export function ViewModeSelector() {
   const { viewMode, setViewMode } = useVisualization();
-  const basicViews = queryViewFactory.getViewsByCategory("basic");
-  const otherViews = queryViewFactory.getViewsByCategory("other");
-
   return (
     <Card className='h-full'>
       <CardHeader className='pb-3'>
@@ -26,7 +23,7 @@ export function ViewModeSelector() {
           <ScrollArea className='h-full px-4'>
             <TabsContent value='basic' className='mt-0 border-0 p-0'>
               <div className='grid grid-cols-3 gap-2 py-4'>
-                {basicViews.map((mode) => (
+                {VIEW_MODES.map((mode) => (
                   <ViewModeButton
                     key={mode.id}
                     mode={mode}
@@ -38,18 +35,7 @@ export function ViewModeSelector() {
                 ))}
               </div>
             </TabsContent>
-            <TabsContent value='other' className='mt-0 border-0 p-0'>
-              <div className='grid grid-cols-3 gap-2 py-4'>
-                {otherViews.map((mode) => (
-                  <ViewModeButton
-                    key={mode.id}
-                    mode={mode}
-                    isSelected={viewMode === mode.id}
-                    onClick={() => setViewMode(mode.id)}
-                  />
-                ))}
-              </div>
-            </TabsContent>
+           
           </ScrollArea>
         </Tabs>
       </CardContent>

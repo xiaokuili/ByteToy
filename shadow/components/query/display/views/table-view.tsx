@@ -9,26 +9,13 @@ import {
 import {
   QueryResult,
   QueryResultView,
+  VIEW_MODES,
   ViewModeDefinition,
   ViewProcessor,
 } from "../types";
 
 const tableProcessor: ViewProcessor = {
-  processData(queryResult: QueryResult): ProcessedData {
-    if (
-      !Array.isArray(queryResult.rows) ||
-      !Array.isArray(queryResult.columns)
-    ) {
-      return {
-        isValid: false,
-        error: "Invalid data structure for table view",
-      };
-    }
-    return {
-      isValid: true,
-      data: queryResult, // 表格视图不需要特殊处理
-    };
-  },
+ 
 
   validateData(data: QueryResult) {
     // 表格视图的验证逻辑
@@ -84,7 +71,7 @@ export function createTableView(
 ): QueryResultView {
   return {
     Component: TableViewComponent,
-    definition,
+    definition: definition,
     processor: tableProcessor,
   };
 }

@@ -35,12 +35,7 @@ export function SQLWorkbench() {
           onSelectDatabase={handleSelectDatabase}
           onUpdateVariable={setVariables}
           variables={variables}
-          className='
-            border-b 
-            border-gray-200 
-            dark:border-gray-700
-            dark:bg-gray-800
-          '
+     
         />
         {isEditorVisible && (
           <QuerySearchSqlEditor
@@ -51,11 +46,7 @@ export function SQLWorkbench() {
             setQueryError={setQueryError}
             setVariables={setVariables}
             setSqlContent={setSqlContent}
-            className='
-              bg-gray-50/50
-              dark:bg-gray-900/50
-              shadow-inner
-            '
+            
           />
         )}
       </div>

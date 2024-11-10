@@ -4,86 +4,53 @@ import {
   ViewProcessor,
   ViewModeDefinition,
   QueryResultView,
+  ProcessedData,
 } from "../types";
 import ReactECharts from "echarts-for-react";
 import { formatNumber } from "@/lib/utils";
-import { QueryErrorView } from "./error-view";
 
 interface BarChartData {
   labels: string[];
-  series: Array<{
-    name: string;
-    data: number[];
-    type: "bar";
-    label?: {
-      show: boolean;
-      position: "top";
-    };
-  }>;
+  values: number[];
 }
 
-const barProcessor: ViewProcessor = {
-  processData(queryResult: QueryResult): ProcessedData {
-    const { rows, columns } = queryResult;
-
+const barProcessor: ViewProcessor<BarChartData> = {
+  processData: (queryResult: QueryResult): ProcessedData<BarChartData> => {
     try {
-      const labelColumn = columns[0];
-      const valueColumns = columns.slice(1);
-
-      const labels = rows.map((row) => String(row[labelColumn.name]));
-      const series = valueColumns.map((valueCol) => ({
-        name: valueCol.name,
-        type: "bar" as const,
-        data: rows.map((row) => Number(row[valueCol.name])),
-        label: {
-          show: true,
-          position: "top" as const,
-        },
-      }));
+      const labels = queryResult.rows.map(row => row.label);
+      const values = queryResult.rows.map(row => row.value);
 
       return {
         isValid: true,
-        data: { labels, series },
+        data: { labels, values }
       };
     } catch (error) {
       return {
         isValid: false,
-        error: "Failed to process data for bar chart",
+        error: "Failed to process data for bar chart"
       };
     }
   },
 
-  validateData(data: BarChartData) {
-    if (!data.labels || !data.series || data.series.length === 0) {
-      return {
-        isValid: false,
-        error: "Invalid data structure for bar chart",
+  validateData: (data: BarChartData) => {
+    if (!data.labels.length || !data.values.length) {
+      return { 
+        isValid: false, 
+        error: "Bar chart requires non-empty labels and values" 
       };
     }
-
-    const hasValidValues = data.series.every((series) =>
-      series.data.every((value) => typeof value === "number" && !isNaN(value))
-    );
-
-    if (!hasValidValues) {
-      return {
-        isValid: false,
-        error: "All series must contain valid numeric data",
-      };
-    }
-
     return { isValid: true };
-  },
+  }
 };
 
-function BarChart({ data }: { data: BarChartData }) {
+const BarChart: React.FC<{ data: BarChartData }> = ({ data }) => {
   const option = {
     tooltip: {
       trigger: "axis",
       axisPointer: { type: "shadow" },
     },
     legend: {
-      data: data.series.map((s) => s.name),
+      data: ["Bar Chart"],
     },
     grid: {
       left: "3%",
@@ -102,7 +69,17 @@ function BarChart({ data }: { data: BarChartData }) {
         formatter: (value: number) => formatNumber(value),
       },
     },
-    series: data.series,
+    series: [
+      {
+        name: "Bar Chart",
+        type: "bar",
+        data: data.values,
+        label: {
+          show: true,
+          position: "top" as const,
+        },
+      },
+    ],
   };
 
   return (
@@ -114,12 +91,15 @@ function BarChart({ data }: { data: BarChartData }) {
       />
     </div>
   );
-}
+};
 
-export function createBarView(definition: ViewModeDefinition): QueryResultView {
+
+export function createBarChartView(
+  definition: ViewModeDefinition
+): QueryResultView {
   return {
     Component: BarChart,
-    definition,
+    definition: definition,
     processor: barProcessor,
   };
 }

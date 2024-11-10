@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dialog";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
-import { useVisualization } from "@/hooks/use-visualization";
 
 // Types
 interface DatabaseProps {
@@ -93,7 +92,7 @@ export function QuerySearchSqlEditor({
       setQueryResult(result.data);
       setViewMode("table");
     } else {
-      setQueryError(result.error);
+      setQueryError(result.error || "Unknown error");
     }
 
     setIsExecuting(false);
@@ -165,7 +164,7 @@ export function SQLEditorUI({
       <div className='flex-1'>
         <SQLEditor
           value={sqlContent}
-          onChange={onSqlChange}
+          onChange={(value: string|undefined) => onSqlChange(value || '')}
           height='200px'
           placeholder='SELECT * FROM users WHERE...'
         />

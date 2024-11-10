@@ -23,15 +23,16 @@ export interface QueryResult {
     type: string;
   }>;
 }
-export interface ProcessedData {
+
+export interface ProcessedData<T = any> {
   isValid: boolean;
   error?: string;
-  data?: any;
+  data?: T;
 }
 
-export interface ViewProcessor {
-  processData: (data: QueryResult) => ProcessedData;
-  validateData: (processedData: any) => { isValid: boolean; error?: string };
+export interface ViewProcessor<T = any> {
+  processData?: (data: QueryResult) => ProcessedData<T>; 
+  validateData?: (processedData: T) => { isValid: boolean; error?: string };
 }
 
 export interface ViewModeDefinition {
@@ -42,10 +43,10 @@ export interface ViewModeDefinition {
   tooltip: any;
 }
 
-export interface QueryResultView {
-  Component: React.ComponentType<QueryResult>;
+export interface QueryResultView<T = any> {
+  Component: React.ComponentType<{ data: T }>;
   definition: ViewModeDefinition;
-  processor: ViewProcessor;
+  processor: ViewProcessor<T>;
 }
 
 // ... VIEW_MODES definition ...

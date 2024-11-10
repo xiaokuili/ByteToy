@@ -5,15 +5,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { queryViewFactory } from "./view-factory";
+import { VIEW_MODES } from "./types";
 
 interface ViewTooltipProps {
   children: React.ReactNode;
   viewId: string;
 }
 export function ViewTooltip({ children, viewId }: ViewTooltipProps) {
-  const tooltipContent = queryViewFactory.getTooltipContent(viewId);
-
+  const tooltipContent = VIEW_MODES.find(mode => mode.id === viewId)?.tooltip;
   if (!tooltipContent) {
     return <>{children}</>;
   }
@@ -40,7 +39,7 @@ export function ViewTooltip({ children, viewId }: ViewTooltipProps) {
                   Examples:{" "}
                 </span>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {tooltipContent.examples.map((example, i) => (
+                  {tooltipContent.examples.map((example: string, i: number) => (
                     <span
                       key={i}
                       className="inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700"

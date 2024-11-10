@@ -1,81 +1,51 @@
-import { VIEW_MODES, QueryResultView, ViewModeDefinition, QueryResult, ViewProcessor } from "./types";
-import { createTableView } from "./views/table-view";
-import { createBarView } from "./views/bar-view";
+import { QueryResult, QueryResultView, ProcessedData, ViewModeDefinition } from "./types";
 import { VisualizationErrorView } from "./views/error-view";
+import { VIEW_MODES } from "./types";
+import { createBarChartView } from "./views/bar-view";
+import { createTableView } from "./views/table-view";
 import { createLineView } from "./views/line-view";
+import React from "react";
 
-export class QueryViewFactory {
-  private views: Map<string, QueryResultView>;
+export class ViewFactory {
+  private views: Map<string, QueryResultView<any>> = new Map();
 
-  constructor() {
-    this.views = new Map();
-    this.registerDefaultViews();
-  }
-  private registerDefaultViews() {
-    const tableDefinition = VIEW_MODES.find((m) => m.id === "table")!;
-    const barDefinition = VIEW_MODES.find((m) => m.id === "bar")!;
-    const lineDefinition = VIEW_MODES.find((m) => m.id === "line")!;
-
-    const tableView = createTableView(tableDefinition);
-    const barView = createBarView(barDefinition);
-    const lineView = createLineView(lineDefinition);
-
-    this.registerView("table", tableView);
-    this.registerView("bar", barView);
-    this.registerView("line", lineView);
+  register<T>(viewId: string, view: QueryResultView<T>) {
+    this.views.set(viewId, view);
   }
 
-  private registerView(id: string, view: QueryResultView) {
-    this.views.set(id, {
-      ...view,
-      Component: this.wrapWithProcessing(view.Component, view.processor),
-    });
+  createView(viewId: string, queryResult: QueryResult): React.ReactElement | null {
+    const view = this.views.get(viewId);
+
+    if (!view) {
+      return <VisualizationErrorView error={`View ${viewId} not found`} />;
+    }
+
+    const processedResult = view.processor.processData
+      ? view.processor.processData(queryResult)
+      : { isValid: true, data: queryResult };
+
+    if (!processedResult?.isValid || !processedResult?.data) {
+      return <VisualizationErrorView error={processedResult?.error || "Invalid data"} />;
+    }
+
+    const validation = view.processor.validateData
+      ? view.processor.validateData(processedResult.data)
+      : { isValid: true };
+
+    if (!validation?.isValid) {
+      return <VisualizationErrorView error={validation?.error || "Data validation failed"} />;
+    }
+    return <view.Component data={processedResult.data} />;
   }
 
-  wrapWithProcessing(
-    WrappedComponent: React.ComponentType<any>,
-    processor: ViewProcessor
-  ): React.ComponentType<QueryResult> {
-    return function ProcessingWrapper(props: QueryResult) {
-      // 处理数据
-      const processedData = processor.processData(props);
-      if (!processedData.isValid) {
-        return (
-          <VisualizationErrorView
-            error={processedData.error || "Failed to process data"}
-          />
-        );
-      }
 
-      // 验证数据
-      const validationResult = processor.validateData(processedData.data);
-      if (!validationResult.isValid) {
-        return (
-          <VisualizationErrorView error={validationResult.error || "Invalid data"} />
-        );
-      }
-
-      // 渲染组件
-      return <WrappedComponent data={processedData.data} />;
-    };
-  }
-
-  getView(type: string): React.ComponentType<QueryResult> {
-    const view = this.views.get(type);
-    return view ? view.Component : this.views.get("table")!.Component;
-  }
-
-  getViewDefinition(type: string): ViewModeDefinition | undefined {
-    return this.views.get(type)?.definition;
-  }
-
-  getViewsByCategory(category: "basic" | "other"): ViewModeDefinition[] {
-    return VIEW_MODES.filter((mode) => mode.category === category);
-  }
-
-  getTooltipContent(viewId: string): any | undefined {
-    return VIEW_MODES.find((mode) => mode.id === viewId)?.tooltip;
-  }
 }
 
-export const queryViewFactory = new QueryViewFactory();
+
+// 创建工厂实例
+export const viewFactory = new ViewFactory();
+  
+viewFactory.register('bar', createBarChartView(VIEW_MODES.find(mode => mode.id === 'bar') as ViewModeDefinition));
+viewFactory.register('table', createTableView(VIEW_MODES.find(mode => mode.id === 'table') as ViewModeDefinition));
+viewFactory.register('line', createLineView(VIEW_MODES.find(mode => mode.id === 'line') as ViewModeDefinition));
+

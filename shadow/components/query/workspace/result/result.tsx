@@ -12,19 +12,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import {
-  QueryViewFactory,
-  QueryResult,
-} from "@/components/query/display/view-factory";
+
 import { cn } from "@/lib/utils";
-import { queryViewFactory } from "@/components/query/display/view-factory";
 import { useVisualization } from "@/hook/use-visualization";
+import { QueryResult } from "../../display/types";
+import { Visualization } from "@/components/query/display/visualization";
+
 export function ScrollCard({
   children,
   className,
   contentClassName,
   minWidth = "min-w-full",
-}: ScrollCardProps) {
+}: {
+  children: React.ReactNode;
+  className?: string;
+  contentClassName?: string;
+  minWidth?: string;
+}) {
   return (
     <ScrollArea className='flex-1 h-full'>
       <div
@@ -43,11 +47,16 @@ export function ScrollCard({
   );
 }
 
+interface QueryErrorViewProps {
+  error: string;
+  title?: string;
+}
+
 function QueryErrorView({ error, title = "Query Error" }: QueryErrorViewProps) {
   return (
     <Card className='w-full border-destructive/50'>
       <CardHeader className='flex flex-row items-center gap-2 pb-2'>
-        <AlertCircle className='h-4 w-4 text-destructive' /> {/* 修复这里 */}
+        <AlertCircle className='h-4 w-4 text-destructive' />
         <CardTitle className='text-sm font-medium text-destructive'>
           {title}
         </CardTitle>
@@ -76,14 +85,15 @@ export function EmptyViewComponet() {
   );
 }
 
+
 export function QueryViewComponent({
   data,
   error,
 }: {
   data: QueryResult;
-  error: string;
+  error?: string;
 }) {
-  const { chartType, viewMode } = useVisualization();
+  const { viewMode } = useVisualization();
   // 1. 添加空状态处理
   if (!data && !error) {
     return <EmptyViewComponet />;
@@ -104,11 +114,16 @@ export function QueryViewComponent({
       </Card>
     );
   }
-  const View = queryViewFactory.getView(viewMode);
+  
 
   return (
     <ScrollCard>
-      <View className='min-h-full min-w-full' {...data} />
+      <Visualization 
+        viewId={viewMode} 
+        queryResult={data} 
+      />
     </ScrollCard>
   );
 }
+
+
