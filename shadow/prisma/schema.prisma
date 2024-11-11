@@ -31,3 +31,17 @@ model metadata {
 
   @@map("metadata")
 }
+
+model visualization {
+  id           String   @id @default(cuid())
+  name         String   
+  datasourceId String   @map("datasource_id")
+  sqlContent   String   @db.Text @map("sql_content")
+  viewMode     String   @map("view_mode")
+  viewParams   Json     @map("view_params")
+  sqlVariables Json     @map("sql_variables")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("visualization")
+}
