@@ -4,16 +4,18 @@ import { useState } from "react";
 import { SQLWorkbenchHeader } from "./header/index";
 import { QuerySearchSqlEditor } from "./editor";
 import { QueryViewComponent } from "./result/result";
-import { Variable } from "@/types/base";
+import { useVisualization } from "@/hook/use-visualization";
 import { QueryFooterHeader } from "./footer";
 
 export function SQLWorkbench() {
   // 数据库
-  const [databaseId, setDatabaseId] = useState<string>("");
+  const { datasourceId: databaseId, setDatasourceId: setDatabaseId } =
+    useVisualization();
 
   // sql editor
-  const [variables, setVariables] = useState<Variable[]>([]);
-  const [sqlContent, setSqlContent] = useState<string>("");
+  const { sqlVariables: variables, setSqlVariables: setVariables } =
+    useVisualization();
+  const { sqlContent, setSqlContent } = useVisualization();
 
   // result
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);

@@ -1,5 +1,8 @@
+"use server";
+
 import { prisma } from "@/lib/prisma";
 import { Variable } from "@/types/base";
+
 
 interface CreateVisualizationInput {
   name: string;

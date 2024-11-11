@@ -47,7 +47,6 @@ export function QuerySearchSqlEditor({
   // UI States
   const [isExecuting, setIsExecuting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [setViewMode] = useState<"table" | "chart">("table");
   // SQL Content Handlers
   const handleSqlChange = (value: string) => {
     setSqlContent(value);
@@ -87,7 +86,6 @@ export function QuerySearchSqlEditor({
 
     if (result.success) {
       setQueryResult(result.data);
-      setViewMode("table");
     } else {
       setQueryError(result.error || "Unknown error");
     }
