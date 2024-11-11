@@ -11,13 +11,12 @@ import { FileTextIcon } from "lucide-react";
 
 export function ViewModeSelector() {
   const { viewMode, setViewMode } = useVisualization();
-
   return (
-    <Card className='h-full'>
+    <Card className='h-full flex flex-col'>
       <CardHeader className='pb-3'>
         <CardTitle className='text-base font-semibold'>数据可视化</CardTitle>
       </CardHeader>
-      <CardContent className='p-0'>
+      <CardContent className='p-0 flex-1 min-h-0'>
         <ScrollArea className='h-full px-4'>
           <ChartVisualization viewMode={viewMode} setViewMode={setViewMode} />
         </ScrollArea>
