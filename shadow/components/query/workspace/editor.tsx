@@ -137,7 +137,7 @@ export function SQLEditorUI({
   onSqlChange,
 }: SQLEditorUIProps) {
   return (
-    <>
+    <div className='flex w-full gap-4'>
       <div className='flex flex-col gap-2'>
         <Button
           variant='ghost'
@@ -158,7 +158,7 @@ export function SQLEditorUI({
         </Button>
       </div>
 
-      <div className='flex-1'>
+      <div className='flex-1 w-full'>
         <SQLEditor
           value={sqlContent}
           onChange={(value: string | undefined) => onSqlChange(value || "")}
@@ -166,7 +166,7 @@ export function SQLEditorUI({
           placeholder='SELECT * FROM users WHERE...'
         />
       </div>
-    </>
+    </div>
   );
 }
 

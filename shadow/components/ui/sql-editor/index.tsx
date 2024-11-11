@@ -1,8 +1,7 @@
 "use client";
 
 import { Editor, useMonaco } from "@monaco-editor/react";
-import { useTheme } from "next-themes";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { BasicSQLCompletionProvider } from "./sql-suggests";
 interface SQLEditorProps {
   value?: string;
@@ -36,7 +35,7 @@ export function SQLEditor({
 
         const context = completionProvider.analyzeContext(
           textUntilPosition,
-          position,
+          position
         );
         const suggestions = completionProvider.generateSuggestions(context);
         const range = completionProvider.calculateRange(context);
@@ -57,9 +56,9 @@ export function SQLEditor({
     <div>
       <Editor
         height={height}
-        language="sql"
+        language='sql'
         value={value}
-        theme="vs-dark"
+        theme='vs-dark'
         onChange={onChange}
         options={{
           minimap: { enabled: false },
@@ -79,12 +78,19 @@ export function SQLEditor({
           renderLineHighlight: "none",
           scrollbar: {
             vertical: "hidden",
-            horizontal: "hidden",
+            horizontal: "auto", // Allow horizontal scrolling
           },
           overviewRulerBorder: false,
           hideCursorInOverviewRuler: true,
           glyphMargin: false,
           contextmenu: false,
+          wordWrap: "on", // Disable line wrapping
+          wrappingIndent: "indent", // Indent wrapped lines
+          autoIndent: "full", // Enable auto indentation
+          formatOnType: true, // Format while typing
+          formatOnPaste: true, // Format pasted content
+          insertSpaces: true, // Use spaces for indentation
+          tabSize: 2, // Set tab size to 2 spaces
         }}
       />
     </div>

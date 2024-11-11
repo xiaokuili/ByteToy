@@ -34,3 +34,4 @@ v 0.0.1
 - 开始实现ai分析流程
 - 实现llm-view 可以请求大模型接口功能
 - 修复view-select 可以滚动
+- 修复sql editor 可以换行
