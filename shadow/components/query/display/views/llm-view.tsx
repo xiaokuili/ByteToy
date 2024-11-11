@@ -10,7 +10,7 @@ import {
 import { generateQueryResult } from "@/lib/ai-service";
 
 interface LLMViewData {
-  rows: Array<{ label: string; value: any }>;
+  rows: Array<{ label: string; value: string }>;
   queryResult: QueryResult;
   generatedContent?: string;
 }
@@ -23,13 +23,14 @@ const llmProcessor: ViewProcessor<LLMViewData> = {
         data: {
           rows: queryResult.rows,
           queryResult,
-          generatedContent: undefined
+          generatedContent: undefined,
         },
       };
+      // eslint-disable-next-line no-empty
     } catch (error) {
       return {
         isValid: false,
-        error: "Failed to process data for LLM view",
+        error: error,
       };
     }
   },
@@ -46,7 +47,9 @@ const llmProcessor: ViewProcessor<LLMViewData> = {
 };
 
 const LLMView: React.FC<{ data: LLMViewData }> = ({ data }) => {
-  const [content, setContent] = useState<string | undefined>(data.generatedContent);
+  const [content, setContent] = useState<string | undefined>(
+    data.generatedContent
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
@@ -71,12 +74,12 @@ const LLMView: React.FC<{ data: LLMViewData }> = ({ data }) => {
   }, [data.queryResult, content]);
 
   return (
-    <div className="w-full h-full p-4 overflow-auto">
-      <div className="prose max-w-none">
+    <div className='w-full h-full p-4 overflow-auto'>
+      <div className='prose max-w-none'>
         {loading ? (
           <div>正在生成分析...</div>
         ) : error ? (
-          <div className="text-red-500">{error}</div>
+          <div className='text-red-500'>{error}</div>
         ) : content ? (
           <div>{content}</div>
         ) : (
@@ -87,12 +90,10 @@ const LLMView: React.FC<{ data: LLMViewData }> = ({ data }) => {
   );
 };
 
-export function createLLMView(
-  definition: ViewModeDefinition,
-): QueryResultView {
+export function createLLMView(definition: ViewModeDefinition): QueryResultView {
   return {
     Component: LLMView,
     definition: definition,
     processor: llmProcessor,
   };
-} 
+}

@@ -26,7 +26,7 @@ interface QueryState {
 }
 
 interface QueryActions {
-  setQueryResult: (result: any) => void;
+  setQueryResult: (result: QueryResult) => void;
   setQueryError: (error: string) => void;
   setVariables: (variables: Variable[]) => void;
   setSqlContent: (sqlContent: string) => void;
@@ -47,7 +47,7 @@ export function QuerySearchSqlEditor({
   // UI States
   const [isExecuting, setIsExecuting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [viewMode, setViewMode] = useState<"table" | "chart">("table");
+  const [setViewMode] = useState<"table" | "chart">("table");
   // SQL Content Handlers
   const handleSqlChange = (value: string) => {
     setSqlContent(value);
@@ -95,7 +95,7 @@ export function QuerySearchSqlEditor({
     setIsExecuting(false);
   };
 
-  const handleQueryError = (error: any) => {
+  const handleQueryError = (error: string) => {
     console.error("Error executing SQL:", error);
     setIsExecuting(false);
   };
@@ -103,7 +103,7 @@ export function QuerySearchSqlEditor({
   // Preview Logic
   const getPreviewSql = () => getFinalSql(sqlContent, variables);
   return (
-    <div className="flex">
+    <div className='flex'>
       <SQLEditorUI
         isExecuting={isExecuting}
         onExecute={handleExecute}
@@ -138,32 +138,32 @@ export function SQLEditorUI({
 }: SQLEditorUIProps) {
   return (
     <>
-      <div className="flex flex-col gap-2">
+      <div className='flex flex-col gap-2'>
         <Button
-          variant="ghost"
-          size="icon"
+          variant='ghost'
+          size='icon'
           onClick={onExecute}
           disabled={isExecuting}
-          className="text-blue-600 hover:text-blue-600 hover:bg-blue-50"
+          className='text-blue-600 hover:text-blue-600 hover:bg-blue-50'
         >
           {isExecuting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className='h-4 w-4 animate-spin' />
           ) : (
-            <Play className="h-4 w-4" />
+            <Play className='h-4 w-4' />
           )}
         </Button>
 
-        <Button variant="ghost" size="icon" onClick={onShowPreview}>
-          <Eye className="h-4 w-4" />
+        <Button variant='ghost' size='icon' onClick={onShowPreview}>
+          <Eye className='h-4 w-4' />
         </Button>
       </div>
 
-      <div className="flex-1">
+      <div className='flex-1'>
         <SQLEditor
           value={sqlContent}
           onChange={(value: string | undefined) => onSqlChange(value || "")}
-          height="200px"
-          placeholder="SELECT * FROM users WHERE..."
+          height='200px'
+          placeholder='SELECT * FROM users WHERE...'
         />
       </div>
     </>
@@ -181,21 +181,21 @@ export function PreviewDialog({
   open,
   onOpenChange,
   content,
-  icon = <Eye className="h-4 w-4" />, // 默认图标
+  icon = <Eye className='h-4 w-4' />, // 默认图标
 }: PreviewDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className='sm:max-w-[600px]'>
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className='flex items-center gap-2'>
             {icon}
             Preview
           </DialogTitle>
           <DialogDescription>Preview content with formatting</DialogDescription>
         </DialogHeader>
-        <div className="relative">
-          <pre className="p-4 rounded-lg bg-muted text-sm overflow-auto max-h-[400px] font-mono">
-            <code className="text-foreground">{content}</code>
+        <div className='relative'>
+          <pre className='p-4 rounded-lg bg-muted text-sm overflow-auto max-h-[400px] font-mono'>
+            <code className='text-foreground'>{content}</code>
           </pre>
         </div>
       </DialogContent>

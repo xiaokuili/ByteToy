@@ -47,7 +47,8 @@ export async function executeQuery(datasourceId: string, sql: string) {
 
     try {
       // 3. 执行查询
-      const result = await queryClient.$queryRawUnsafe<Record<string, unknown>[]>(sql);
+      const result =
+        await queryClient.$queryRawUnsafe<Record<string, unknown>[]>(sql);
       // 改进格式化逻辑
       const formattedRows = result.map((row) => {
         const formattedRow: Record<string, unknown> = {};
@@ -135,7 +136,6 @@ export async function executeQuery(datasourceId: string, sql: string) {
   }
 }
 
-
 // 构建连接字符串
 function buildConnectionString(datasource: Datasource): string {
   const { type, host, port, databaseName, username, password, useSSL } =
@@ -152,7 +152,7 @@ function buildConnectionString(datasource: Datasource): string {
 }
 
 export async function checkConnection(
-  datasource: Datasource,
+  datasource: Datasource
 ): Promise<ConnectionResult> {
   // 构建连接字符串
   const connectionString = buildConnectionString(datasource);
@@ -199,8 +199,8 @@ interface PostgresColumn {
 }
 export async function introspectDatabase(
   client: PrismaClient,
-  datasource: Datasource,
-): Promise<Record<string, any>> {
+  datasource: Datasource
+): Promise<Record<string, Schema>> {
   const type = "postgresql";
   const targetSchemas = "All";
   try {
@@ -209,7 +209,7 @@ export async function introspectDatabase(
         // 构建 schema 过滤条件
         const schemaFilter =
           targetSchemas === "All"
-            ? "AND table_schema = 'public'" 
+            ? "AND table_schema = 'public'"
             : `AND table_schema IN ('${targetSchemas}')`;
 
         const query = `
@@ -227,7 +227,7 @@ export async function introspectDatabase(
 
         const tables = (await client.$queryRawUnsafe(
           query,
-          datasource.databaseName,
+          datasource.databaseName
         )) as PostgresColumn[];
 
         return formatPostgresStructure(tables);
@@ -241,7 +241,9 @@ export async function introspectDatabase(
     throw error;
   }
 }
-function formatPostgresStructure(rawData: any[]): Record<string, Schema> {
+function formatPostgresStructure(
+  rawData: PostgresColumn[]
+): Record<string, Schema> {
   const schemas: Record<string, Schema> = {};
 
   // 按 schema 和 table 分组处理数据

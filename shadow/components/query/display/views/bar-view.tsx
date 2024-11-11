@@ -24,10 +24,11 @@ const barProcessor: ViewProcessor<BarChartData> = {
         isValid: true,
         data: { labels, values },
       };
+      // eslint-disable-next-line no-empty
     } catch (error) {
       return {
         isValid: false,
-        error: "Failed to process data for bar chart",
+        error: error,
       };
     }
   },
@@ -83,7 +84,7 @@ const BarChart: React.FC<{ data: BarChartData }> = ({ data }) => {
   };
 
   return (
-    <div className="w-full h-full flex-1 min-h-0">
+    <div className='w-full h-full flex-1 min-h-0'>
       <ReactECharts
         option={option}
         style={{ height: "100%", minHeight: "100%" }}
@@ -94,7 +95,7 @@ const BarChart: React.FC<{ data: BarChartData }> = ({ data }) => {
 };
 
 export function createBarChartView(
-  definition: ViewModeDefinition,
+  definition: ViewModeDefinition
 ): QueryResultView {
   return {
     Component: BarChart,

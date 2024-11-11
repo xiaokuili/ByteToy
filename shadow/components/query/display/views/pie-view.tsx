@@ -7,7 +7,6 @@ import {
   ProcessedData,
 } from "../types";
 import ReactECharts from "echarts-for-react";
-import { formatNumber } from "@/lib/utils";
 
 interface PieChartData {
   data: Array<{
@@ -28,10 +27,11 @@ const pieProcessor: ViewProcessor<PieChartData> = {
         isValid: true,
         data: { data },
       };
+      // eslint-disable-next-line no-empty
     } catch (error) {
       return {
         isValid: false,
-        error: "Failed to process data for pie chart",
+        error: error,
       };
     }
   },
@@ -73,7 +73,7 @@ const PieChart: React.FC<{ data: PieChartData }> = ({ data }) => {
   };
 
   return (
-    <div className="w-full h-full flex-1 min-h-0">
+    <div className='w-full h-full flex-1 min-h-0'>
       <ReactECharts
         option={option}
         style={{ height: "100%", minHeight: "100%" }}
@@ -84,11 +84,11 @@ const PieChart: React.FC<{ data: PieChartData }> = ({ data }) => {
 };
 
 export function createPieChartView(
-  definition: ViewModeDefinition,
+  definition: ViewModeDefinition
 ): QueryResultView {
   return {
     Component: PieChart,
     definition: definition,
     processor: pieProcessor,
   };
-} 
+}

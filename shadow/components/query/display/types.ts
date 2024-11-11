@@ -17,20 +17,20 @@ import {
 } from "lucide-react";
 
 export interface QueryResult {
-  rows: any[];
+  rows: Array<Record<string, unknown>>;
   columns: Array<{
     name: string;
     type: string;
   }>;
 }
 
-export interface ProcessedData<T = any> {
+export interface ProcessedData<T> {
   isValid: boolean;
   error?: string;
   data?: T;
 }
 
-export interface ViewProcessor<T = any> {
+export interface ViewProcessor<T = unknown> {
   processData?: (data: QueryResult) => ProcessedData<T>;
   validateData?: (processedData: T) => { isValid: boolean; error?: string };
 }
@@ -38,12 +38,16 @@ export interface ViewProcessor<T = any> {
 export interface ViewModeDefinition {
   id: string;
   name: string;
-  icon: any;
+  icon: React.ComponentType;
   category: string;
-  tooltip: any;
+  tooltip: {
+    title?: string;
+    description: string;
+    examples?: string[];
+  };
 }
 
-export interface QueryResultView<T = any> {
+export interface QueryResultView<T = unknown> {
   Component: React.ComponentType<{ data: T }>;
   definition: ViewModeDefinition;
   processor: ViewProcessor<T>;

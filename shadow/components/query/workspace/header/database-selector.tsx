@@ -18,10 +18,10 @@ interface DatabaseOptionProps {
 
 function DatabaseOption({ database }: DatabaseOptionProps) {
   return (
-    <SelectItem value={database.id} className="group">
-      <div className="flex items-center gap-2 py-1">
-        <Server className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-        <span className="font-medium group-hover:text-primary transition-colors">
+    <SelectItem value={database.id} className='group'>
+      <div className='flex items-center gap-2 py-1'>
+        <Server className='h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors' />
+        <span className='font-medium group-hover:text-primary transition-colors'>
           {database.name}
         </span>
       </div>
@@ -37,10 +37,10 @@ export function DatabaseSelector({ onSelect }: DatabaseSelectorProps) {
       const response = await getMetadatas();
       if (response.success) {
         setDatabases(
-          response.data.map((db: any) => ({
+          response.data.map((db: Database) => ({
             id: db.id,
             name: db.name || db.displayName,
-          })),
+          }))
         );
       } else {
         toast.error(response.error);
@@ -58,14 +58,14 @@ export function DatabaseSelector({ onSelect }: DatabaseSelectorProps) {
           "bg-background",
           "border-muted",
           "hover:bg-muted/50",
-          "transition-colors",
+          "transition-colors"
         )}
       >
-        <div className="flex items-center gap-2">
-          <Database className="h-4 w-4 text-muted-foreground" />
-          <SelectValue placeholder="选择数据库" />
+        <div className='flex items-center gap-2'>
+          <Database className='h-4 w-4 text-muted-foreground' />
+          <SelectValue placeholder='选择数据库' />
         </div>
-        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        <ChevronDown className='h-4 w-4 text-muted-foreground' />
       </SelectTrigger>
       <SelectContent>
         {databases.map((db) => (

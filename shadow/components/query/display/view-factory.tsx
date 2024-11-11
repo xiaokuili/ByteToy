@@ -15,6 +15,7 @@ import { createLLMView } from "./views/llm-view";
 import React from "react";
 
 export class ViewFactory {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private views: Map<string, QueryResultView<any>> = new Map();
 
   register<T>(viewId: string, view: QueryResultView<T>) {
@@ -23,7 +24,7 @@ export class ViewFactory {
 
   createView(
     viewId: string,
-    queryResult: QueryResult,
+    queryResult: QueryResult
   ): React.ReactElement | null {
     const view = this.views.get(viewId);
 
@@ -64,36 +65,36 @@ export const viewFactory = new ViewFactory();
 viewFactory.register(
   "bar",
   createBarChartView(
-    VIEW_MODES.find((mode) => mode.id === "bar") as ViewModeDefinition,
-  ),
+    VIEW_MODES.find((mode) => mode.id === "bar") as ViewModeDefinition
+  )
 );
 viewFactory.register(
   "table",
   createTableView(
-    VIEW_MODES.find((mode) => mode.id === "table") as ViewModeDefinition,
-  ),
+    VIEW_MODES.find((mode) => mode.id === "table") as ViewModeDefinition
+  )
 );
 viewFactory.register(
   "line",
   createLineView(
-    VIEW_MODES.find((mode) => mode.id === "line") as ViewModeDefinition,
-  ),
+    VIEW_MODES.find((mode) => mode.id === "line") as ViewModeDefinition
+  )
 );
 viewFactory.register(
   "pie",
   createPieChartView(
-    VIEW_MODES.find((mode) => mode.id === "pie") as ViewModeDefinition,
-  ),
+    VIEW_MODES.find((mode) => mode.id === "pie") as ViewModeDefinition
+  )
 );
 viewFactory.register(
   "number",
   createNumberView(
-    VIEW_MODES.find((mode) => mode.id === "number") as ViewModeDefinition,
-  ),
+    VIEW_MODES.find((mode) => mode.id === "number") as ViewModeDefinition
+  )
 );
 viewFactory.register(
   "llm",
   createLLMView(
-    LLM_VIEW_MODES.find((mode) => mode.id === "llm") as ViewModeDefinition,
-  ),
+    LLM_VIEW_MODES.find((mode) => mode.id === "llm") as ViewModeDefinition
+  )
 );

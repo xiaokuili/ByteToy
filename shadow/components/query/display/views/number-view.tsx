@@ -31,10 +31,11 @@ const numberProcessor: ViewProcessor<NumberData> = {
           label: row.label,
         },
       };
+      // eslint-disable-next-line no-empty
     } catch (error) {
       return {
         isValid: false,
-        error: "Failed to process data for number view",
+        error: error,
       };
     }
   },
@@ -48,8 +49,8 @@ const numberProcessor: ViewProcessor<NumberData> = {
     }
     if (data.label && typeof data.label !== "string") {
       return {
-        isValid: false, 
-        error: "Label must be a string if provided"
+        isValid: false,
+        error: "Label must be a string if provided",
       };
     }
     return { isValid: true };
@@ -58,19 +59,19 @@ const numberProcessor: ViewProcessor<NumberData> = {
 
 const NumberView: React.FC<{ data: NumberData }> = ({ data }) => {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center">
-      <div className="text-4xl font-bold">{formatNumber(data.value)}</div>
-      {data.label && <div className="text-lg text-gray-500">{data.label}</div>}
+    <div className='w-full h-full flex flex-col items-center justify-center'>
+      <div className='text-4xl font-bold'>{formatNumber(data.value)}</div>
+      {data.label && <div className='text-lg text-gray-500'>{data.label}</div>}
     </div>
   );
 };
 
 export function createNumberView(
-  definition: ViewModeDefinition,
+  definition: ViewModeDefinition
 ): QueryResultView {
   return {
     Component: NumberView,
     definition: definition,
     processor: numberProcessor,
   };
-} 
+}
