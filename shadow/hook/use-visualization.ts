@@ -7,10 +7,13 @@ interface VisualizationStore {
   setViewMode: (mode: string) => void;
   // 添加 AI 视图的参数
   aiParams: {
-    type: 'imitate' | 'generate';
+    type: "imitate" | "generate";
     input: string;
   };
-  setAiParams: (params: { type: 'imitate' | 'generate'; input: string }) => void;
+  setAiParams: (params: {
+    type: "imitate" | "generate";
+    input: string;
+  }) => void;
 }
 
 export const useVisualization = create<VisualizationStore>((set) => ({
@@ -19,8 +22,8 @@ export const useVisualization = create<VisualizationStore>((set) => ({
   viewMode: "table",
   setViewMode: (mode) => set({ viewMode: mode }),
   aiParams: {
-    type: 'imitate',
-    input: '',
+    type: "imitate",
+    input: "",
   },
   setAiParams: (params) => set({ aiParams: params }),
 }));
