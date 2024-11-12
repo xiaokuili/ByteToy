@@ -5,15 +5,6 @@ import { Variable } from "@/types/base";
 interface VisualizationStore {
   viewMode: string;
   setViewMode: (mode: string) => void;
-  // 添加 AI 视图的参数
-  aiParams: {
-    type: "imitate" | "generate";
-    input: string;
-  };
-  setAiParams: (params: {
-    type: "imitate" | "generate";
-    input: string;
-  }) => void;
   datasourceId: string;
   setDatasourceId: (id: string) => void;
   sqlContent: string;
@@ -35,11 +26,6 @@ export const useVisualizationOpen = create<VisualizationOpenStore>((set) => ({
 export const useVisualization = create<VisualizationStore>((set) => ({
   viewMode: "table",
   setViewMode: (mode) => set({ viewMode: mode }),
-  aiParams: {
-    type: "",
-    input: "",
-  },
-  setAiParams: (params) => set({ aiParams: params }),
   datasourceId: "",
   setDatasourceId: (id) => set({ datasourceId: id }),
   sqlContent: "",

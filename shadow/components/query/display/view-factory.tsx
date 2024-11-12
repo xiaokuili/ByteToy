@@ -1,9 +1,4 @@
-import {
-  LLM_VIEW_MODES,
-  QueryResult,
-  QueryResultView,
-  ViewModeDefinition,
-} from "./types";
+import { QueryResult, QueryResultView, ViewModeDefinition } from "./types";
 import { VisualizationErrorView } from "./views/error-view";
 import { VIEW_MODES } from "./types";
 import { createBarChartView } from "./views/bar-view";
@@ -11,7 +6,6 @@ import { createTableView } from "./views/table-view";
 import { createLineView } from "./views/line-view";
 import { createPieChartView } from "./views/pie-view";
 import { createNumberView } from "./views/number-view";
-import { createLLMView } from "./views/llm-view";
 import React from "react";
 
 export class ViewFactory {
@@ -90,11 +84,5 @@ viewFactory.register(
   "number",
   createNumberView(
     VIEW_MODES.find((mode) => mode.id === "number") as ViewModeDefinition
-  )
-);
-viewFactory.register(
-  "llm",
-  createLLMView(
-    LLM_VIEW_MODES.find((mode) => mode.id === "llm") as ViewModeDefinition
   )
 );

@@ -230,21 +230,3 @@ export const VIEW_MODES: ViewModeDefinition[] = [
   
 ];
 
-
-export const LLM_VIEW_MODES: ViewModeDefinition[] = [
-  {
-    id: "llm",
-    name: "AI分析",
-    icon: FileTextIcon,
-    category: "basic",
-    tooltip: {
-      title: "AI Analysis View",
-      description: "基于数据的AI智能分析和内容生成",
-      examples: [
-        "数据趋势分析",
-        "数据洞察报告",
-        "自动化数据解读"
-      ],
-    },
-  },
-]

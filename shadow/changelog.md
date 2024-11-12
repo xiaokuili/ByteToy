@@ -36,3 +36,4 @@ v 0.0.1
 - 修复view-select 可以滚动
 - 修复sql editor 可以换行
 - 实现存储query（section）功能
+- 删除ai展示 query 这一层只展示数据
