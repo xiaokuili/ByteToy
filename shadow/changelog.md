@@ -38,3 +38,4 @@ v 0.0.1
 - 实现存储query（section）功能
 - 删除ai展示 query 这一层只展示数据
 - 调整query 存储名称展示
+- 实现query 列表页面
