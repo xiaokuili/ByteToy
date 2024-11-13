@@ -20,7 +20,7 @@ export default function DashboardPage() {
       </div>
       <div className='ml-64 flex-1'>
         <div className="flex flex-col h-screen">
-          <div className="flex-none">
+          <div className="sticky top-0 z-10 bg-background">
             <DashboardHeader />
           </div>
           <div className="flex-1 overflow-auto">

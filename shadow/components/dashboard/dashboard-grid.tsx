@@ -9,7 +9,12 @@ import { executeQuery } from "@/lib/datasource-action";
 import { getFinalSql } from "@/utils/variable-utils";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { MagicWandIcon } from "@radix-ui/react-icons";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface DashboardGridProps {
@@ -86,18 +91,54 @@ export function DashboardGrid({ blocks }: DashboardGridProps) {
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
         rowHeight={100}
+ 
       >
         {blocks.map((block) => (
           <div key={block.id} className='bg-card border rounded-lg p-4'>
             <div className='h-full'>
-              <h3 className='text-lg font-semibold mb-2'>{block.name}</h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className='text-lg font-semibold'>{block.name}</h3>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-12 w-12">
+                      <MagicWandIcon className="h-4 w-4" />
+                    </Button>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Tabs defaultValue="generate">
+                          <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="generate">生成</TabsTrigger>
+                            <TabsTrigger value="clone">仿写</TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="generate">
+                            <div className="space-y-2">
+                              <Label>生成指令</Label>
+                              <Input placeholder="输入生成指令..." />
+                              <Button className="w-full">生成</Button>
+                            </div>
+                          </TabsContent>
+                          <TabsContent value="clone">
+                            <div className="space-y-2">
+                              <Label>历史记录</Label>
+                              <Input placeholder="输入历史记录..." />
+                              <Button className="w-full">仿写</Button>
+                            </div>
+                          </TabsContent>
+                        </Tabs>
+                      </div>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
+              </div>
               <div className='h-[calc(100%-2rem)]'>
                 {queryErrors[block.id] ? (
                   <QueryErrorView error={queryErrors[block.id]} />
                 ) : !queryResults[block.id] ? (
                   <LoadingView />
                 ) : (
-                <VisualizationComponent 
+                <AICard 
                     viewId={block.viewMode}
                     queryResult={queryResults[block.id]}
                 />
@@ -110,3 +151,50 @@ export function DashboardGrid({ blocks }: DashboardGridProps) {
     </div>
   );
 }
+
+interface AICardProps {
+    viewId: string;
+    queryResult: any;
+}
+
+function AICard({ viewId, queryResult }: AICardProps) {
+    const [prompt, setPrompt] = useState("");
+    const [example, setExample] = useState("");
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [isCloning, setIsCloning] = useState(false);
+
+    const handleGenerate = async () => {
+        if (!prompt) return;
+        setIsGenerating(true);
+        try {
+            // TODO: 调用AI生成接口
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+            console.error("Generation failed:", error);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    const handleClone = async () => {
+        if (!example) return;
+        setIsCloning(true);
+        try {
+            // TODO: 调用AI仿写接口
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error) {
+            console.error("Cloning failed:", error);
+        } finally {
+            setIsCloning(false);
+        }
+    };
+    return (
+            <VisualizationComponent 
+                viewId={viewId}
+                queryResult={queryResult}
+            />
+            
+    );
+}
+
+
