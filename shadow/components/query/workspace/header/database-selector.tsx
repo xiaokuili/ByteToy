@@ -52,7 +52,7 @@ export function DatabaseSelector({ onSelect }: DatabaseSelectorProps) {
   }, []);
 
   return (
-    <Select value={datasourceId || databases[0]?.id} onValueChange={onSelect}>
+    <Select value={datasourceId || ""} onValueChange={onSelect}>
       <SelectTrigger
         className={cn(
           "w-[250px]",

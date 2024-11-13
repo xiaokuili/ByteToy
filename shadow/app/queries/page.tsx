@@ -13,6 +13,7 @@ import {
 import { listVisualizations } from "@/lib/visualization-actions";
 import { useEffect, useState } from "react";
 import { Visualization } from "@/types/base";
+import Link from "next/link";
 
 export default function QueriesPage() {
   const [loading, setLoading] = useState(true);
@@ -37,7 +38,7 @@ export default function QueriesPage() {
     };
 
     fetchVisualizations();
-  }, []);
+  }, [page]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -62,8 +63,8 @@ export default function QueriesPage() {
                   <span>
                     创建时间: {new Date(item.createdAt).toLocaleDateString()}
                   </span>
-                  <Button variant='ghost' size='sm'>
-                    查看详情
+                  <Button variant='ghost' size='sm' asChild>
+                    <Link href={`/queries/${item.id}`}>查看详情</Link>
                   </Button>
                 </div>
               </CardContent>

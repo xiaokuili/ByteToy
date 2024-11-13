@@ -19,32 +19,39 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export function QuestionHeaderComponent() {
-  const { datasourceId, sqlContent, viewMode, aiParams, sqlVariables, id } =
-    useVisualization();
+  const {
+    datasourceId,
+    sqlContent,
+    viewMode,
+    aiParams,
+    sqlVariables,
+    id,
+    name,
+    setName,
+  } = useVisualization();
   const [isSaving, setIsSaving] = useState(false);
-  const [visualizationName, setVisualizationName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSave = async () => {
-    if (!visualizationName) return;
+    if (!name) return;
 
     setIsSaving(true);
     try {
       await createVisualization({
         id,
-        name: visualizationName,
+        name,
         datasourceId,
         sqlContent,
         viewMode,
         viewParams: aiParams,
         sqlVariables,
       });
-     
+
       toast.success("保存成功", {
         description: "可以在查询列表中查看",
       });
       setIsOpen(false);
-      setVisualizationName("");
+      setName("");
     } catch (err) {
       console.error(err);
       toast.error("保存失败", {
@@ -79,8 +86,8 @@ export function QuestionHeaderComponent() {
             </AlertDialogHeader>
             <div className='py-4'>
               <Input
-                value={visualizationName}
-                onChange={(e) => setVisualizationName(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder='可视化名称'
                 className='w-full'
               />
@@ -89,7 +96,7 @@ export function QuestionHeaderComponent() {
               <AlertDialogCancel>取消</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleSave}
-                disabled={isSaving || !visualizationName}
+                disabled={isSaving || !name}
               >
                 {isSaving ? "保存中..." : "确定"}
               </AlertDialogAction>

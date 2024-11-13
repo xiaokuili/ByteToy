@@ -16,6 +16,8 @@ interface VisualizationStore {
   setId: (id: string | null) => void;
   isLoading: boolean;
   error: string | null;
+  name: string;
+  setName: (name: string) => void;
 
   // 加载可视化数据的方法
   loadVisualization: (id: string) => Promise<void>;
@@ -30,6 +32,7 @@ const initialState = {
   sqlVariables: [],
   id: null,
   isLoading: false,
+  name: "",
   error: null,
 };
 export const useVisualization = create<VisualizationStore>((set) => ({
@@ -40,10 +43,9 @@ export const useVisualization = create<VisualizationStore>((set) => ({
   setSqlContent: (sql) => set({ sqlContent: sql }),
   setSqlVariables: (variables) => set({ sqlVariables: variables }),
   setId: (id) => set({ id }),
-
+  setName: (name) => set({ name }),
   loadVisualization: async (id: string) => {
     try {
-      console.log("before loadVisualization", id);
       set({ isLoading: true, error: null });
       const visualization = await getVisualization(id);
       if (visualization) {
@@ -53,9 +55,9 @@ export const useVisualization = create<VisualizationStore>((set) => ({
           datasourceId: visualization.datasourceId,
           sqlContent: visualization.sqlContent,
           sqlVariables: visualization.sqlVariables,
+          name: visualization.name,
         });
       }
-      console.log("afterloadVisualization", visualization);
     } catch (error) {
       set({ error: error.message });
     } finally {

@@ -28,19 +28,38 @@ interface PaginatedResult<T> {
   pageSize: number;
   totalPages: number;
 }
-
 export async function createVisualization(input: CreateVisualizationInput) {
-  return prisma.visualization.create({
-    data: {
-      id: input.id,
-      name: input.name,
-      datasourceId: input.datasourceId,
-      sqlContent: input.sqlContent,
-      viewMode: input.viewMode,
-      viewParams: input.viewParams,
-      sqlVariables: input.sqlVariables,
-    },
-  });
+  try {
+    const visualization = await prisma.visualization.upsert({
+      where: {
+        id: input.id,
+      },
+      update: {
+        name: input.name,
+        datasourceId: input.datasourceId,
+        sqlContent: input.sqlContent,
+        viewMode: input.viewMode,
+        viewParams: input.viewParams,
+        sqlVariables: input.sqlVariables,
+        updatedAt: new Date(),
+      },
+      create: {
+        id: input.id,
+        name: input.name,
+        datasourceId: input.datasourceId,
+        sqlContent: input.sqlContent,
+        viewMode: input.viewMode,
+        viewParams: input.viewParams,
+        sqlVariables: input.sqlVariables,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+    return { success: true, data: visualization };
+  } catch (error) {
+    console.error("Failed to create/update visualization:", error);
+    return { success: false, error: "Failed to create/update visualization" };
+  }
 }
 
 export async function getVisualization(id: string) {

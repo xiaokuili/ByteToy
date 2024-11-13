@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Variable } from "@/types/base";
 import { executeQuery } from "@/lib/datasource-action";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,40 @@ export function QuerySearchSqlEditor({
   // UI States
   const [isExecuting, setIsExecuting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  // Execute query on initial load if SQL exists
+  const initialLoadRef = useRef(false);
+
+  useEffect(() => {
+    const executeSqlOnLoad = async () => {
+      // 如果已经执行过，则直接返回
+      if (initialLoadRef.current) return;
+      // 如果验证不通过，也直接返回
+      if (!validateQuery()) return;
+
+      initialLoadRef.current = true;
+      setIsExecuting(true);
+      setQueryResult(null);
+      setQueryError("");
+
+      try {
+        const finalSql = getFinalSql(sqlContent, variables);
+        const result = await executeQuery(databaseId, finalSql);
+
+        if (result.success) {
+          setQueryResult(result.data);
+        } else {
+          setQueryError(result.error || "Unknown error");
+        }
+      } catch (error) {
+        console.error("Error executing initial SQL:", error);
+      } finally {
+        setIsExecuting(false);
+      }
+    };
+
+    executeSqlOnLoad();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [databaseId, sqlContent, variables, setQueryResult, setQueryError]);
   // SQL Content Handlers
   const handleSqlChange = (value: string) => {
     setSqlContent(value);
