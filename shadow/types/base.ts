@@ -11,6 +11,16 @@ export interface Datasource {
   useSSL: boolean;
 }
 
+export interface Visualization {
+  id: string;
+  name: string;
+  datasourceId: string;
+  sqlContent: string;
+  viewMode: string;
+  viewParams: Record<string, unknown>;
+  sqlVariables: Variable[];
+}
+
 export interface PostgreSQLDatasource extends Datasource {
   type: "PostgreSQL";
 }

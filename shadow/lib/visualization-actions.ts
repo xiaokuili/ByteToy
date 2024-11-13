@@ -12,9 +12,21 @@ interface CreateVisualizationInput {
   viewParams: Record<string, unknown>;
   sqlVariables: Variable[];
 }
-
 interface UpdateVisualizationInput extends Partial<CreateVisualizationInput> {
   id: string;
+}
+
+interface PaginationParams {
+  page: number;
+  pageSize: number;
+}
+
+interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 export async function createVisualization(input: CreateVisualizationInput) {
@@ -37,8 +49,32 @@ export async function getVisualization(id: string) {
   });
 }
 
-export async function listVisualizations() {
-  return prisma.visualization.findMany();
+export async function listVisualizations(
+  params?: PaginationParams
+): Promise<PaginatedResult<Visualization>> {
+  const { page = 1, pageSize = 10 } = params || {};
+  const skip = (page - 1) * pageSize;
+
+  const [total, items] = await Promise.all([
+    prisma.visualization.count(),
+    prisma.visualization.findMany({
+      skip,
+      take: pageSize,
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+  ]);
+
+  const totalPages = Math.ceil(total / pageSize);
+
+  return {
+    data: items,
+    total,
+    page,
+    pageSize,
+    totalPages,
+  };
 }
 
 export async function updateVisualization(input: UpdateVisualizationInput) {
