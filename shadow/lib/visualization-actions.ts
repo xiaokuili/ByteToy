@@ -3,8 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import { Variable } from "@/types/base";
 
-
 interface CreateVisualizationInput {
+  id: string;
   name: string;
   datasourceId: string;
   sqlContent: string;
@@ -20,6 +20,7 @@ interface UpdateVisualizationInput extends Partial<CreateVisualizationInput> {
 export async function createVisualization(input: CreateVisualizationInput) {
   return prisma.visualization.create({
     data: {
+      id: input.id,
       name: input.name,
       datasourceId: input.datasourceId,
       sqlContent: input.sqlContent,

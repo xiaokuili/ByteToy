@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import { Variable } from "@/types/base";
+import { getVisualization } from "@/lib/visualization-actions";
 
 interface VisualizationStore {
   viewMode: string;
@@ -11,7 +12,59 @@ interface VisualizationStore {
   setSqlContent: (sql: string) => void;
   sqlVariables: Variable[];
   setSqlVariables: (variables: Variable[]) => void;
+  id: string | null;
+  setId: (id: string | null) => void;
+  isLoading: boolean;
+  error: string | null;
+
+  // 加载可视化数据的方法
+  loadVisualization: (id: string) => Promise<void>;
+  // 重置所有状态
+  reset: () => void;
 }
+
+const initialState = {
+  viewMode: "table",
+  datasourceId: "",
+  sqlContent: "",
+  sqlVariables: [],
+  id: null,
+  isLoading: false,
+  error: null,
+};
+export const useVisualization = create<VisualizationStore>((set) => ({
+  ...initialState,
+
+  setViewMode: (mode) => set({ viewMode: mode }),
+  setDatasourceId: (id) => set({ datasourceId: id }),
+  setSqlContent: (sql) => set({ sqlContent: sql }),
+  setSqlVariables: (variables) => set({ sqlVariables: variables }),
+  setId: (id) => set({ id }),
+
+  loadVisualization: async (id: string) => {
+    try {
+      console.log("before loadVisualization", id);
+      set({ isLoading: true, error: null });
+      const visualization = await getVisualization(id);
+      if (visualization) {
+        set({
+          id,
+          viewMode: visualization.viewMode,
+          datasourceId: visualization.datasourceId,
+          sqlContent: visualization.sqlContent,
+          sqlVariables: visualization.sqlVariables,
+        });
+      }
+      console.log("afterloadVisualization", visualization);
+    } catch (error) {
+      set({ error: error.message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  reset: () => set(initialState),
+}));
 
 interface VisualizationOpenStore {
   isOpen: boolean;
@@ -21,15 +74,4 @@ interface VisualizationOpenStore {
 export const useVisualizationOpen = create<VisualizationOpenStore>((set) => ({
   isOpen: false,
   setIsOpen: (open) => set({ isOpen: open }),
-}));
-
-export const useVisualization = create<VisualizationStore>((set) => ({
-  viewMode: "table",
-  setViewMode: (mode) => set({ viewMode: mode }),
-  datasourceId: "",
-  setDatasourceId: (id) => set({ datasourceId: id }),
-  sqlContent: "",
-  setSqlContent: (sql) => set({ sqlContent: sql }),
-  sqlVariables: [],
-  setSqlVariables: (variables) => set({ sqlVariables: variables }),
 }));
