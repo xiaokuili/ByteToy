@@ -35,3 +35,4 @@ v 0.0.1
 - 实现llm-view 可以请求大模型接口功能
 - 调整viewMode， 不应该有llm 展示在图形展示中
 - 实现dashboard 的visualization 列表页面
+- dashboard 添加title 和 variables 配置

@@ -3,9 +3,9 @@
 import { DashboardGrid } from "@/components/dashboard/dashboard-grid";
 import { VisualizationSelector } from "@/components/dashboard/block-selector";
 import { useState } from "react";
-import { Variable, Visualization } from "@/types/base";
-import { VariablesSection } from "@/components/query/workspace/header/variables-section";
-import { Button } from "@/components/ui/button";
+import { Visualization } from "@/types/base";
+
+import { DashboardHeader } from "@/components/dashboard/dashboard-head";
 
 export default function DashboardPage() {
   const [selectedBlocks, setSelectedBlocks] = useState<Visualization[]>([]);
@@ -19,7 +19,14 @@ export default function DashboardPage() {
         <VisualizationSelector onVisualizationSelect={handleVisualizationSelect} />
       </div>
       <div className='ml-64 flex-1'>
-        <DashboardGrid blocks={selectedBlocks} />
+        <div className="flex flex-col h-screen">
+          <div className="flex-none">
+            <DashboardHeader />
+          </div>
+          <div className="flex-1 overflow-auto">
+            <DashboardGrid blocks={selectedBlocks} />
+          </div>
+        </div>
       </div>
     </div>
   );
