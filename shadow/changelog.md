@@ -33,13 +33,5 @@ v 0.0.1
 - 开始实现ai分析 页面
 - 开始实现ai分析流程
 - 实现llm-view 可以请求大模型接口功能
-- 修复view-select 可以滚动
-- 修复sql editor 可以换行
-- 实现存储query（section）功能
-- 删除ai展示 query 这一层只展示数据
-- 调整query 存储名称展示
-- 实现query 列表页面
-- 介入query接口，展示指标页面
-- view页面实现自动渲染
-- 实现query 更新
-- 在画布中展示view
+- 调整viewMode， 不应该有llm 展示在图形展示中
+- 实现dashboard 的visualization 列表页面

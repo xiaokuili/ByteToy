@@ -16,23 +16,32 @@ interface DashboardGridProps {
   blocks: Visualization[];
 }
 
-export function EmptyViewComponet() {
-  return <div>Empty</div>;
+export function LoadingView() {
+  return <div>Loading...</div>;
+}
+
+export function QueryErrorView({ error }: { error: string }) {
+  return <div>{error}</div>;
 }
 
 export function DashboardGrid({ blocks }: DashboardGridProps) {
   const [queryResults, setQueryResults] = useState<Record<string, any>>({});
   const [queryErrors, setQueryErrors] = useState<Record<string, string>>({});
-
   useEffect(() => {
+    let isMounted = true;  // 用于防止组件卸载后的状态更新
+
     const executeQueries = async () => {
       const results: Record<string, any> = {};
       const errors: Record<string, string> = {};
 
       for (const block of blocks) {
+        // 如果组件已卸载，停止执行
+        if (!isMounted) return;
+        
         try {
           const finalSql = getFinalSql(block.sqlContent, block.sqlVariables);
           const result = await executeQuery(block.datasourceId, finalSql);
+          console.log(finalSql,result);
 
           if (result.success) {
             results[block.id] = result.data;
@@ -44,13 +53,22 @@ export function DashboardGrid({ blocks }: DashboardGridProps) {
           errors[block.id] = "Failed to execute query";
         }
       }
-
-      setQueryResults(results);
-      setQueryErrors(errors);
+      console.log(blocks);
+      // 确保组件仍然挂载时才更新状态
+      if (isMounted) {
+        setQueryResults(results);
+        setQueryErrors(errors);
+      }
     };
-
+  
     executeQueries();
+
+    // 清理函数
+    return () => {
+      isMounted = false;
+    };
   }, [blocks]);
+
   const layouts = {
     lg: blocks.map((block, index) => ({
       i: block.id,
@@ -60,7 +78,6 @@ export function DashboardGrid({ blocks }: DashboardGridProps) {
       h: 4,
     })),
   };
-
   return (
     <div className='flex-1 p-4'>
       <ResponsiveGridLayout
@@ -78,12 +95,12 @@ export function DashboardGrid({ blocks }: DashboardGridProps) {
                 {queryErrors[block.id] ? (
                   <QueryErrorView error={queryErrors[block.id]} />
                 ) : !queryResults[block.id] ? (
-                  <EmptyViewComponet />
+                  <LoadingView />
                 ) : (
-                  <VisualizationComponent
+                <VisualizationComponent 
                     viewId={block.viewMode}
                     queryResult={queryResults[block.id]}
-                  />
+                />
                 )}
               </div>
             </div>

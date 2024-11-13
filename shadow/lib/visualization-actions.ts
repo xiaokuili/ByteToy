@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { Variable } from "@/types/base";
+import { Visualization } from "@/types/base";
 
 interface CreateVisualizationInput {
   id: string;
