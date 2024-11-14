@@ -38,3 +38,4 @@ v 0.0.1
 - dashboard 添加title 和 variables 配置
 - 实现copy card 功能
 - 实现llm功能和展示
+- 解决右边滚动条

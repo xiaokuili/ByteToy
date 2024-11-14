@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation"; // 注意是从 'next/navigation' 导入
-import Link from "next/link"; // 添加这个导入
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import {
   Home,
@@ -14,7 +14,7 @@ import {
   Trash2,
   Plus,
   ChevronsRight,
-  AlignJustify,
+  ChevronLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,36 +30,54 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// 导入新的 hook
-import { useSidebar } from "@/hook/use-sidebar";
+function NavLink({
+  href,
+  icon,
+  label,
+  collapsed,
+  className,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  collapsed: boolean;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-gray-100",
+        "transition-colors duration-200",
+        className
+      )}
+    >
+      <span>{icon}</span>
+      {!collapsed && <span>{label}</span>}
+    </Link>
+  );
+}
 
 export function SidebarComponent() {
   const [openCollections, setOpenCollections] = useState(true);
   const [openBrowse, setOpenBrowse] = useState(false);
-  // 删除本地的 isSidebarCollapsed 状态，改用 hook
-  const { isCollapsed, toggle } = useSidebar();
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const router = useRouter();
 
-  // 更新 toggleSidebar 函数
-  const toggleSidebar = () => toggle();
-
   const handleAddDatabase = () => {
-    router.push("/metadata/new"); // 跳转到新建页面
+    router.push("/metadata/new");
   };
 
   return (
     <aside
       className={cn(
-        "bg-gray-50 border-r border-gray-200 flex flex-col h-full sticky left-0 top-16 bottom-0 overflow-hidden flex-shrink-0 transition-all duration-300 ease-in-out",
+        "flex flex-col h-full bg-gray-50 border-r border-gray-200",
+        "transition-all duration-300 ease-in-out",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
-      <div
-        className={cn(
-          "flex items-center p-4 border-gray-200",
-          isCollapsed ? "justify-center" : "justify-between"
-        )}
-      >
+      {/* Logo/Header Section */}
+      <div className='h-16 flex items-center justify-between px-4 border-b'>
         {!isCollapsed && (
           <div className='flex items-center'>
             <FolderOpen className='h-6 w-6 text-blue-500' />
@@ -70,29 +88,24 @@ export function SidebarComponent() {
           variant='ghost'
           size='icon'
           className='hover:bg-gray-200 transition-colors'
-          onClick={toggleSidebar}
+          onClick={() => setIsCollapsed(!isCollapsed)}
         >
           {isCollapsed ? (
             <ChevronsRight className='h-5 w-5' />
           ) : (
-            <AlignJustify className='h-5 w-5' />
+            <ChevronLeft className='h-5 w-5' />
           )}
         </Button>
       </div>
-      <div className='flex-grow overflow-y-auto p-4 space-y-4'>
-        <Button
-          variant='ghost'
-          className={cn(
-            "w-full justify-start",
-            isCollapsed && "justify-center px-0"
-          )}
-          asChild
-        >
-          <Link href='/'>
-            <Home className='h-5 w-5' />
-            {!isCollapsed && <span className='ml-2'>首页</span>}
-          </Link>
-        </Button>
+
+      {/* Navigation Links */}
+      <div className='flex flex-col flex-1 p-4 space-y-4'>
+        <NavLink
+          href='/'
+          icon={<Home className='h-5 w-5' />}
+          label='首页'
+          collapsed={isCollapsed}
+        />
 
         <Collapsible open={openCollections} onOpenChange={setOpenCollections}>
           <CollapsibleTrigger asChild>
@@ -205,7 +218,8 @@ export function SidebarComponent() {
         </Button>
       </div>
 
-      <div className='p-4 border-t border-gray-200'>
+      {/* Bottom section */}
+      <div className='p-4 border-t'>
         {!isCollapsed && (
           <div className='text-sm text-gray-600 mb-2'>
             开始连接您的数据库或添加csv文件
