@@ -8,7 +8,9 @@ import { Visualization } from "@/types/base";
 interface VisualizationSelectorProps {
   onVisualizationSelect: (visualization: Visualization) => void;
 }
-export function VisualizationSelector({ onVisualizationSelect }: VisualizationSelectorProps) {
+export function VisualizationSelector({
+  onVisualizationSelect,
+}: VisualizationSelectorProps) {
   const [visualizations, setVisualizations] = useState<Visualization[]>([]);
 
   useEffect(() => {
