@@ -30,8 +30,14 @@ export interface ProcessedData<T> {
   data?: T;
 }
 
+// 2. 分别定义不同层的配置类型
+interface QueryConfig {
+  // query 相关配置
+  filter?: string;
+  sort?: string;
+}
 export interface ViewProcessor<T = unknown> {
-  processData?: (data: QueryResult) => ProcessedData<T>;
+  processData?: (data: QueryResult, config?: C) => ProcessedData<T>;
   validateData?: (processedData: T) => { isValid: boolean; error?: string };
 }
 
@@ -189,12 +195,15 @@ export const VIEW_MODES: ViewModeDefinition[] = [
   },
   {
     id: "number",
-    name: "Number", 
+    name: "Number",
     icon: HashIcon,
     category: "basic",
     tooltip: {
       description: "Display data as a number",
-      examples: ["SELECT 1 as value, 'Total' as label", "SELECT 100 as value, 'Score' as label"],
+      examples: [
+        "SELECT 1 as value, 'Total' as label",
+        "SELECT 100 as value, 'Score' as label",
+      ],
     },
   },
   {
@@ -227,6 +236,4 @@ export const VIEW_MODES: ViewModeDefinition[] = [
       examples: ["Geographical data visualization", "Data mapping"],
     },
   },
-  
 ];
-

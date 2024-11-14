@@ -4,7 +4,7 @@ import { Visualization } from "@/types/base";
 import { useEffect } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { useState } from "react";
-import { Visualization as VisualizationComponent } from "@/components/query/display/visualization";
+import { DashboardVisualization } from "./dashboard-view";
 import { executeQuery } from "@/lib/datasource-action";
 import { getFinalSql } from "@/utils/variable-utils";
 import "react-grid-layout/css/styles.css";
@@ -139,7 +139,7 @@ export function DashboardGrid({
                 ) : !queryResults[visualization.id] ? (
                   <LoadingView />
                 ) : (
-                  <VisualizationComponent
+                  <DashboardVisualization
                     viewId={visualization.viewMode}
                     queryResult={queryResults[visualization.id]}
                   />

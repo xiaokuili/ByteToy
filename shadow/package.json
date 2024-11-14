@@ -37,7 +37,7 @@
     "next": "14.2.16",
     "next-themes": "^0.3.0",
     "node-sql-parser": "^5.3.3",
-    "openai": "^4.71.1",
+    "openai": "^4.72.0",
     "prisma": "^5.21.1",
     "react": "^18",
     "react-dom": "^18",
