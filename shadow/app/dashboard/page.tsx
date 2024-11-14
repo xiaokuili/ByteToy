@@ -14,25 +14,29 @@ export default function DashboardPage() {
   const handleVisualizationSelect = (visualization: Visualization) => {
     setSelectedVisualizations([...selectedVisualizations, visualization]);
   };
-
   return (
-    <div className='flex'>
-      <div className='fixed h-screen overflow-y-auto'>
-        <VisualizationSelector
-          onVisualizationSelect={handleVisualizationSelect}
-        />
+    <div className='flex h-full w-full '>
+      {/* Left Panel */}
+      <div className='w-64 border-r border-gray-200 p-4'>
+        <div className='h-full'>
+          <VisualizationSelector
+            onVisualizationSelect={handleVisualizationSelect}
+          />
+        </div>
       </div>
-      <div className='ml-64 flex-1'>
-        <div className='flex flex-col h-screen'>
-          <div className='sticky top-0 z-10 bg-background'>
-            <DashboardHeader />
-          </div>
-          <div className='flex-1 overflow-auto'>
-            <DashboardGrid
-              visualizations={selectedVisualizations}
-              setSelectedVisualizations={setSelectedVisualizations}
-            />
-          </div>
+
+      {/* Right Panel */}
+      <div className='flex-1 flex flex-col '>
+        {/* Top Section */}
+        <DashboardHeader />
+
+        {/* Bottom Section - Scrollable */}
+        <div className='flex-1 overflow-y-auto p-4'>
+          {/* Example content to demonstrate scroll */}
+          <DashboardGrid
+            visualizations={selectedVisualizations}
+            setSelectedVisualizations={setSelectedVisualizations}
+          />
         </div>
       </div>
     </div>
