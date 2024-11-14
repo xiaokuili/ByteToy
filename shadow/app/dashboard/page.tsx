@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardGrid } from "@/components/dashboard/dashboard-grid";
-import { VisualizationSelector } from "@/components/dashboard/block-selector";
+import { VisualizationSelector } from "@/components/dashboard/dashboard-selector";
 import { useState } from "react";
 import { Visualization } from "@/types/base";
 
