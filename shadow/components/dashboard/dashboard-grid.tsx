@@ -100,11 +100,11 @@ export function DashboardGrid({ blocks }: DashboardGridProps) {
                 <h3 className='text-lg font-semibold'>{block.name}</h3>
                 <HoverCard>
                   <HoverCardTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-12 w-12">
+                    <Button variant="ghost" size="icon" className="h-12 w-12" onMouseDown={(e) => e.stopPropagation()}>
                       <MagicWandIcon className="h-4 w-4" />
                     </Button>
                   </HoverCardTrigger>
-                  <HoverCardContent className="w-80">
+                  <HoverCardContent className="w-80" onMouseDown={(e) => e.stopPropagation()}>
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <Tabs defaultValue="generate">
