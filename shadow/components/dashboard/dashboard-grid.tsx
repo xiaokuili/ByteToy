@@ -12,6 +12,7 @@ import "react-resizable/css/styles.css";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { CopyIcon } from "@radix-ui/react-icons";
 import { MagicWandIcon } from "@radix-ui/react-icons";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import {
@@ -22,7 +23,8 @@ import {
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface DashboardGridProps {
-  blocks: Visualization[];
+  visualizations: Visualization[];
+  setSelectedVisualizations: (visualizations: Visualization[]) => void;
 }
 
 export function LoadingView() {
@@ -33,7 +35,10 @@ export function QueryErrorView({ error }: { error: string }) {
   return <div>{error}</div>;
 }
 
-export function DashboardGrid({ blocks }: DashboardGridProps) {
+export function DashboardGrid({
+  visualizations,
+  setSelectedVisualizations,
+}: DashboardGridProps) {
   const [queryResults, setQueryResults] = useState<Record<string, any>>({});
   const [queryErrors, setQueryErrors] = useState<Record<string, string>>({});
   useEffect(() => {
@@ -43,26 +48,33 @@ export function DashboardGrid({ blocks }: DashboardGridProps) {
       const results: Record<string, any> = {};
       const errors: Record<string, string> = {};
 
-      for (const block of blocks) {
+      for (const visualization of visualizations) {
         // 如果组件已卸载，停止执行
         if (!isMounted) return;
 
         try {
-          const finalSql = getFinalSql(block.sqlContent, block.sqlVariables);
-          const result = await executeQuery(block.datasourceId, finalSql);
-          console.log(finalSql, result);
+          const finalSql = getFinalSql(
+            visualization.sqlContent,
+            visualization.sqlVariables
+          );
+          const result = await executeQuery(
+            visualization.datasourceId,
+            finalSql
+          );
 
           if (result.success) {
-            results[block.id] = result.data;
+            results[visualization.id] = result.data;
           } else {
-            errors[block.id] = result.error || "Unknown error";
+            errors[visualization.id] = result.error || "Unknown error";
           }
         } catch (error) {
-          console.error(`Error executing query for block ${block.id}:`, error);
-          errors[block.id] = "Failed to execute query";
+          console.error(
+            `Error executing query for block ${visualization.id}:`,
+            error
+          );
+          errors[visualization.id] = "Failed to execute query";
         }
       }
-      console.log(blocks);
       // 确保组件仍然挂载时才更新状态
       if (isMounted) {
         setQueryResults(results);
@@ -76,11 +88,19 @@ export function DashboardGrid({ blocks }: DashboardGridProps) {
     return () => {
       isMounted = false;
     };
-  }, [blocks]);
+  }, [visualizations]);
+  const onCopyVisualization = (visualization: Visualization) => {
+    const newVisualization = {
+      ...visualization,
+      id: `${visualization.id}-copy-${Date.now()}`, // Generate unique ID for copy
+      name: `${visualization.name} (Copy)`, // Add (Copy) to name
+    };
+    setSelectedVisualizations([...visualizations, newVisualization]); // Add copy to end of blocks array
+  };
 
   const layouts = {
-    lg: blocks.map((block, index) => ({
-      i: block.id,
+    lg: visualizations.map((visualization, index) => ({
+      i: visualization.id,
       x: (index * 4) % 12,
       y: Math.floor(index / 3) * 4,
       w: 4,
@@ -97,22 +117,31 @@ export function DashboardGrid({ blocks }: DashboardGridProps) {
         rowHeight={100}
         draggableCancel='.no-drag'
       >
-        {blocks.map((block) => (
-          <div key={block.id} className='bg-card border rounded-lg p-4'>
+        {visualizations.map((visualization) => (
+          <div key={visualization.id} className='bg-card border rounded-lg p-4'>
             <div className='h-full'>
               <div className='flex items-center justify-between mb-2 no-drag'>
-                <h3 className='text-lg font-semibold'>{block.name}</h3>
-                <AIConfig />
+                <h3 className='text-lg font-semibold'>{visualization.name}</h3>
+                <div className='flex items-center gap-2'>
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    onClick={() => onCopyVisualization(visualization)}
+                  >
+                    <CopyIcon className='h-4 w-4' />
+                  </Button>
+                  <AIConfig />
+                </div>
               </div>
               <div className='h-[calc(100%-2rem)]'>
-                {queryErrors[block.id] ? (
-                  <QueryErrorView error={queryErrors[block.id]} />
-                ) : !queryResults[block.id] ? (
+                {queryErrors[visualization.id] ? (
+                  <QueryErrorView error={queryErrors[visualization.id]} />
+                ) : !queryResults[visualization.id] ? (
                   <LoadingView />
                 ) : (
                   <VisualizationComponent
-                    viewId={block.viewMode}
-                    queryResult={queryResults[block.id]}
+                    viewId={visualization.viewMode}
+                    queryResult={queryResults[visualization.id]}
                   />
                 )}
               </div>
@@ -123,6 +152,7 @@ export function DashboardGrid({ blocks }: DashboardGridProps) {
     </div>
   );
 }
+
 export function AIConfig() {
   const [aiResponse, setAiResponse] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);

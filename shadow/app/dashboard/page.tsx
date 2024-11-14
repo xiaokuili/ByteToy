@@ -8,23 +8,30 @@ import { Visualization } from "@/types/base";
 import { DashboardHeader } from "@/components/dashboard/dashboard-head";
 
 export default function DashboardPage() {
-  const [selectedBlocks, setSelectedBlocks] = useState<Visualization[]>([]);
+  const [selectedVisualizations, setSelectedVisualizations] = useState<
+    Visualization[]
+  >([]);
   const handleVisualizationSelect = (visualization: Visualization) => {
-    setSelectedBlocks([...selectedBlocks, visualization]);
+    setSelectedVisualizations([...selectedVisualizations, visualization]);
   };
 
   return (
     <div className='flex'>
       <div className='fixed h-screen overflow-y-auto'>
-        <VisualizationSelector onVisualizationSelect={handleVisualizationSelect} />
+        <VisualizationSelector
+          onVisualizationSelect={handleVisualizationSelect}
+        />
       </div>
       <div className='ml-64 flex-1'>
-        <div className="flex flex-col h-screen">
-          <div className="sticky top-0 z-10 bg-background">
+        <div className='flex flex-col h-screen'>
+          <div className='sticky top-0 z-10 bg-background'>
             <DashboardHeader />
           </div>
-          <div className="flex-1 overflow-auto">
-            <DashboardGrid blocks={selectedBlocks} />
+          <div className='flex-1 overflow-auto'>
+            <DashboardGrid
+              visualizations={selectedVisualizations}
+              setSelectedVisualizations={setSelectedVisualizations}
+            />
           </div>
         </div>
       </div>
