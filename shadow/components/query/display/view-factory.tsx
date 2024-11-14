@@ -1,3 +1,5 @@
+"use client";
+
 import { QueryResult, QueryResultView, ViewModeDefinition } from "./types";
 import { VisualizationErrorView } from "./views/error-view";
 import { VIEW_MODES } from "./types";
@@ -8,79 +10,102 @@ import { createPieChartView } from "./views/pie-view";
 import { createNumberView } from "./views/number-view";
 import React from "react";
 
-export class ViewFactory {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private views: Map<string, QueryResultView<any>> = new Map();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const views: Map<string, QueryResultView<any>> = new Map();
 
-  register<T>(viewId: string, view: QueryResultView<T>) {
-    this.views.set(viewId, view);
+export function register<T>(viewId: string, view: QueryResultView<T>) {
+  views.set(viewId, view);
+}
+
+export function ViewFactory({
+  viewId,
+  queryResult,
+  config,
+}: {
+  viewId: string;
+  queryResult: QueryResult;
+  config?: unknown;
+}) {
+  const [processedData, setProcessedData] = React.useState<unknown>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const processData = async () => {
+      const view = views.get(viewId);
+
+      if (!view) {
+        setError(`View ${viewId} not found`);
+        return;
+      }
+
+      try {
+        const processedResult = view.processor.processData
+          ? await view.processor.processData(queryResult, config)
+          : { isValid: true, data: queryResult };
+
+        if (!processedResult?.isValid || !processedResult?.data) {
+          setError(processedResult?.error || "Invalid data");
+          return;
+        }
+
+        const validation = view.processor.validateData
+          ? view.processor.validateData(processedResult.data)
+          : { isValid: true };
+
+        if (!validation?.isValid) {
+          setError(validation?.error || "Data validation failed");
+          return;
+        }
+
+        setProcessedData(processedResult.data);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      }
+    };
+
+    processData();
+  }, [viewId, queryResult, config]);
+
+  if (error) {
+    return <VisualizationErrorView error={error} />;
   }
 
-  createView(
-    viewId: string,
-    queryResult: QueryResult
-  ): React.ReactElement | null {
-    const view = this.views.get(viewId);
-
-    if (!view) {
-      return <VisualizationErrorView error={`View ${viewId} not found`} />;
-    }
-
-    const processedResult = view.processor.processData
-      ? view.processor.processData(queryResult)
-      : { isValid: true, data: queryResult };
-
-    if (!processedResult?.isValid || !processedResult?.data) {
-      return (
-        <VisualizationErrorView
-          error={processedResult?.error || "Invalid data"}
-        />
-      );
-    }
-
-    const validation = view.processor.validateData
-      ? view.processor.validateData(processedResult.data)
-      : { isValid: true };
-
-    if (!validation?.isValid) {
-      return (
-        <VisualizationErrorView
-          error={validation?.error || "Data validation failed"}
-        />
-      );
-    }
-    return <view.Component data={processedResult.data} />;
+  if (!processedData) {
+    return null;
   }
+
+  const view = views.get(viewId);
+  return <view.Component data={processedData} />;
 }
 
 // 创建工厂实例
-export const viewFactory = new ViewFactory();
 
-viewFactory.register(
+register(
   "bar",
   createBarChartView(
     VIEW_MODES.find((mode) => mode.id === "bar") as ViewModeDefinition
   )
 );
-viewFactory.register(
+register(
   "table",
   createTableView(
     VIEW_MODES.find((mode) => mode.id === "table") as ViewModeDefinition
   )
 );
-viewFactory.register(
+register(
   "line",
   createLineView(
     VIEW_MODES.find((mode) => mode.id === "line") as ViewModeDefinition
   )
 );
-viewFactory.register(
+register(
   "pie",
   createPieChartView(
     VIEW_MODES.find((mode) => mode.id === "pie") as ViewModeDefinition
   )
 );
-viewFactory.register(
+register(
   "number",
   createNumberView(
     VIEW_MODES.find((mode) => mode.id === "number") as ViewModeDefinition

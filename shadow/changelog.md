@@ -37,4 +37,4 @@ v 0.0.1
 - 实现dashboard 的visualization 列表页面
 - dashboard 添加title 和 variables 配置
 - 实现copy card 功能
-- 
+- 实现llm功能和展示

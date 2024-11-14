@@ -6,7 +6,8 @@ import {
   QueryResultView,
   ProcessedData,
 } from "../../query/display/types";
-import OpenAI from "openai";
+import { DashboardConfig } from "../types";
+import { generateLLMResponse } from "@/lib/llm";
 
 interface LLMData {
   prompt: string;
@@ -15,32 +16,26 @@ interface LLMData {
 
 const llmProcessor: ViewProcessor<LLMData> = {
   processData: async (
-    queryResult: QueryResult
+    queryResult: QueryResult,
+    config: DashboardConfig
   ): Promise<ProcessedData<LLMData>> => {
     try {
       // Assume first row contains prompt in 'prompt' column
-      const prompt = queryResult.rows[0].prompt as string;
-
-      const configuration = new Configuration({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
-      const openai = new OpenAIApi(configuration);
-
-      const completion = await openai.createChatCompletion({
-        model: "deepseek-chat",
-        messages: [{ role: "user", content: prompt }],
-      });
-
-      const response = completion.data.choices[0].message?.content || "";
-
+      // console.log("config", config);
+      // const response = await generateLLMResponse({
+      //   queryResult,
+      //   prompt: config.llmConfig?.prompt,
+      // });
+      console.log("queryResult", queryResult);
+      console.log("config", config);
       return {
         isValid: true,
-        data: { prompt, response },
+        data: { prompt: "asdfasdf", response: "asdfasdf" },
       };
     } catch (error) {
       return {
         isValid: false,
-        error: String(error),
+        error: "asdfasdf",
       };
     }
   },

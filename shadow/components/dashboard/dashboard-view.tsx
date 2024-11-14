@@ -1,6 +1,5 @@
-import { IViewFactory } from "../query/display/view-factory";
-import { QueryResultView } from "../query/display/types";
-import { viewFactory } from "../query/display/view-factory";
+import { QueryResult } from "../query/display/types";
+import { register, ViewFactory } from "../query/display/view-factory";
 import { createLLMView } from "./views/llm-view";
 import { FileTextIcon } from "lucide-react";
 import { ViewModeDefinition } from "../query/display/types";
@@ -18,9 +17,7 @@ const DashboardViewModeDefinitions: ViewModeDefinition[] = [
   },
 ];
 
-const dashboardViewFactory = viewFactory;
-
-dashboardViewFactory.register(
+register(
   "llm",
   createLLMView(
     DashboardViewModeDefinitions.find(
@@ -30,9 +27,17 @@ dashboardViewFactory.register(
 );
 
 export const DashboardVisualization: React.FC<{
-  viewId: string;
+  dashboardViewId: string;
   queryResult: QueryResult;
-}> = ({ viewId, queryResult }) => {
+  config: DashboardConfig;
+}> = ({ dashboardViewId, queryResult, config }) => {
   // 创建并返回选中的视图
-  return dashboardViewFactory.createView(viewId, queryResult);
+  console.log("dashboardViewId", dashboardViewId);
+  return (
+    <ViewFactory
+      viewId={dashboardViewId}
+      queryResult={queryResult}
+      config={config}
+    />
+  );
 };

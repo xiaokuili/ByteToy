@@ -15,11 +15,13 @@ import { Label } from "../ui/label";
 import { CopyIcon } from "@radix-ui/react-icons";
 import { MagicWandIcon } from "@radix-ui/react-icons";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { DashboardConfig } from "./types";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "../ui/hover-card";
+
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface DashboardGridProps {
@@ -39,17 +41,19 @@ export function DashboardGrid({
   visualizations,
   setSelectedVisualizations,
 }: DashboardGridProps) {
-  const [queryResults, setQueryResults] = useState<Record<string, any>>({});
+  const [queryResults, setQueryResults] = useState<Record<string, QueryResult>>(
+    {}
+  );
   const [queryErrors, setQueryErrors] = useState<Record<string, string>>({});
+  const [config, setConfig] = useState<DashboardConfig>({});
   useEffect(() => {
-    let isMounted = true; // 用于防止组件卸载后的状态更新
-
+    let isMounted = true; // Prevent state updates after unmount
     const executeQueries = async () => {
-      const results: Record<string, any> = {};
+      const results: Record<string, QueryResult> = {};
       const errors: Record<string, string> = {};
 
       for (const visualization of visualizations) {
-        // 如果组件已卸载，停止执行
+        // Stop execution if component is unmounted
         if (!isMounted) return;
 
         try {
@@ -89,6 +93,7 @@ export function DashboardGrid({
       isMounted = false;
     };
   }, [visualizations]);
+
   const onCopyVisualization = (visualization: Visualization) => {
     const newVisualization = {
       ...visualization,
@@ -119,33 +124,14 @@ export function DashboardGrid({
       >
         {visualizations.map((visualization) => (
           <div key={visualization.id} className='bg-card border rounded-lg p-4'>
-            <div className='h-full'>
-              <div className='flex items-center justify-between mb-2 no-drag'>
-                <h3 className='text-lg font-semibold'>{visualization.name}</h3>
-                <div className='flex items-center gap-2'>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    onClick={() => onCopyVisualization(visualization)}
-                  >
-                    <CopyIcon className='h-4 w-4' />
-                  </Button>
-                  <AIConfig />
-                </div>
-              </div>
-              <div className='h-[calc(100%-2rem)]'>
-                {queryErrors[visualization.id] ? (
-                  <QueryErrorView error={queryErrors[visualization.id]} />
-                ) : !queryResults[visualization.id] ? (
-                  <LoadingView />
-                ) : (
-                  <DashboardVisualization
-                    viewId={visualization.viewMode}
-                    queryResult={queryResults[visualization.id]}
-                  />
-                )}
-              </div>
-            </div>
+            <DashboardGridItem
+              visualization={visualization}
+              queryErrors={queryErrors}
+              queryResults={queryResults}
+              onCopyVisualization={onCopyVisualization}
+              config={config}
+              setConfig={setConfig}
+            />
           </div>
         ))}
       </ResponsiveGridLayout>
@@ -153,26 +139,88 @@ export function DashboardGrid({
   );
 }
 
-export function AIConfig() {
-  const [aiResponse, setAiResponse] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
+export function DashboardGridItem({
+  visualization,
+  queryErrors,
+  queryResults,
+  onCopyVisualization,
+  config,
+  setConfig,
+}: {
+  visualization: Visualization;
+  queryErrors: Record<string, string>;
+  queryResults: Record<string, QueryResult>;
+  onCopyVisualization: (visualization: Visualization) => void;
+  config: DashboardConfig;
+  setConfig: (config: DashboardConfig) => void;
+}) {
+  const dashbaordConfig = {
+    llmConfig: {
+      prompt: "帮我解释这些数据",
+    },
+  };
+  return (
+    <div className='h-full'>
+      <div className='flex items-center justify-between mb-2 no-drag'>
+        <h3 className='text-lg font-semibold'>{visualization.name}</h3>
+        <div className='flex items-center gap-2'>
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={() => onCopyVisualization(visualization)}
+          >
+            <CopyIcon className='h-4 w-4' />
+          </Button>
+          <AIConfig
+            config={config}
+            setConfig={setConfig}
+            visualization={visualization}
+          />
+        </div>
+      </div>
+      <div className='h-[calc(100%-2rem)]'>
+        {queryErrors[visualization.id] ? (
+          <QueryErrorView error={queryErrors[visualization.id]} />
+        ) : !queryResults[visualization.id] ? (
+          <LoadingView />
+        ) : (
+          <DashboardVisualization
+            dashboardViewId='llm'
+            queryResult={queryResults[visualization.id]}
+            config={dashbaordConfig}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface AIConfigProps {
+  setConfig: (config: DashboardConfig) => void;
+  visualization: Visualization;
+}
+export function AIConfig({ setConfig, visualization }: AIConfigProps) {
   const [prompt, setPrompt] = useState("");
   const [referenceText, setReferenceText] = useState("");
   const [mode, setMode] = useState<"generate" | "reference">("generate");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleAIAnalysis = async () => {
-    setIsLoading(true);
     try {
       // TODO: Implement AI analysis API call here
-      const mockResponse =
-        mode === "generate"
-          ? `Generated response based on: ${prompt}`
-          : `Response mimicking style of: ${referenceText}`;
-      setAiResponse(mockResponse);
+      setConfig({
+        llmConfig: {
+          prompt: "帮我解释这些数据",
+        },
+      });
+      setVisualization({
+        ...visualization,
+        viewMode: "llm",
+      });
+      setIsLoading(false);
     } catch (error) {
       console.error("AI analysis failed:", error);
     } finally {
-      setIsLoading(false);
     }
   };
 
@@ -226,13 +274,6 @@ export function AIConfig() {
           >
             {isLoading ? "Processing..." : "Analyze"}
           </Button>
-
-          {aiResponse && (
-            <div className='space-y-2'>
-              <Label>Result</Label>
-              <p className='text-sm'>{aiResponse}</p>
-            </div>
-          )}
         </div>
       </HoverCardContent>
     </HoverCard>
