@@ -22,16 +22,13 @@ export function VisualizationSelector({
   }, []);
 
   return (
-    <div className='w-64 border-r bg-background h-screen flex flex-col'>
-      <div className='p-4 flex-none'>
-        <h2 className='text-lg font-semibold'>可视化组件</h2>
-      </div>
+    <div className='w-64 bg-background h-screen flex flex-col'>
       <ScrollArea className='flex-1'>
         <div className='p-4 pt-0'>
           {visualizations.map((visualization) => (
             <Card
               key={visualization.id}
-              className='mb-2 cursor-pointer hover:bg-accent'
+              className='cursor-pointer hover:bg-accent'
               onClick={() => onVisualizationSelect(visualization)}
             >
               <CardHeader>

@@ -17,7 +17,7 @@ export default function DashboardPage() {
   return (
     <div className='flex h-full w-full '>
       {/* Left Panel */}
-      <div className='w-64 border-r border-gray-200 p-4'>
+      <div className='w-64  p-4'>
         <div className='h-full'>
           <VisualizationSelector
             onVisualizationSelect={handleVisualizationSelect}
