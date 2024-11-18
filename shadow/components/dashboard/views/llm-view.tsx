@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import {
   QueryResult,
@@ -8,40 +9,55 @@ import {
 } from "../../query/display/types";
 import { generateLLMResponse } from "@/lib/llm";
 import { DashboardSection } from "@/types/base";
+import { debounce } from "lodash";
 interface LLMData {
   prompt: string;
   response: string;
 }
-
 const llmProcessor: ViewProcessor<LLMData> = {
-  processData: async (
-    queryResult: QueryResult,
-    config: DashboardSection
-  ): Promise<ProcessedData<LLMData>> => {
-    try {
-      // Assume first row contains prompt in 'prompt' column
-      console.log("config", config);
-      const response = await generateLLMResponse({
+  processData: (() => {
+    const debouncedRequest = debounce(async (
+      queryResult: QueryResult,
+      prompt: string | undefined,
+      resolve: (value: ProcessedData<LLMData>) => void
+    ) => {
+      try {
+        const response = await generateLLMResponse({
+          queryResult,
+          prompt: prompt,
+        });
+
+        resolve({
+          isValid: true,
+          data: {
+            prompt: prompt,
+            response: response.content,
+          },
+        });
+      } catch (error) {
+        resolve({
+          isValid: false,
+          error: error,
+        });
+      }
+    }, 500);
+
+    return async (
+      queryResult: QueryResult,
+      config: DashboardSection
+    ): Promise<ProcessedData<LLMData>> => {
+      console.log('processData called:', {
         queryResult,
-        prompt: config.llmConfig?.prompt,
+        config,
+        timestamp: new Date().toISOString()
       });
-      
-      console.log("response", response);
-      return {
-        isValid: true,
-        data: {
-          prompt: config.llmConfig?.prompt,
-          response: response.content,
-        },
-      };
-  /* eslint-disable */
-    } catch (error) {
-      return {
-        isValid: false,
-        error: "asdfasdf",
-      };
-    }
-  },
+
+      return new Promise((resolve) => {
+        debouncedRequest(queryResult, config.llmConfig?.prompt, resolve);
+      });
+    };
+  })(),
+
   /* eslint-disable */
   validateData: (data: LLMData) => {
     return { isValid: true };
@@ -49,6 +65,7 @@ const llmProcessor: ViewProcessor<LLMData> = {
 };
 
 const LLMView: React.FC<{ data: LLMData }> = ({ data }) => {
+
   return (
     <div className='w-full h-full flex-1 min-h-0 p-4'>
      

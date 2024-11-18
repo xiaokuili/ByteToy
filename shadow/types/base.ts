@@ -33,6 +33,8 @@ export interface Visualization {
   viewMode: string;
   viewParams: Record<string, unknown>;
   sqlVariables: Variable[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PostgreSQLDatasource extends Datasource {

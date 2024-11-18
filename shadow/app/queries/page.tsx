@@ -80,7 +80,6 @@ export default function QueriesPage() {
                 <PaginationItem>
                   <PaginationPrevious
                     onClick={() => page > 1 && setPage(page - 1)}
-                    disabled={page <= 1}
                   />
                 </PaginationItem>
                 <PaginationItem>
@@ -89,7 +88,6 @@ export default function QueriesPage() {
                 <PaginationItem>
                   <PaginationNext
                     onClick={() => page < totalPages && setPage(page + 1)}
-                    disabled={page >= totalPages}
                   />
                 </PaginationItem>
               </PaginationContent>

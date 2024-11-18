@@ -87,6 +87,7 @@ export class BasicSQLCompletionProvider extends SQLCompletionProvider {
     const beforeText = text.trim().toUpperCase();
 
     return {
+      clauseType: "NONE",
       beforeText: text,
       currentWord: "",
       position: {

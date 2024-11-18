@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-
+import { Datasource } from "@/types/base";
 import { toast } from "sonner";
 import { createMetadata, checkConnection } from "@/lib/datasource-action";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,10 @@ export function DatabaseConnectionFormComponent() {
     startTransition(async () => {
       try {
         // 第一步：检查数据库连接
-        const connectionResult = await checkConnection(values);
+
+        const connectionResult = await checkConnection(values as Datasource);
+
+
 
         if (!connectionResult.success) {
           toast.error(connectionResult.error || "数据库连接失败");
@@ -70,7 +73,7 @@ export function DatabaseConnectionFormComponent() {
         toast.success("数据库连接成功");
 
         // 第二步：创建元数据
-        const metadataResult = await createMetadata(values);
+        const metadataResult = await createMetadata(values as Datasource);
 
         if (!metadataResult.success) {
           toast.error(metadataResult.error || "数据库添加失败");

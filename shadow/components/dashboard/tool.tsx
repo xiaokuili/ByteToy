@@ -1,5 +1,7 @@
 import { PlusSquare, Type, Heading, Variable } from "lucide-react";
 import { useDashboard, useDashboardActive } from "@/hook/use-dashboard";
+import { DashboardSection } from "@/types/base";
+
 
 interface DashboardToolbarProps {
   onAddBlock: (block: DashboardSection) => void;

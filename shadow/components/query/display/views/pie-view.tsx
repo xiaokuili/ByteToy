@@ -25,7 +25,7 @@ const pieProcessor: ViewProcessor<PieChartData> = {
 
       return {
         isValid: true,
-        data: { data },
+        data: { data: data as PieChartData["data"] },
       };
       // eslint-disable-next-line no-empty
     } catch (error) {

@@ -8,6 +8,7 @@ import { createTableView } from "./views/table-view";
 import { createLineView } from "./views/line-view";
 import { createPieChartView } from "./views/pie-view";
 import { createNumberView } from "./views/number-view";
+import { createEmptyView } from "./views/empty-view";
 import React from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,6 +84,12 @@ export function ViewFactory({
   return <view.Component data={processedData} />;
 }
 
+export function LoadingView() {
+  return <div>Loading...</div>;
+}
+
+
+
 // 创建工厂实例
 
 register(
@@ -115,8 +122,10 @@ register(
     VIEW_MODES.find((mode) => mode.id === "number") as ViewModeDefinition
   )
 );
-
-export function LoadingView() {
-  return <div>Loading...</div>;
-}
+register(
+  "empty",
+  createEmptyView(
+    VIEW_MODES.find((mode) => mode.id === "empty") as ViewModeDefinition
+  )
+);
 

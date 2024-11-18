@@ -22,6 +22,8 @@ export interface QueryResult {
     name: string;
     type: string;
   }>;
+  rowCount?: number;
+  executionTime?: number;
 }
 
 export interface ProcessedData<T> {

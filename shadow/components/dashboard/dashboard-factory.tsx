@@ -33,6 +33,12 @@ export const DashboardFactory: React.FC<{
   config: DashboardSection;
 }> = ({ dashboardViewId, queryResult, config }) => {
   // 创建并返回选中的视图
+  console.log('DashboardFactory render:', {
+    dashboardViewId,
+    queryResult,
+    config,
+    timestamp: new Date().toISOString()
+  });
   return (
     <ViewFactory
       viewId={dashboardViewId}

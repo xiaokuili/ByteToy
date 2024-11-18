@@ -6,6 +6,7 @@ import { QuerySearchSqlEditor } from "./editor";
 import { QueryViewComponent } from "./result/result";
 import { useVisualization } from "@/hook/use-visualization";
 import { QueryFooterHeader } from "./footer";
+import { QueryResult } from "../display/types";
 
 export function SQLWorkbench() {
   // 数据库

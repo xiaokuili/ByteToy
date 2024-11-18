@@ -277,8 +277,6 @@ function formatPostgresStructure(
       name: row.column,
       type: row.type,
       nullable: row.nullable === "YES",
-      comment: row.comment || undefined,
-      key: row.key || undefined,
     });
   });
 

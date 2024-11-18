@@ -27,8 +27,8 @@ const numberProcessor: ViewProcessor<NumberData> = {
       return {
         isValid: true,
         data: {
-          value: row.value,
-          label: row.label,
+          value: row.value as number,
+          label: row.label as string,
         },
       };
       // eslint-disable-next-line no-empty

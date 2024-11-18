@@ -1,8 +1,6 @@
 "use client";
 
 import { Editor, useMonaco } from "@monaco-editor/react";
-import { useEffect } from "react";
-import { BasicSQLCompletionProvider } from "./sql-suggests";
 interface SQLEditorProps {
   value?: string;
   onChange?: (value: string | undefined) => void;
@@ -17,40 +15,7 @@ export function SQLEditor({
   onChange,
   height = "200px",
 }: SQLEditorProps) {
-  const monaco = useMonaco();
 
-  useEffect(() => {
-    if (!monaco) return;
-    const completionProvider = new BasicSQLCompletionProvider();
-
-    const provider = monaco.languages.registerCompletionItemProvider("sql", {
-      triggerCharacters: [" ", "."], // 添加更多触发字符
-      provideCompletionItems: (model, position) => {
-        const textUntilPosition = model.getValueInRange({
-          startLineNumber: 1,
-          startColumn: 1,
-          endLineNumber: position.lineNumber,
-          endColumn: position.column,
-        });
-
-        const context = completionProvider.analyzeContext(
-          textUntilPosition,
-          position
-        );
-        const suggestions = completionProvider.generateSuggestions(context);
-        const range = completionProvider.calculateRange(context);
-
-        return {
-          suggestions: suggestions.map((suggestion) => ({
-            ...suggestion,
-            range,
-          })),
-        };
-      },
-    });
-
-    return () => provider.dispose();
-  }, [monaco]);
 
   return (
     <div>
@@ -68,7 +33,7 @@ export function SQLEditor({
             strings: true,
           },
           suggestOnTriggerCharacters: true,
-          wordBasedSuggestions: false,
+          wordBasedSuggestions: "allDocuments",
           fontSize: 16,
           fontFamily: 'JetBrains Mono, Menlo, Monaco, "Courier New", monospace',
           lineNumbers: "off",

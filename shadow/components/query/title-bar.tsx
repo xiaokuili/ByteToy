@@ -23,7 +23,6 @@ export function QuestionHeaderComponent() {
     datasourceId,
     sqlContent,
     viewMode,
-    aiParams,
     sqlVariables,
     id,
     name,
@@ -43,7 +42,7 @@ export function QuestionHeaderComponent() {
         datasourceId,
         sqlContent,
         viewMode,
-        viewParams: aiParams,
+        viewParams: {},
         sqlVariables,
       });
 

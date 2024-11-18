@@ -9,12 +9,18 @@ import { getMetadatas } from "@/lib/datasource-action";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
-import { Database, Server } from "lucide-react";
+import { Database as DatabaseIcon, Server } from "lucide-react";
 import { SelectItem } from "@/components/ui/select";
 import { useVisualization } from "@/hook/use-visualization";
 
+interface Database {
+  id: string;
+  name: string;
+}
+
 interface DatabaseOptionProps {
   database: Database;
+
 }
 
 function DatabaseOption({ database }: DatabaseOptionProps) {
@@ -30,8 +36,12 @@ function DatabaseOption({ database }: DatabaseOptionProps) {
   );
 }
 
+interface DatabaseSelectorProps {
+  onSelect: (id: string) => void;
+}
+
 export function DatabaseSelector({ onSelect }: DatabaseSelectorProps) {
-  const [databases, setDatabases] = useState<Database[]>([]);
+  const [databases, setDatabases] = useState<{ id: string; name: string }[]>([]);
   const { datasourceId } = useVisualization();
   useEffect(() => {
     const fetchDatabases = async () => {
@@ -40,7 +50,7 @@ export function DatabaseSelector({ onSelect }: DatabaseSelectorProps) {
         setDatabases(
           response.data.map((db: Database) => ({
             id: db.id,
-            name: db.name || db.displayName,
+            name: db.name 
           }))
         );
       } else {
@@ -63,7 +73,7 @@ export function DatabaseSelector({ onSelect }: DatabaseSelectorProps) {
         )}
       >
         <div className='flex items-center gap-2'>
-          <Database className='h-4 w-4 text-muted-foreground' />
+          <DatabaseIcon className='h-4 w-4 text-muted-foreground' />
           <SelectValue placeholder='选择数据库'>
             {databases.find((db) => db.id === datasourceId)?.name ||
               "选择数据库"}

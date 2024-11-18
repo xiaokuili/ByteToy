@@ -30,6 +30,10 @@ export const useDashboard = create<DashboardStore>((set) => ({
       llmType: "imitate",
       prompt: "",
     },
+    // @ts-ignore
+    visualization: {
+      viewMode: "empty",
+    },
   }),
   addSection: (section) =>
     set((state) => ({ sections: [...state.sections, section] })),

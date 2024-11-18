@@ -6,6 +6,7 @@ import { executeQuery } from "@/lib/datasource-action";
 import { Button } from "@/components/ui/button";
 import { Play, Eye, Loader2 } from "lucide-react";
 import { parseVariables, getFinalSql } from "@/utils/variable-utils";
+import { QueryResult } from "@/components/query/display/types";
 import { SQLEditor } from "@/components/ui/sql-editor";
 import {
   Dialog,

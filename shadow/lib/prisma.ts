@@ -7,10 +7,11 @@ declare global {
 const prismaClientSingleton = () => {
   return new PrismaClient();
 };
-
+// @ts-expect-error
 const prisma = globalThis.prisma ?? prismaClientSingleton();
 
 if (process.env.NODE_ENV !== "production") {
+  // @ts-expect-error
   globalThis.prisma = prisma;
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { useState } from "react";
 import { DashboardFactory } from "./dashboard-factory";
@@ -86,7 +86,6 @@ export function DashboardCanvas({
     };
 
     executeQueries();
-
     // 清理函数
     return () => {
       isMounted = false;
@@ -149,7 +148,18 @@ export function DashboardGridItem({
   removeSection: (sectionId: string) => void;
   setActiveId: (id: string | null) => void;
 }) {
-
+  const dashboardView = useMemo(() => (
+    <DashboardFactory
+      dashboardViewId={section.type !== 'OTHER' ? section.type.toLowerCase() : section.visualization.viewMode}
+      queryResult={queryResults[section.id]}
+      config={section}
+    />
+  ), [
+    section.type,
+    section.visualization?.viewMode,
+    queryResults[section.id],
+    section
+  ]);
   return (
     <div className='h-full'>
       <div className='flex items-center justify-between mb-2 no-drag'>
@@ -181,15 +191,7 @@ export function DashboardGridItem({
       <div className='h-[calc(100%-2rem)]'>
         {queryErrors[section.id] ? (
           <QueryErrorView error={queryErrors[section.id]} />
-        ) : !queryResults[section.id] ? (
-          <LoadingView />
-        ) : (
-          <DashboardFactory
-            dashboardViewId={section.type !== 'OTHER' ? section.type.toLowerCase() : section.visualization.viewMode}
-            queryResult={queryResults[section.id]}
-            config={section}
-          />
-        )}
+        ) : dashboardView}
       </div>
     </div>
   );
