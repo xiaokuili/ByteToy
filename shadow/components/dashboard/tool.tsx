@@ -19,7 +19,7 @@ export const DashboardToolbar: React.FC<DashboardToolbarProps> = ({
   return (
     <div className='flex gap-2'>
       <button
-        className='p-2 hover:bg-blue-100 rounded-md bg-blue-50 hover:text-blue-700 text-blue-600 shadow-lg hover:bg-blue-200 transform hover:scale-105 transition-all duration-200'
+        className='p-2 hover:bg-blue-100/30 rounded-md bg-blue-50/30 hover:text-blue-700/70 text-blue-600/70 shadow-lg hover:bg-blue-200/30 transform hover:scale-105 transition-all duration-200'
         onClick={() => {
           const section = initSection();
           onAddBlock(section);
@@ -31,7 +31,7 @@ export const DashboardToolbar: React.FC<DashboardToolbarProps> = ({
       </button>
 
       <button
-        className='p-2 hover:bg-gray-100 rounded-md'
+        className='p-2 hover:bg-gray-100/80 rounded-md'
         onClick={onAddVariable}
         title='Add Variable'
       >
@@ -39,7 +39,7 @@ export const DashboardToolbar: React.FC<DashboardToolbarProps> = ({
       </button>
 
       <button
-        className='p-2 hover:bg-gray-100 rounded-md'
+        className='p-2 hover:bg-gray-100/80 rounded-md'
         onClick={onAddHeader}
         title='Add Header'
       >
@@ -47,7 +47,7 @@ export const DashboardToolbar: React.FC<DashboardToolbarProps> = ({
       </button>
 
       <button
-        className='p-2 hover:bg-gray-100 rounded-md'
+        className='p-2 hover:bg-gray-100/80 rounded-md'
         onClick={onAddText}
         title='Add Text'
       >

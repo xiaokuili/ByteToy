@@ -163,7 +163,7 @@ export function DashboardGridItem({
     },
   };
   return (
-    <div>
+    <div className='h-full'>
       <div className='flex items-center justify-between mb-2 no-drag'>
         <h3 className='text-lg font-semibold'>{section.name}</h3>
         <div className='flex items-center gap-2'>
