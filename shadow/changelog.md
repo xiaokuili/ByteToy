@@ -44,4 +44,4 @@ v 0.0.1
 - 调整header border
 - 调整是否展示配置
 - 基于dashboarrd section 数据结构进行实现
-- 
+- 优化section选择大小等

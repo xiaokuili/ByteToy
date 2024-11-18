@@ -12,8 +12,6 @@ import "react-resizable/css/styles.css";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { CopyIcon } from "@radix-ui/react-icons";
-import { MagicWandIcon } from "@radix-ui/react-icons";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { DashboardConfig } from "./types";
 import {
@@ -23,12 +21,14 @@ import {
 } from "../ui/hover-card";
 import { DashboardSection } from "@/types/base";
 import { TrashIcon } from "@radix-ui/react-icons";
+import { useDashboardActive } from "@/hook/use-dashboard";
+import { Settings } from "lucide-react";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface DashboardCanvasProps {
   dashboardSections: DashboardSection[];
-  deleteSection: (sectionId: string) => void;
+  removeSection: (sectionId: string) => void;
 }
 
 export function LoadingView() {
@@ -41,8 +41,9 @@ export function QueryErrorView({ error }: { error: string }) {
 
 export function DashboardCanvas({
   dashboardSections,
-  deleteSection,
+  removeSection,
 }: DashboardCanvasProps) {
+  const { activeId, setActiveId } = useDashboardActive();
   const [queryResults, setQueryResults] = useState<Record<string, QueryResult>>(
     {}
   );
@@ -58,6 +59,10 @@ export function DashboardCanvas({
       for (const section of dashboardSections) {
         // Stop execution if component is unmounted
         if (!isMounted) return;
+        if (!section.visualization?.id) {
+          errors[section.id] = "请选择合适的数据和内容生成进行展示";
+          continue;
+        }
 
         try {
           const finalSql = getFinalSql(
@@ -100,10 +105,10 @@ export function DashboardCanvas({
   const layouts = {
     lg: dashboardSections.map((section, index) => ({
       i: section.id,
-      x: (index * 4) % 12,
-      y: Math.floor(index / 3) * 4,
-      w: 4,
-      h: 4,
+      x: (index * 6) % 12, // Changed from 4 to 6 to make blocks wider
+      y: Math.floor(index / 2) * 6, // Changed from 3 to 2 and height from 4 to 6
+      w: 3, // Changed from 4 to 6 for wider blocks
+      h: 3, // Changed from 4 to 6 for taller blocks
     })),
   };
   return (
@@ -113,18 +118,24 @@ export function DashboardCanvas({
         layouts={layouts}
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-        rowHeight={100}
+        rowHeight={80} // Reduced from 100 to 80 to compensate for taller blocks
         draggableCancel='.no-drag'
       >
         {dashboardSections.map((section) => (
-          <div key={section.id} className='bg-card border rounded-lg p-4'>
+          <div
+            key={section.id}
+            className={`bg-card rounded-lg p-4 transition-all duration-200 ${
+              activeId === section.id
+                ? "ring-1 ring-blue-200 shadow-[0_0_8px_rgba(59,130,246,0.2)]"
+                : ""
+            }`}
+          >
             <DashboardGridItem
               section={section}
               queryErrors={queryErrors}
               queryResults={queryResults}
-              deleteSection={deleteSection}
-              config={config}
-              setConfig={setConfig}
+              removeSection={removeSection}
+              setActiveId={setActiveId}
             />
           </div>
         ))}
@@ -137,16 +148,14 @@ export function DashboardGridItem({
   section,
   queryErrors,
   queryResults,
-  deleteSection,
-  config,
-  setConfig,
+  removeSection,
+  setActiveId,
 }: {
   section: DashboardSection;
   queryErrors: Record<string, string>;
   queryResults: Record<string, QueryResult>;
-  deleteSection: (sectionId: string) => void;
-  config: DashboardConfig;
-  setConfig: (config: DashboardConfig) => void;
+  removeSection: (sectionId: string) => void;
+  setActiveId: (id: string | null) => void;
 }) {
   const dashbaordConfig = {
     llmConfig: {
@@ -154,14 +163,28 @@ export function DashboardGridItem({
     },
   };
   return (
-    <div className='h-full'>
+    <div>
       <div className='flex items-center justify-between mb-2 no-drag'>
         <h3 className='text-lg font-semibold'>{section.name}</h3>
         <div className='flex items-center gap-2'>
           <Button
             variant='ghost'
             size='icon'
-            onClick={() => deleteSection(section.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveId(section.id);
+            }}
+          >
+            <Settings className='h-4 w-4' />
+          </Button>
+          <Button
+            variant='ghost'
+            size='icon'
+            onClick={(e) => {
+              e.stopPropagation();
+              removeSection(section.id);
+              setActiveId(null);
+            }}
           >
             <TrashIcon className='h-4 w-4' />
           </Button>
@@ -174,9 +197,9 @@ export function DashboardGridItem({
           <LoadingView />
         ) : (
           <DashboardVisualization
-            dashboardViewId='llm'
+            dashboardViewId={section.visualization.viewMode}
             queryResult={queryResults[section.id]}
-            config={dashbaordConfig}
+            config={section.llmConfig.prompt}
           />
         )}
       </div>

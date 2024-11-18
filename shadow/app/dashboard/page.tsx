@@ -6,11 +6,11 @@ import { useState } from "react";
 import { Visualization } from "@/types/base";
 import { DashboardToolbar } from "@/components/dashboard/tool";
 import { DashboardHeader } from "@/components/dashboard/dashboard-head";
-import { useDashboardSetting, useDashboard } from "@/hook/use-dashboard";
+import { useDashboard, useDashboardActive } from "@/hook/use-dashboard";
 
 export default function DashboardPage() {
-  const { sections, addSection, deleteSection, updateSection } = useDashboard();
-  const { isSettingOpen } = useDashboardSetting();
+  const { sections, addSection, removeSection, updateSection } = useDashboard();
+  const { activeId } = useDashboardActive();
 
   const handleAddSection = (section: DashboardSection) => {
     addSection(section);
@@ -27,14 +27,14 @@ export default function DashboardPage() {
           <div className='bg-gray-50 rounded-lg min-h-full'>
             <DashboardCanvas
               dashboardSections={sections}
-              deleteSection={deleteSection}
+              removeSection={removeSection}
             />
           </div>
         </div>
       </div>
 
       {/* Right Panel - Block Settings */}
-      {isSettingOpen && (
+      {activeId && (
         <div className='w-96 border-l'>
           <VisualizationSetting onUpdateSection={updateSection} />
         </div>
