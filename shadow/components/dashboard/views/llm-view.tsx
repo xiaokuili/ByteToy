@@ -21,16 +21,16 @@ const llmProcessor: ViewProcessor<LLMData> = {
   ): Promise<ProcessedData<LLMData>> => {
     try {
       // Assume first row contains prompt in 'prompt' column
-      // console.log("config", config);
-      // const response = await generateLLMResponse({
-      //   queryResult,
-      //   prompt: config.llmConfig?.prompt,
-      // });
+      console.log("config", config);
+      const response = await generateLLMResponse({
+        queryResult,
+        prompt: config.llmConfig?.prompt,
+      });
       console.log("queryResult", queryResult);
       console.log("config", config);
       return {
         isValid: true,
-        data: { prompt: "asdfasdf", response: "asdfasdf" },
+        data: response.content,
       };
     } catch (error) {
       return {

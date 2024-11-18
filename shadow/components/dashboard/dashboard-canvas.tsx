@@ -55,7 +55,7 @@ export function DashboardCanvas({
     const executeQueries = async () => {
       const results: Record<string, QueryResult> = {};
       const errors: Record<string, string> = {};
-
+      console.log("dashboardSections", dashboardSections);
       for (const section of dashboardSections) {
         // Stop execution if component is unmounted
         if (!isMounted) return;
@@ -197,7 +197,11 @@ export function DashboardGridItem({
           <LoadingView />
         ) : (
           <DashboardVisualization
-            dashboardViewId={section.visualization.viewMode}
+            dashboardViewId={
+              section.type === "other"
+                ? section.visualization.viewMode
+                : section.type
+            }
             queryResult={queryResults[section.id]}
             config={section.llmConfig.prompt}
           />
