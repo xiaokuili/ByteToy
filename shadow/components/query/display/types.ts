@@ -30,14 +30,10 @@ export interface ProcessedData<T> {
   data?: T;
 }
 
-// 2. 分别定义不同层的配置类型
-interface QueryConfig {
-  // query 相关配置
-  filter?: string;
-  sort?: string;
-}
-export interface ViewProcessor<T = unknown> {
-  processData?: (data: QueryResult, config?: C) => ProcessedData<T>;
+
+
+export interface ViewProcessor<T = unknown, C = unknown> {
+  processData?: (data: QueryResult, config?: C) => ProcessedData<T> | Promise<ProcessedData<T>>;
   validateData?: (processedData: T) => { isValid: boolean; error?: string };
 }
 

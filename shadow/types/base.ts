@@ -11,9 +11,10 @@ export interface Datasource {
   useSSL: boolean;
 }
 
-export type SectionType = "Header" | "Text" | "Visualization";
+export type SectionType = "Header" | "Text" | "LLM" | "OTHER";
 
-export interface DashboardSection extends Visualization {
+export interface DashboardSection {
+  id: string;
   type: SectionType;
   content?: string; // For Header/Text content
   llmConfig?: {
@@ -21,7 +22,7 @@ export interface DashboardSection extends Visualization {
     prompt: string;
   };
   name: string;
-  
+  visualization?: Visualization; // 添加这个属性
 }
 
 export interface Visualization {
@@ -55,7 +56,6 @@ export interface Schema {
   name: string;
   tables: Table[];
 }
-export type SectionType = "LLM" | "PIE" | "CHART" | "TABLE";
 
 export interface Variable {
   id: string;

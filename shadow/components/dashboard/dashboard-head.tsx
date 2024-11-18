@@ -2,10 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SaveIcon, ShareIcon, X } from "lucide-react";
-import { useState } from "react";
-import { Variable } from "@/types/base";
-import { Badge } from "@/components/ui/badge";
+import { SaveIcon, ShareIcon } from "lucide-react";
+
 
 interface DashboardHeaderProps {
   title?: string;

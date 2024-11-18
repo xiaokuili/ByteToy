@@ -35,6 +35,7 @@ const llmProcessor: ViewProcessor<LLMData> = {
           response: response.content,
         },
       };
+  /* eslint-disable */
     } catch (error) {
       return {
         isValid: false,
@@ -42,9 +43,8 @@ const llmProcessor: ViewProcessor<LLMData> = {
       };
     }
   },
-
+  /* eslint-disable */
   validateData: (data: LLMData) => {
-
     return { isValid: true };
   },
 };

@@ -2,8 +2,6 @@
 
 import { DashboardCanvas } from "@/components/dashboard/dashboard-canvas";
 import { VisualizationSetting } from "@/components/dashboard/dashboard-setting";
-import { useState } from "react";
-import { Visualization } from "@/types/base";
 import { DashboardToolbar } from "@/components/dashboard/tool";
 import { DashboardHeader } from "@/components/dashboard/dashboard-head";
 import { useDashboard, useDashboardActive } from "@/hook/use-dashboard";
@@ -12,9 +10,7 @@ export default function DashboardPage() {
   const { sections, addSection, removeSection, updateSection } = useDashboard();
   const { activeId } = useDashboardActive();
 
-  const handleAddSection = (section: DashboardSection) => {
-    addSection(section);
-  };
+
   return (
     <div className='flex h-full w-full'>
       {/* Left Panel - Dashboard Report */}

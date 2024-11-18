@@ -1,6 +1,5 @@
 "use client";
 
-import { Visualization } from "@/types/base";
 import { useEffect } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { useState } from "react";
@@ -10,19 +9,12 @@ import { getFinalSql } from "@/utils/variable-utils";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { DashboardConfig } from "./types";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "../ui/hover-card";
+
 import { DashboardSection } from "@/types/base";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useDashboardActive } from "@/hook/use-dashboard";
 import { Settings } from "lucide-react";
+import { QueryResult } from "../query/display/types";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -48,7 +40,6 @@ export function DashboardCanvas({
     {}
   );
   const [queryErrors, setQueryErrors] = useState<Record<string, string>>({});
-  const [config, setConfig] = useState<DashboardConfig>({});
 
   useEffect(() => {
     let isMounted = true; // Prevent state updates after unmount
@@ -157,11 +148,7 @@ export function DashboardGridItem({
   removeSection: (sectionId: string) => void;
   setActiveId: (id: string | null) => void;
 }) {
-  const dashbaordConfig = {
-    llmConfig: {
-      prompt: "帮我解释这些数据",
-    },
-  };
+
   return (
     <div className='h-full'>
       <div className='flex items-center justify-between mb-2 no-drag'>
@@ -197,11 +184,7 @@ export function DashboardGridItem({
           <LoadingView />
         ) : (
           <DashboardVisualization
-            dashboardViewId={
-              section.type === "other"
-                ? section.visualization.viewMode
-                : section.type
-            }
+            dashboardViewId={section.visualization.viewMode}
             queryResult={queryResults[section.id]}
             config={section.llmConfig.prompt}
           />

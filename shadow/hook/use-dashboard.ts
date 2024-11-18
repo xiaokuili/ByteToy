@@ -24,7 +24,7 @@ export const useDashboard = create<DashboardStore>((set) => ({
   initSection: () => ({
     id: crypto.randomUUID(),
     name: "新建内容",
-    type: "other",
+    type: "OTHER",
     content: "通过数据源生成内容",
     llmConfig: {
       llmType: "imitate",

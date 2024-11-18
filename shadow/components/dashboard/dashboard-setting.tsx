@@ -1,9 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { listVisualizations } from "@/lib/visualization-actions";
-import { Visualization } from "@/types/base";
+import { DashboardSection, Visualization } from "@/types/base";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,7 +19,7 @@ import {
 import { useDashboardActive } from "@/hook/use-dashboard";
 
 interface VisualizationSettingProps {
-  updateSection: (id: string, section: Partial<DashboardSection>) => void;
+  onUpdateSection: (id: string, section: Partial<DashboardSection>) => void;
 }
 export function VisualizationSetting({
   onUpdateSection,
@@ -210,7 +209,7 @@ export function VisualizationSetting({
                         ) as HTMLInputElement
                       )?.value as "imitate" | "generate";
                       onUpdateSection(activeId, {
-                        type: "llm",
+                        type: "LLM",
                         llmConfig: {
                           llmType,
                           prompt: promptValue,
