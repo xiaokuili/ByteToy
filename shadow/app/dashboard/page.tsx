@@ -6,11 +6,14 @@ import { useState } from "react";
 import { Visualization } from "@/types/base";
 import { DashboardToolbar } from "@/components/dashboard/tool";
 import { DashboardHeader } from "@/components/dashboard/dashboard-head";
+import { useDashboardSetting } from "@/hook/use-dashboard";
 
 export default function DashboardPage() {
   const [selectedVisualizations, setSelectedVisualizations] = useState<
     Visualization[]
   >([]);
+  const { isSettingOpen } = useDashboardSetting();
+
   const handleVisualizationSelect = (visualization: Visualization) => {
     setSelectedVisualizations([...selectedVisualizations, visualization]);
   };
@@ -33,16 +36,18 @@ export default function DashboardPage() {
       </div>
 
       {/* Right Panel - Block Settings */}
-      <div className='w-96 border-l'>
-        <VisualizationSetting
-          onVisualizationSelect={handleVisualizationSelect}
-        />
-      </div>
+      {isSettingOpen && (
+        <div className='w-96 border-l'>
+          <VisualizationSetting
+            onVisualizationSelect={handleVisualizationSelect}
+          />
+        </div>
+      )}
 
       {/* Toolbar */}
       <div className='fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white shadow-lg rounded-lg px-4 py-2 border'>
         <DashboardToolbar
-          onAddBlock={() => {}}
+          onAddBlock={handleVisualizationSelect}
           onAddVariable={() => {}}
           onAddHeader={() => {}}
           onAddText={() => {}}
