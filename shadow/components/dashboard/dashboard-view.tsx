@@ -32,7 +32,6 @@ export const DashboardVisualization: React.FC<{
   config: DashboardConfig;
 }> = ({ dashboardViewId, queryResult, config }) => {
   // 创建并返回选中的视图
-  console.log("dashboardViewId", dashboardViewId);
   return (
     <ViewFactory
       viewId={dashboardViewId}

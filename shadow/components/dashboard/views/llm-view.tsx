@@ -26,11 +26,14 @@ const llmProcessor: ViewProcessor<LLMData> = {
         queryResult,
         prompt: config.llmConfig?.prompt,
       });
-      console.log("queryResult", queryResult);
-      console.log("config", config);
+      
+      console.log("response", response);
       return {
         isValid: true,
-        data: response.content,
+        data: {
+          prompt: config.llmConfig?.prompt,
+          response: response.content,
+        },
       };
     } catch (error) {
       return {
@@ -41,12 +44,7 @@ const llmProcessor: ViewProcessor<LLMData> = {
   },
 
   validateData: (data: LLMData) => {
-    if (!data.prompt || !data.response) {
-      return {
-        isValid: false,
-        error: "LLM view requires both prompt and response",
-      };
-    }
+
     return { isValid: true };
   },
 };
@@ -54,12 +52,8 @@ const llmProcessor: ViewProcessor<LLMData> = {
 const LLMView: React.FC<{ data: LLMData }> = ({ data }) => {
   return (
     <div className='w-full h-full flex-1 min-h-0 p-4'>
-      <div className='mb-4'>
-        <h3 className='font-medium mb-2'>Prompt:</h3>
-        <div className='bg-muted p-3 rounded'>{data.prompt}</div>
-      </div>
+     
       <div>
-        <h3 className='font-medium mb-2'>Response:</h3>
         <div className='bg-muted p-3 rounded whitespace-pre-wrap'>
           {data.response}
         </div>
