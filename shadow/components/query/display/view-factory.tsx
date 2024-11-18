@@ -28,9 +28,11 @@ export function ViewFactory({
 }) {
   const [processedData, setProcessedData] = React.useState<unknown>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
     const processData = async () => {
+      setLoading(true);
       const view = views.get(viewId);
 
       if (!view) {
@@ -61,6 +63,8 @@ export function ViewFactory({
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -71,11 +75,12 @@ export function ViewFactory({
     return <VisualizationErrorView error={error} />;
   }
 
-  if (!processedData) {
-    return null;
+  if (loading || !processedData) {
+    return <LoadingView />;
   }
 
   const view = views.get(viewId);
+  console.log("processedData", processedData);
   return <view.Component data={processedData} />;
 }
 
@@ -111,3 +116,8 @@ register(
     VIEW_MODES.find((mode) => mode.id === "number") as ViewModeDefinition
   )
 );
+
+export function LoadingView() {
+  return <div>Loading...</div>;
+}
+

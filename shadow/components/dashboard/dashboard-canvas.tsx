@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { useState } from "react";
-import { DashboardVisualization } from "./dashboard-view";
+import { DashboardFactory } from "./dashboard-factory";
 import { executeQuery } from "@/lib/datasource-action";
 import { getFinalSql } from "@/utils/variable-utils";
 import "react-grid-layout/css/styles.css";
@@ -98,7 +98,7 @@ export function DashboardCanvas({
       x: (index * 6) % 12, // Changed from 4 to 6 to make blocks wider
       y: Math.floor(index / 2) * 6, // Changed from 3 to 2 and height from 4 to 6
       w: 3, // Changed from 4 to 6 for wider blocks
-      minH: 3, // Changed from 4 to 6 for taller blocks
+      minH: 4, // Changed from 4 to 6 for taller blocks
       autoSize: true,
     })),
   };
@@ -183,10 +183,10 @@ export function DashboardGridItem({
         ) : !queryResults[section.id] ? (
           <LoadingView />
         ) : (
-          <DashboardVisualization
+          <DashboardFactory
             dashboardViewId={section.visualization.viewMode}
             queryResult={queryResults[section.id]}
-            config={section.llmConfig.prompt}
+            config={section}
           />
         )}
       </div>

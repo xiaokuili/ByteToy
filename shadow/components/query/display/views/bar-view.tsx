@@ -22,7 +22,7 @@ const barProcessor: ViewProcessor<BarChartData> = {
 
       return {
         isValid: true,
-        data: { labels, values },
+        data: { labels: labels as string[], values: values as number[] },
       };
       // eslint-disable-next-line no-empty
     } catch (error) {

@@ -3,6 +3,7 @@ import { register, ViewFactory } from "../query/display/view-factory";
 import { createLLMView } from "./views/llm-view";
 import { FileTextIcon } from "lucide-react";
 import { ViewModeDefinition } from "../query/display/types";
+import { DashboardSection } from "@/types/base";
 
 const DashboardViewModeDefinitions: ViewModeDefinition[] = [
   {
@@ -26,10 +27,10 @@ register(
   )
 );
 
-export const DashboardVisualization: React.FC<{
+export const DashboardFactory: React.FC<{
   dashboardViewId: string;
   queryResult: QueryResult;
-  config: DashboardConfig;
+  config: DashboardSection;
 }> = ({ dashboardViewId, queryResult, config }) => {
   // 创建并返回选中的视图
   return (

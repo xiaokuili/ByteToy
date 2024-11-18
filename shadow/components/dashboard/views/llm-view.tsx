@@ -6,9 +6,8 @@ import {
   QueryResultView,
   ProcessedData,
 } from "../../query/display/types";
-import { DashboardConfig } from "../types";
 import { generateLLMResponse } from "@/lib/llm";
-
+import { DashboardSection } from "@/types/base";
 interface LLMData {
   prompt: string;
   response: string;
@@ -17,7 +16,7 @@ interface LLMData {
 const llmProcessor: ViewProcessor<LLMData> = {
   processData: async (
     queryResult: QueryResult,
-    config: DashboardConfig
+    config: DashboardSection
   ): Promise<ProcessedData<LLMData>> => {
     try {
       // Assume first row contains prompt in 'prompt' column
