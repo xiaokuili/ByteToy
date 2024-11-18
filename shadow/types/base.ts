@@ -20,6 +20,8 @@ export interface DashboardSection extends Visualization {
     llmType: "imitate" | "generate";
     prompt: string;
   };
+  name: string;
+  
 }
 
 export interface Visualization {

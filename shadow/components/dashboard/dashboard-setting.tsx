@@ -54,7 +54,7 @@ export function VisualizationSetting({
           <TabsList className='grid w-full grid-cols-2'>
             <TabsTrigger value='explore' className='flex items-center gap-2'>
               <Search className='w-4 h-4' />
-              数据探索
+              基本配置
             </TabsTrigger>
             <TabsTrigger value='generate' className='flex items-center gap-2'>
               <Wand2 className='w-4 h-4' />
@@ -64,9 +64,26 @@ export function VisualizationSetting({
 
           <TabsContent value='explore' className='border-b p-4'>
             <div className='space-y-4'>
+              {/* Section Title Configuration */}
               <div>
-                <h3 className='text-sm font-medium mb-2'>搜索数据</h3>
+                <h3 className='text-sm font-medium mb-2'>标题配置</h3>
+                <div className='relative'>
+                  <Input
+                    type='text'
+                    placeholder='请输入标题...'
+                    onChange={(e) =>
+                      onUpdateSection(activeId, {
+                        name: e.target.value,
+                      })
+                    }
+                    className='w-full'
+                  />
+                </div>
+              </div>
 
+              {/* Data Search & Selection */}
+              <div>
+                <h3 className='text-sm font-medium mb-2'>数据配置</h3>
                 <div className='relative'>
                   <Input
                     type='text'
@@ -79,7 +96,7 @@ export function VisualizationSetting({
                 </div>
               </div>
 
-              <ScrollArea className='h-[calc(100vh-300px)]'>
+              <ScrollArea className='h-[calc(100vh-380px)]'>
                 {filteredVisualizations.length === 0 ? (
                   <div className='text-center text-muted-foreground py-8'>
                     未找到匹配的可视化组件
