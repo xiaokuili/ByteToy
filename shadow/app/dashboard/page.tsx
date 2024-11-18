@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardGrid } from "@/components/dashboard/dashboard-grid";
-import { VisualizationSelector } from "@/components/dashboard/dashboard-selector";
+import { VisualizationSetting } from "@/components/dashboard/dashboard-setting";
 import { useState } from "react";
 import { Visualization } from "@/types/base";
 import { DashboardToolbar } from "@/components/dashboard/tool";
@@ -16,28 +16,27 @@ export default function DashboardPage() {
   };
   return (
     <div className='flex h-full w-full'>
-      {/* Left Panel */}
-      <div className='w-64  p-4'>
-        <div className='h-full'>
-          <VisualizationSelector
-            onVisualizationSelect={handleVisualizationSelect}
-          />
-        </div>
-      </div>
-
-      {/* Right Panel */}
+      {/* Left Panel - Dashboard Report */}
       <div className='flex-1 flex flex-col'>
         {/* Top Section */}
         <DashboardHeader />
 
         {/* Bottom Section - Scrollable */}
         <div className='flex-1 overflow-y-auto p-4'>
-          {/* Example content to demonstrate scroll */}
-          <DashboardGrid
-            visualizations={selectedVisualizations}
-            setSelectedVisualizations={setSelectedVisualizations}
-          />
+          <div className='bg-gray-50 rounded-lg min-h-full'>
+            <DashboardGrid
+              visualizations={selectedVisualizations}
+              setSelectedVisualizations={setSelectedVisualizations}
+            />
+          </div>
         </div>
+      </div>
+
+      {/* Right Panel - Block Settings */}
+      <div className='w-96 border-l'>
+        <VisualizationSetting
+          onVisualizationSelect={handleVisualizationSelect}
+        />
       </div>
 
       {/* Toolbar */}
