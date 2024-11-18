@@ -80,7 +80,6 @@ export function ViewFactory({
   }
 
   const view = views.get(viewId);
-  console.log("processedData", processedData);
   return <view.Component data={processedData} />;
 }
 

@@ -54,6 +54,7 @@ export function DashboardCanvas({
           continue;
         }
 
+       
         try {
           const finalSql = getFinalSql(
             section.visualization.sqlContent,
@@ -98,8 +99,8 @@ export function DashboardCanvas({
       x: (index * 6) % 12, // Changed from 4 to 6 to make blocks wider
       y: Math.floor(index / 2) * 6, // Changed from 3 to 2 and height from 4 to 6
       w: 3, // Changed from 4 to 6 for wider blocks
-      minH: 4, // Changed from 4 to 6 for taller blocks
-      autoSize: true,
+      h: 4, // Changed from 4 to 6 for taller blocks
+      
     })),
   };
   return (
@@ -184,7 +185,7 @@ export function DashboardGridItem({
           <LoadingView />
         ) : (
           <DashboardFactory
-            dashboardViewId={section.visualization.viewMode}
+            dashboardViewId={section.type !== 'OTHER' ? section.type.toLowerCase() : section.visualization.viewMode}
             queryResult={queryResults[section.id]}
             config={section}
           />

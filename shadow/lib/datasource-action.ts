@@ -22,6 +22,7 @@ interface ConnectionResult {
     }
   >;
 }
+// todo: 添加缓存
 export async function executeQuery(datasourceId: string, sql: string) {
   try {
     // 1. 获取数据源信息
