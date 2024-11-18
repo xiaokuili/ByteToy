@@ -1,21 +1,19 @@
 "use client";
 
-import { DashboardGrid } from "@/components/dashboard/dashboard-grid";
+import { DashboardCanvas } from "@/components/dashboard/dashboard-canvas";
 import { VisualizationSetting } from "@/components/dashboard/dashboard-setting";
 import { useState } from "react";
 import { Visualization } from "@/types/base";
 import { DashboardToolbar } from "@/components/dashboard/tool";
 import { DashboardHeader } from "@/components/dashboard/dashboard-head";
-import { useDashboardSetting } from "@/hook/use-dashboard";
+import { useDashboardSetting, useDashboard } from "@/hook/use-dashboard";
 
 export default function DashboardPage() {
-  const [selectedVisualizations, setSelectedVisualizations] = useState<
-    Visualization[]
-  >([]);
+  const { sections, addSection, deleteSection, updateSection } = useDashboard();
   const { isSettingOpen } = useDashboardSetting();
 
-  const handleVisualizationSelect = (visualization: Visualization) => {
-    setSelectedVisualizations([...selectedVisualizations, visualization]);
+  const handleAddSection = (section: DashboardSection) => {
+    addSection(section);
   };
   return (
     <div className='flex h-full w-full'>
@@ -27,9 +25,9 @@ export default function DashboardPage() {
         {/* Bottom Section - Scrollable */}
         <div className='flex-1 overflow-y-auto p-4'>
           <div className='bg-gray-50 rounded-lg min-h-full'>
-            <DashboardGrid
-              visualizations={selectedVisualizations}
-              setSelectedVisualizations={setSelectedVisualizations}
+            <DashboardCanvas
+              dashboardSections={sections}
+              deleteSection={deleteSection}
             />
           </div>
         </div>
@@ -38,16 +36,14 @@ export default function DashboardPage() {
       {/* Right Panel - Block Settings */}
       {isSettingOpen && (
         <div className='w-96 border-l'>
-          <VisualizationSetting
-            onVisualizationSelect={handleVisualizationSelect}
-          />
+          <VisualizationSetting onUpdateSection={updateSection} />
         </div>
       )}
 
       {/* Toolbar */}
       <div className='fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white shadow-lg rounded-lg px-4 py-2 border'>
         <DashboardToolbar
-          onAddBlock={handleVisualizationSelect}
+          onAddBlock={addSection}
           onAddVariable={() => {}}
           onAddHeader={() => {}}
           onAddText={() => {}}

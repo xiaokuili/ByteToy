@@ -1,5 +1,9 @@
 import { PlusSquare, Type, Heading, Variable } from "lucide-react";
-import { useDashboardSetting } from "@/hook/use-dashboard";
+import {
+  useDashboardSetting,
+  useDashboard,
+  useDashboardActive,
+} from "@/hook/use-dashboard";
 
 interface DashboardToolbarProps {
   onAddBlock: (block: DashboardSection) => void;
@@ -15,17 +19,17 @@ export const DashboardToolbar: React.FC<DashboardToolbarProps> = ({
   onAddText,
 }) => {
   const { setSettingOpen } = useDashboardSetting();
+  const { initSection } = useDashboard();
+  const { setActiveId } = useDashboardActive();
   return (
     <div className='flex gap-2'>
       <button
         className='p-2 hover:bg-blue-100 rounded-md bg-blue-50 hover:text-blue-700 text-blue-600 shadow-lg hover:bg-blue-200 transform hover:scale-105 transition-all duration-200'
         onClick={() => {
+          const section = initSection();
           setSettingOpen(true);
-          onAddBlock({
-            type: "Other",
-            name: "New Block",
-            id: crypto.randomUUID(),
-          });
+          onAddBlock(section);
+          setActiveId(section.id);
         }}
         title='Add Block'
       >

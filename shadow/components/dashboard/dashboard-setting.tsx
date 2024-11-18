@@ -17,16 +17,18 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { useDashboardActive } from "@/hook/use-dashboard";
 
 interface VisualizationSettingProps {
-  onVisualizationSelect: (visualization: Visualization) => void;
+  updateSection: (id: string, section: Partial<DashboardSection>) => void;
 }
 
 export function VisualizationSetting({
-  onVisualizationSelect,
+  onUpdateSection,
 }: VisualizationSettingProps) {
   const [visualizations, setVisualizations] = useState<Visualization[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const { activeId } = useDashboardActive();
 
   useEffect(() => {
     const fetchVisualizations = async () => {
@@ -89,7 +91,11 @@ export function VisualizationSetting({
                         <HoverCardTrigger>
                           <div
                             className='flex items-center justify-between p-3 rounded-md border hover:bg-accent/50 transition-colors cursor-pointer'
-                            onClick={() => onVisualizationSelect(visualization)}
+                            onClick={() =>
+                              onUpdateSection(activeId, {
+                                visualization: visualization,
+                              })
+                            }
                           >
                             <div>
                               <p className='font-medium'>

@@ -43,3 +43,5 @@ v 0.0.1
 - 调整 dashboard 布局, 先添加一个配置框
 - 调整header border
 - 调整是否展示配置
+- 基于dashboarrd section 数据结构进行实现
+- 

@@ -11,12 +11,11 @@ export interface Datasource {
   useSSL: boolean;
 }
 
-export type SectionType = "Header" | "Text" | "Other";
+export type SectionType = "Header" | "Text" | "Visualization";
 
 export interface DashboardSection extends Visualization {
   type: SectionType;
-  header?: string;
-  text?: string;
+  content?: string; // For Header/Text content
   llmConfig?: {
     llmType: "imitate" | "generate";
     prompt: string;
