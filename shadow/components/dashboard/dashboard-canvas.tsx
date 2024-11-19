@@ -9,7 +9,7 @@ import { getFinalSql } from "@/utils/variable-utils";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { Button } from "../ui/button";
-
+import { useQueryExecution } from "@/hook/use-queryexecution";
 import { DashboardSection } from "@/types/base";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useDashboardActive } from "@/hook/use-dashboard";
@@ -79,7 +79,6 @@ export function DashboardCanvas({
 
 export function DashboardGridItem({
   section,
-
   removeSection,
   setActiveId,
 }: {
@@ -87,52 +86,6 @@ export function DashboardGridItem({
   removeSection: (sectionId: string) => void;
   setActiveId: (id: string | null) => void;
 }) {
-  const [queryResult, setQueryResult] = useState<QueryResult>({});
-  const [queryError, setQueryError] = useState<string>("");
-
-  // 使用 useMemo 缓存查询执行函数
-  const executeQueries = useMemo(
-    () => async () => {
-      if (!section.visualization?.id) {
-        setQueryError("请选择合适的数据和内容生成进行展示");
-        return;
-      }
-
-      try {
-        const finalSql = getFinalSql(
-          section.visualization.sqlContent,
-          section.visualization.sqlVariables
-        );
-        const result = await executeQuery(
-          section.visualization.datasourceId,
-          finalSql
-        );
-
-        if (result.success) {
-          setQueryResult(result.data);
-          setQueryError("");
-        } else {
-          setQueryError(result.error || "Unknown error");
-          setQueryResult({});
-        }
-      } catch (error) {
-        console.error(`Error executing query for block ${section.id}:`, error);
-        setQueryError("Failed to execute query");
-      }
-    },
-    [section.visualization, section.id] // 只依赖这些必要的属性
-  );
-
-  useEffect(() => {
-    executeQueries();
-  }, [executeQueries]); // 只在 executeQueries 改变时执行
-
-  console.log(
-    "section",
-    section.type,
-    section.visualization?.viewMode,
-    queryResult
-  );
   return (
     <div className='h-full'>
       <div className='flex items-center justify-between mb-2 no-drag'>
@@ -162,19 +115,14 @@ export function DashboardGridItem({
         </div>
       </div>
       <div className='h-[calc(100%-2rem)]'>
-        {queryError ? (
-          <QueryErrorView error={queryError} />
-        ) : (
-          <DashboardFactory
-            dashboardViewId={
-              section.type !== "OTHER"
-                ? section.type.toLowerCase()
-                : section.visualization.viewMode
-            }
-            queryResult={queryResult}
-            config={section}
-          />
-        )}
+        <DashboardFactory
+          dashboardViewId={
+            section.type !== "OTHER"
+              ? section.type.toLowerCase()
+              : section.visualization.viewMode
+          }
+          config={section}
+        />
       </div>
     </div>
   );

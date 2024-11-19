@@ -1,129 +1,59 @@
-"use client";
-
-import { QueryResult, QueryResultView, ViewModeDefinition } from "./types";
-import { VisualizationErrorView } from "./views/error-view";
-import { VIEW_MODES } from "./types";
-import { createBarChartView } from "./views/bar-view";
-import { createTableView } from "./views/table-view";
-import { createLineView } from "./views/line-view";
-import { createPieChartView } from "./views/pie-view";
-import { createNumberView } from "./views/number-view";
-import { createEmptyView } from "./views/empty-view";
+import { useViewProcessor } from "@/hook/use-view-processor";
+import { QueryResult } from "../types";
+import { views } from "./view-base";
+import { useQueryExecution } from "@/hook/use-queryexecution";
+import { useEffect } from "react";
 import React from "react";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const views: Map<string, QueryResultView<any>> = new Map();
-
-export function register<T>(viewId: string, view: QueryResultView<T>) {
-  views.set(viewId, view);
-}
 
 export function ViewFactory({
   viewId,
-  queryResult,
   config,
 }: {
   viewId: string;
-  queryResult: QueryResult;
   config?: unknown;
 }) {
-  const [processedData, setProcessedData] = React.useState<unknown>(null);
-  const [error, setError] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState(false);
+  // 使用 key 来强制整个组件树重新创建
+  return (
+    <React.Fragment key={`${viewId}-${JSON.stringify(config)}`}>
+      <ViewFactoryInner viewId={viewId} config={config} />
+    </React.Fragment>
+  );
+}
 
-  React.useEffect(() => {
-    console.log("factory render:", { viewId, queryResult, config });
-    const processData = async () => {
-      setLoading(true);
-      const view = views.get(viewId);
+// 内部组件处理实际的渲染逻辑
+function ViewFactoryInner({
+  viewId,
+  config,
+}: {
+  viewId: string;
+  config?: unknown;
+}) {
+  const { queryResult, queryError } = useQueryExecution(config);
 
-      if (!view) {
-        setError(`View ${viewId} not found`);
-        return;
-      }
+  const { processedData, error, loading } = useViewProcessor(
+    viewId,
+    queryResult,
+    config
+  );
+  const ViewComponent = views.get(viewId);
 
-      try {
-        const processedResult = view.processor.processData
-          ? await view.processor.processData(queryResult, config)
-          : { isValid: true, data: queryResult };
-
-        if (!processedResult?.isValid || !processedResult?.data) {
-          setError(processedResult?.error || "Invalid data");
-          return;
-        }
-
-        const validation = view.processor.validateData
-          ? view.processor.validateData(processedResult.data)
-          : { isValid: true };
-
-        if (!validation?.isValid) {
-          setError(validation?.error || "Data validation failed");
-          return;
-        }
-
-        setProcessedData(processedResult.data);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    processData();
-  }, [viewId, queryResult, config]);
-
-  if (error) {
-    return <VisualizationErrorView error={error} />;
-  }
-
-  if (loading || !processedData) {
-    return <LoadingView />;
-  }
-
-  const view = views.get(viewId);
-  return <view.Component data={processedData} />;
+  return queryError ? (
+    <VisualizationErrorView error={queryError} />
+  ) : loading || !processedData ? (
+    <LoadingView />
+  ) : (
+    <ViewComponent.Component data={processedData} />
+  );
 }
 
 export function LoadingView() {
   return <div>Loading...</div>;
 }
 
-// 创建工厂实例
+export function QueryErrorView({ error }: { error: string }) {
+  return <div>{error}</div>;
+}
 
-register(
-  "bar",
-  createBarChartView(
-    VIEW_MODES.find((mode) => mode.id === "bar") as ViewModeDefinition
-  )
-);
-register(
-  "table",
-  createTableView(
-    VIEW_MODES.find((mode) => mode.id === "table") as ViewModeDefinition
-  )
-);
-register(
-  "line",
-  createLineView(
-    VIEW_MODES.find((mode) => mode.id === "line") as ViewModeDefinition
-  )
-);
-register(
-  "pie",
-  createPieChartView(
-    VIEW_MODES.find((mode) => mode.id === "pie") as ViewModeDefinition
-  )
-);
-register(
-  "number",
-  createNumberView(
-    VIEW_MODES.find((mode) => mode.id === "number") as ViewModeDefinition
-  )
-);
-register(
-  "empty",
-  createEmptyView(
-    VIEW_MODES.find((mode) => mode.id === "empty") as ViewModeDefinition
-  )
-);
+export function VisualizationErrorView({ error }: { error: string }) {
+  return <div>{error}</div>;
+}

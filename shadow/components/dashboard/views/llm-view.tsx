@@ -49,12 +49,6 @@ const llmProcessor: ViewProcessor<LLMData> = {
       queryResult: QueryResult,
       config: DashboardSection
     ): Promise<ProcessedData<LLMData>> => {
-      console.log("processData called:", {
-        queryResult,
-        config,
-        timestamp: new Date().toISOString(),
-      });
-
       return new Promise((resolve) => {
         debouncedRequest(queryResult, config?.llmConfig?.prompt, resolve);
       });
