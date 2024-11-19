@@ -32,6 +32,7 @@ export function ViewFactory({
   const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
+    console.log("factory render:", { viewId, queryResult, config });
     const processData = async () => {
       setLoading(true);
       const view = views.get(viewId);
@@ -88,8 +89,6 @@ export function LoadingView() {
   return <div>Loading...</div>;
 }
 
-
-
 // 创建工厂实例
 
 register(
@@ -128,4 +127,3 @@ register(
     VIEW_MODES.find((mode) => mode.id === "empty") as ViewModeDefinition
   )
 );
-

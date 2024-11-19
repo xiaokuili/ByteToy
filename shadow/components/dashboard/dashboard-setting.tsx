@@ -109,6 +109,7 @@ export function VisualizationSetting({
                               onClick={() => {
                                 onUpdateSection(activeId, {
                                   visualization: visualization,
+                                  type: "OTHER",
                                 });
                               }}
                             >

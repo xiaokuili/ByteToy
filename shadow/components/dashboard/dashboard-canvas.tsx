@@ -36,61 +36,6 @@ export function DashboardCanvas({
   removeSection,
 }: DashboardCanvasProps) {
   const { activeId, setActiveId } = useDashboardActive();
-  const [queryResults, setQueryResults] = useState<Record<string, QueryResult>>(
-    {}
-  );
-  const [queryErrors, setQueryErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    let isMounted = true; // Prevent state updates after unmount
-    const executeQueries = async () => {
-      const results: Record<string, QueryResult> = {};
-      const errors: Record<string, string> = {};
-      for (const section of dashboardSections) {
-        // Stop execution if component is unmounted
-        if (!isMounted) return;
-        if (!section.visualization?.id) {
-          errors[section.id] = "请选择合适的数据和内容生成进行展示";
-          continue;
-        }
-
-       
-        try {
-          const finalSql = getFinalSql(
-            section.visualization.sqlContent,
-            section.visualization.sqlVariables
-          );
-          const result = await executeQuery(
-            section.visualization.datasourceId,
-            finalSql
-          );
-
-          if (result.success) {
-            results[section.id] = result.data;
-          } else {
-            errors[section.id] = result.error || "Unknown error";
-          }
-        } catch (error) {
-          console.error(
-            `Error executing query for block ${section.id}:`,
-            error
-          );
-          errors[section.id] = "Failed to execute query";
-        }
-      }
-      // 确保组件仍然挂载时才更新状态
-      if (isMounted) {
-        setQueryResults(results);
-        setQueryErrors(errors);
-      }
-    };
-
-    executeQueries();
-    // 清理函数
-    return () => {
-      isMounted = false;
-    };
-  }, [dashboardSections]);
 
   const layouts = {
     lg: dashboardSections.map((section, index) => ({
@@ -99,7 +44,6 @@ export function DashboardCanvas({
       y: Math.floor(index / 2) * 6, // Changed from 3 to 2 and height from 4 to 6
       w: 3, // Changed from 4 to 6 for wider blocks
       h: 4, // Changed from 4 to 6 for taller blocks
-      
     })),
   };
   return (
@@ -123,8 +67,6 @@ export function DashboardCanvas({
           >
             <DashboardGridItem
               section={section}
-              queryErrors={queryErrors}
-              queryResults={queryResults}
               removeSection={removeSection}
               setActiveId={setActiveId}
             />
@@ -137,29 +79,60 @@ export function DashboardCanvas({
 
 export function DashboardGridItem({
   section,
-  queryErrors,
-  queryResults,
+
   removeSection,
   setActiveId,
 }: {
   section: DashboardSection;
-  queryErrors: Record<string, string>;
-  queryResults: Record<string, QueryResult>;
   removeSection: (sectionId: string) => void;
   setActiveId: (id: string | null) => void;
 }) {
-  const dashboardView = useMemo(() => (
-    <DashboardFactory
-      dashboardViewId={section.type !== 'OTHER' ? section.type.toLowerCase() : section.visualization.viewMode}
-      queryResult={queryResults[section.id]}
-      config={section}
-    />
-  ), [
+  const [queryResult, setQueryResult] = useState<QueryResult>({});
+  const [queryError, setQueryError] = useState<string>("");
+
+  // 使用 useMemo 缓存查询执行函数
+  const executeQueries = useMemo(
+    () => async () => {
+      if (!section.visualization?.id) {
+        setQueryError("请选择合适的数据和内容生成进行展示");
+        return;
+      }
+
+      try {
+        const finalSql = getFinalSql(
+          section.visualization.sqlContent,
+          section.visualization.sqlVariables
+        );
+        const result = await executeQuery(
+          section.visualization.datasourceId,
+          finalSql
+        );
+
+        if (result.success) {
+          setQueryResult(result.data);
+          setQueryError("");
+        } else {
+          setQueryError(result.error || "Unknown error");
+          setQueryResult({});
+        }
+      } catch (error) {
+        console.error(`Error executing query for block ${section.id}:`, error);
+        setQueryError("Failed to execute query");
+      }
+    },
+    [section.visualization, section.id] // 只依赖这些必要的属性
+  );
+
+  useEffect(() => {
+    executeQueries();
+  }, [executeQueries]); // 只在 executeQueries 改变时执行
+
+  console.log(
+    "section",
     section.type,
     section.visualization?.viewMode,
-    queryResults[section.id],
-    section
-  ]);
+    queryResult
+  );
   return (
     <div className='h-full'>
       <div className='flex items-center justify-between mb-2 no-drag'>
@@ -189,9 +162,19 @@ export function DashboardGridItem({
         </div>
       </div>
       <div className='h-[calc(100%-2rem)]'>
-        {queryErrors[section.id] ? (
-          <QueryErrorView error={queryErrors[section.id]} />
-        ) : dashboardView}
+        {queryError ? (
+          <QueryErrorView error={queryError} />
+        ) : (
+          <DashboardFactory
+            dashboardViewId={
+              section.type !== "OTHER"
+                ? section.type.toLowerCase()
+                : section.visualization.viewMode
+            }
+            queryResult={queryResult}
+            config={section}
+          />
+        )}
       </div>
     </div>
   );
