@@ -26,6 +26,7 @@ interface ConnectionResult {
 export async function executeQuery(datasourceId: string, sql: string) {
   try {
     // 1. 获取数据源信息
+    console.log("datasourceId", datasourceId);
     const metadataResult = await getMetadata(datasourceId);
     if (!metadataResult.success || !metadataResult.data) {
       return {
@@ -144,7 +145,7 @@ function buildConnectionString(datasource: Datasource): string {
 
   switch (type.toLowerCase()) {
     case "postgresql":
-      return `postgresql://${username}:${password}@${host}:${port}/${databaseName}?sslmode=${useSSL ? "require" : "disable"}`;
+      return `postgresql://${username}:${password}@${host}:${port}/${databaseName}?sslmode=require `;
 
     // 可以添加其他数据库类型
     default:

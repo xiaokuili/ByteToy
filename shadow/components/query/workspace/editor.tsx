@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Variable } from "@/types/base";
-import { executeQuery } from "@/lib/datasource-action";
 import { Button } from "@/components/ui/button";
 import { Play, Eye, Loader2 } from "lucide-react";
 import { parseVariables, getFinalSql } from "@/utils/variable-utils";
-import { QueryResult } from "@/components/query/display/types";
 import { SQLEditor } from "@/components/ui/sql-editor";
 import {
   Dialog,
@@ -15,73 +13,28 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { useQueryAndViewState } from "@/hook/use-visualization";
+import { toast } from "sonner";
 
-// Types
-interface DatabaseProps {
-  databaseId: string;
-}
-
-interface QueryState {
-  sqlContent: string;
+interface SQLEditorProps {
   variables: Variable[];
-}
-
-interface QueryActions {
-  setQueryResult: (result: QueryResult) => void;
-  setQueryError: (error: string) => void;
+  sqlContent: string;
   setVariables: (variables: Variable[]) => void;
-  setSqlContent: (sqlContent: string) => void;
+  setSqlContent: (sql: string) => void;
 }
-
-interface SQLEditorProps extends DatabaseProps, QueryState, QueryActions {}
 
 // Main Component
 export function QuerySearchSqlEditor({
-  databaseId,
   variables,
   sqlContent,
-  setQueryResult,
-  setQueryError,
   setVariables,
   setSqlContent,
 }: SQLEditorProps) {
+  const { isExecuting, setIsExecuting } = useQueryAndViewState();
   // UI States
-  const [isExecuting, setIsExecuting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  // Execute query on initial load if SQL exists
-  const initialLoadRef = useRef(false);
+  const { databaseId } = useQueryAndViewState();
 
-  useEffect(() => {
-    const executeSqlOnLoad = async () => {
-      // 如果已经执行过，则直接返回
-      if (initialLoadRef.current) return;
-      // 如果验证不通过，也直接返回
-      if (!validateQuery()) return;
-
-      initialLoadRef.current = true;
-      setIsExecuting(true);
-      setQueryResult(null);
-      setQueryError("");
-
-      try {
-        const finalSql = getFinalSql(sqlContent, variables);
-        const result = await executeQuery(databaseId, finalSql);
-
-        if (result.success) {
-          setQueryResult(result.data);
-        } else {
-          setQueryError(result.error || "Unknown error");
-        }
-      } catch (error) {
-        console.error("Error executing initial SQL:", error);
-      } finally {
-        setIsExecuting(false);
-      }
-    };
-
-    executeSqlOnLoad();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [databaseId, sqlContent, variables, setQueryResult, setQueryError]);
   // SQL Content Handlers
   const handleSqlChange = (value: string) => {
     setSqlContent(value);
@@ -92,45 +45,20 @@ export function QuerySearchSqlEditor({
   // Query Execution
   const handleExecute = async () => {
     if (!validateQuery()) return;
-
-    try {
-      await executeQueryWithVariables();
-    } catch (error) {
-      handleQueryError(error);
-    }
+    setIsExecuting(true);
   };
 
   // Query Validation
   const validateQuery = (): boolean => {
-    if (!sqlContent.trim()) return false;
+    if (!sqlContent.trim()) {
+      toast.error("请输入SQL语句");
+      return false;
+    }
     if (!databaseId) {
-      setQueryError("Please select a database first.");
+      toast.error("请选择数据库");
       return false;
     }
     return true;
-  };
-
-  // Query Execution Logic
-  const executeQueryWithVariables = async () => {
-    setIsExecuting(true);
-    setQueryResult(null);
-    setQueryError("");
-
-    const finalSql = getFinalSql(sqlContent, variables);
-    const result = await executeQuery(databaseId, finalSql);
-
-    if (result.success) {
-      setQueryResult(result.data);
-    } else {
-      setQueryError(result.error || "Unknown error");
-    }
-
-    setIsExecuting(false);
-  };
-
-  const handleQueryError = (error: string) => {
-    console.error("Error executing SQL:", error);
-    setIsExecuting(false);
   };
 
   // Preview Logic
@@ -138,11 +66,11 @@ export function QuerySearchSqlEditor({
   return (
     <div className='flex'>
       <SQLEditorUI
-        isExecuting={isExecuting}
         onExecute={handleExecute}
         onShowPreview={() => setShowPreview(true)}
         sqlContent={sqlContent}
         onSqlChange={handleSqlChange}
+        isExecuting={isExecuting}
       />
 
       <PreviewDialog
@@ -155,19 +83,19 @@ export function QuerySearchSqlEditor({
 }
 
 interface SQLEditorUIProps {
-  isExecuting: boolean;
   onExecute: () => void;
   onShowPreview: () => void;
   sqlContent: string;
   onSqlChange: (value: string) => void;
+  isExecuting: boolean;
 }
 
 export function SQLEditorUI({
-  isExecuting,
   onExecute,
   onShowPreview,
   sqlContent,
   onSqlChange,
+  isExecuting,
 }: SQLEditorUIProps) {
   return (
     <div className='flex w-full gap-4'>

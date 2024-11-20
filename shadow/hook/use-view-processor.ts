@@ -2,25 +2,22 @@ import { useState, useEffect } from "react";
 import { QueryResult } from "../types";
 import { views } from "../components/query/display/view-base";
 
-interface ProcessorState {
-  processedData: unknown;
-  error: string | null;
-  loading: boolean;
-}
 export function useViewProcessor(
   viewId: string,
   queryResult: QueryResult,
-  config?: unknown
+  llmConfig?: unknown
 ) {
-  const [loading, setLoading] = useState(false);
+  const [lifecycle, setLifecycle] = useState<
+    "init" | "processing" | "completed"
+  >("init");
   const [error, setError] = useState<string | null>(null);
   const [processedData, setProcessedData] = useState<unknown>(null);
 
   useEffect(() => {
     let mounted = true;
 
-    // 立即更新 loading 状态
-    setLoading(true);
+    // Update lifecycle state immediately
+    setLifecycle("processing");
     setProcessedData(null);
     setError(null);
 
@@ -36,7 +33,7 @@ export function useViewProcessor(
           return;
         }
         const processedResult = view.processor.processData
-          ? await view.processor.processData(queryResult, config)
+          ? await view.processor.processData(queryResult, llmConfig)
           : { isValid: true, data: queryResult };
 
         if (!mounted) return;
@@ -68,7 +65,7 @@ export function useViewProcessor(
         }
       } finally {
         if (mounted) {
-          setLoading(false);
+          setLifecycle("completed");
         }
       }
     };
@@ -80,7 +77,7 @@ export function useViewProcessor(
       setProcessedData(null);
       setError(null);
     };
-  }, [viewId, queryResult, config]);
+  }, [viewId, queryResult, llmConfig]);
 
-  return { processedData, error, loading };
+  return { processedData, error, lifecycle };
 }

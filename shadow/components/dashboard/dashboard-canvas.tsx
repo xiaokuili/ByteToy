@@ -9,7 +9,7 @@ import { getFinalSql } from "@/utils/variable-utils";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { Button } from "../ui/button";
-import { useQueryExecution } from "@/hook/use-queryexecution";
+import { useQueryExecution } from "@/hook/use-view-execution";
 import { DashboardSection } from "@/types/base";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useDashboardActive } from "@/hook/use-dashboard";

@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import { Database as DatabaseIcon, Server } from "lucide-react";
 import { SelectItem } from "@/components/ui/select";
-import { useVisualization } from "@/hook/use-visualization";
+import { useQueryAndViewState } from "@/hook/use-visualization";
 
 interface Database {
   id: string;
@@ -20,7 +20,6 @@ interface Database {
 
 interface DatabaseOptionProps {
   database: Database;
-
 }
 
 function DatabaseOption({ database }: DatabaseOptionProps) {
@@ -41,8 +40,10 @@ interface DatabaseSelectorProps {
 }
 
 export function DatabaseSelector({ onSelect }: DatabaseSelectorProps) {
-  const [databases, setDatabases] = useState<{ id: string; name: string }[]>([]);
-  const { datasourceId } = useVisualization();
+  const [databases, setDatabases] = useState<{ id: string; name: string }[]>(
+    []
+  );
+  const { databaseId } = useQueryAndViewState();
   useEffect(() => {
     const fetchDatabases = async () => {
       const response = await getMetadatas();
@@ -50,7 +51,7 @@ export function DatabaseSelector({ onSelect }: DatabaseSelectorProps) {
         setDatabases(
           response.data.map((db: Database) => ({
             id: db.id,
-            name: db.name 
+            name: db.displayName,
           }))
         );
       } else {
@@ -62,7 +63,7 @@ export function DatabaseSelector({ onSelect }: DatabaseSelectorProps) {
   }, []);
 
   return (
-    <Select value={datasourceId || ""} onValueChange={onSelect}>
+    <Select value={databaseId || ""} onValueChange={onSelect}>
       <SelectTrigger
         className={cn(
           "w-[250px]",
@@ -75,8 +76,7 @@ export function DatabaseSelector({ onSelect }: DatabaseSelectorProps) {
         <div className='flex items-center gap-2'>
           <DatabaseIcon className='h-4 w-4 text-muted-foreground' />
           <SelectValue placeholder='选择数据库'>
-            {databases.find((db) => db.id === datasourceId)?.name ||
-              "选择数据库"}
+            {databases.find((db) => db.id === databaseId)?.name || "选择数据库"}
           </SelectValue>
         </div>
         <ChevronDown className='h-4 w-4 text-muted-foreground' />

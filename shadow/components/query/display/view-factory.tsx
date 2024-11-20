@@ -1,59 +1,171 @@
 import { useViewProcessor } from "@/hook/use-view-processor";
-import { QueryResult } from "../types";
 import { views } from "./view-base";
-import { useQueryExecution } from "@/hook/use-queryexecution";
-import { useEffect } from "react";
+import { useQueryExecution } from "@/hook/use-view-execution";
 import React from "react";
-
+import { Variable } from "@/types/variable";
+import { useQueryAndViewState } from "@/hook/use-visualization";
+// 内部组件处理实际的渲染逻辑
 export function ViewFactory({
   viewId,
-  config,
+  sqlContent,
+  sqlVariables,
+  databaseId,
+  llmConfig,
 }: {
   viewId: string;
-  config?: unknown;
+  sqlContent: string;
+  sqlVariables: Variable[];
+  databaseId: string;
+  llmConfig?: unknown;
 }) {
-  // 使用 key 来强制整个组件树重新创建
+  const currentViewIdRef = React.useRef<string>(viewId);
+  const processingComplete = React.useRef(false);
+
+  const {
+    queryResult,
+    queryError,
+    lifecycle: queryLifecycle,
+  } = useQueryExecution({
+    sqlContent,
+    sqlVariables,
+    databaseId,
+  });
+
+  const { processedData, lifecycle: viewLifecycle } = useViewProcessor(
+    viewId,
+    queryResult,
+    llmConfig
+  );
+  const { setIsExecuting } = useQueryAndViewState();
+
+  React.useEffect(() => {
+    if (queryLifecycle === "completed" && viewLifecycle === "completed") {
+      setIsExecuting(false);
+    }
+  }, [queryLifecycle, viewLifecycle, setIsExecuting]);
+
+  React.useEffect(() => {
+    if (viewLifecycle === "completed") {
+      currentViewIdRef.current = viewId;
+      processingComplete.current = true;
+    } else {
+      processingComplete.current = false;
+    }
+  }, [viewId, viewLifecycle]);
+  const ViewComponent = views.get(viewId);
   return (
-    <React.Fragment key={`${viewId}-${JSON.stringify(config)}`}>
-      <ViewFactoryInner viewId={viewId} config={config} />
-    </React.Fragment>
+    <>
+      {queryError && <VisualizationErrorView error={queryError} />}
+      {(queryLifecycle === "executing" || viewLifecycle === "executing") && (
+        <LoadingView />
+      )}
+      {!queryError &&
+        viewLifecycle !== "executing" &&
+        (!processedData || Object.keys(processedData).length === 0) && (
+          <EmptyDataView />
+        )}
+      {!queryError && !viewLifecycle === "executing" && !ViewComponent && (
+        <ViewNotFoundError viewId={viewId} />
+      )}
+      {!queryError &&
+        viewLifecycle !== "executing" &&
+        ViewComponent &&
+        processedData &&
+        Object.keys(processedData).length > 0 &&
+        processingComplete.current &&
+        currentViewIdRef.current === viewId && (
+          <ViewComponent.Component data={processedData} />
+        )}
+    </>
+  );
+}
+export function EmptyDataView() {
+  return (
+    <div className='flex h-full w-full flex-col items-center justify-center rounded-md border border-dashed p-8 text-center animate-in fade-in-50'>
+      <div className='mx-auto flex max-w-[420px] flex-col items-center justify-center text-center'>
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='h-10 w-10 text-muted-foreground/60 mb-4'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4'
+          />
+        </svg>
+        <h3 className='text-lg font-semibold'>没有数据进行展示</h3>
+        <p className='mt-2 text-sm text-muted-foreground'>
+          请输入SQL语句请求数据并进行展示
+        </p>
+      </div>
+    </div>
   );
 }
 
-// 内部组件处理实际的渲染逻辑
-function ViewFactoryInner({
-  viewId,
-  config,
-}: {
-  viewId: string;
-  config?: unknown;
-}) {
-  const { queryResult, queryError } = useQueryExecution(config);
-
-  const { processedData, error, loading } = useViewProcessor(
-    viewId,
-    queryResult,
-    config
-  );
-  const ViewComponent = views.get(viewId);
-
-  return queryError ? (
-    <VisualizationErrorView error={queryError} />
-  ) : loading || !processedData ? (
-    <LoadingView />
-  ) : (
-    <ViewComponent.Component data={processedData} />
+export function VisualizationErrorView({ error }: { error: string }) {
+  return (
+    <div className='flex h-full w-full items-center justify-center p-8 text-red-500'>
+      <div className='flex flex-col items-center gap-4'>
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='h-12 w-12'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
+          />
+        </svg>
+        <div className='text-lg font-medium'>Visualization Error</div>
+        <div className='text-center text-sm opacity-75'>{error}</div>
+      </div>
+    </div>
   );
 }
 
 export function LoadingView() {
-  return <div>Loading...</div>;
+  return (
+    <div className='flex h-full w-full items-center justify-center p-8 text-gray-500'>
+      <div className='flex flex-col items-center gap-4'>
+        <div className='h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500' />
+        <div className='text-lg font-medium'>Loading</div>
+        <div className='text-sm opacity-75'>
+          Please wait while we process your request...
+        </div>
+      </div>
+    </div>
+  );
 }
 
-export function QueryErrorView({ error }: { error: string }) {
-  return <div>{error}</div>;
-}
-
-export function VisualizationErrorView({ error }: { error: string }) {
-  return <div>{error}</div>;
+export function ViewNotFoundError({ error }: { error: string }) {
+  return (
+    <div className='flex h-full w-full items-center justify-center p-8'>
+      <div className='flex flex-col items-center gap-4'>
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='h-12 w-12 text-destructive'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M6 18L18 6M6 6l12 12'
+          />
+        </svg>
+        <h3 className='text-lg font-semibold'>View Not Found</h3>
+        <p className='text-sm text-muted-foreground text-center'>{error}</p>
+      </div>
+    </div>
+  );
 }

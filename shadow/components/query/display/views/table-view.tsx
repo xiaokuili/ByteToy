@@ -22,6 +22,7 @@ const tableProcessor: ViewProcessor = {
 };
 
 function TableViewComponent({ data }: { data: QueryResult }) {
+  console.log("data", data);
   return (
     <Table>
       <TableHeader>
@@ -53,7 +54,16 @@ function TableViewComponent({ data }: { data: QueryResult }) {
                 className='py-1.5 px-3 text-xs'
               >
                 <div className='max-w-[300px] truncate'>
-                {formatCellValue(row[column.name] as null | undefined | number | boolean | Date | object | string)}
+                  {formatCellValue(
+                    row[column.name] as
+                      | null
+                      | undefined
+                      | number
+                      | boolean
+                      | Date
+                      | object
+                      | string
+                  )}
                 </div>
               </TableCell>
             ))}

@@ -2,71 +2,100 @@ import { create } from "zustand";
 
 import { Variable } from "@/types/base";
 import { getVisualization } from "@/lib/visualization-actions";
+import { useCallback } from "react";
 
-interface VisualizationStore {
-  viewMode: string;
-  setViewMode: (mode: string) => void;
-  datasourceId: string;
-  setDatasourceId: (id: string) => void;
+interface QueryState {
   sqlContent: string;
-  setSqlContent: (sql: string) => void;
-  sqlVariables: Variable[];
-  setSqlVariables: (variables: Variable[]) => void;
-  id: string | null;
-  setId: (id: string | null) => void;
-  isLoading: boolean;
-  error: string | null;
-  name: string;
-  setName: (name: string) => void;
-
-  // 加载可视化数据的方法
-  loadVisualization: (id: string) => Promise<void>;
-  // 重置所有状态
-  reset: () => void;
+  variables: Variable[];
+  databaseId: string;
+  isExecuting: boolean;
+  id: string;
 }
 
-const initialState = {
-  viewMode: "table",
-  datasourceId: "",
+interface ViewState {
+  viewMode: string;
+  id: string;
+}
+
+const useQueryState = create<QueryState>((set) => ({
   sqlContent: "",
-  sqlVariables: [],
-  id: null,
-  isLoading: false,
-  name: "",
-  error: null,
-};
-export const useVisualization = create<VisualizationStore>((set) => ({
-  ...initialState,
-
-  setViewMode: (mode) => set({ viewMode: mode }),
-  setDatasourceId: (id) => set({ datasourceId: id }),
-  setSqlContent: (sql) => set({ sqlContent: sql }),
-  setSqlVariables: (variables) => set({ sqlVariables: variables }),
-  setId: (id) => set({ id }),
-  setName: (name) => set({ name }),
-  loadVisualization: async (id: string) => {
-    try {
-      set({ isLoading: true, error: null });
-      const visualization = await getVisualization(id);
-      if (visualization) {
-        set({
-          id,
-          viewMode: visualization.viewMode,
-          datasourceId: visualization.datasourceId,
-          sqlContent: visualization.sqlContent,
-          sqlVariables: visualization.sqlVariables,
-          name: visualization.name,
-        });
-      }
-    } catch (error) {
-      set({ error: error.message });
-    } finally {
-      set({ isLoading: false });
-    }
-  },
-
-  reset: () => set(initialState),
+  variables: [],
+  databaseId: "",
+  isExecuting: false,
+  id: "",
+  setSqlContent: (sql: string) => set({ sqlContent: sql }),
+  setVariables: (variables: Variable[]) => set({ variables }),
+  setDatabaseId: (id: string) => set({ databaseId: id }),
+  setIsExecuting: (isExecuting: boolean) => set({ isExecuting }),
+  setId: (id: string) => set({ id }),
+  reset: () =>
+    set({
+      sqlContent: "",
+      variables: [],
+      databaseId: "",
+      isExecuting: false,
+      id: "",
+    }),
 }));
+
+const useViewState = create<ViewState>((set) => ({
+  viewMode: "table",
+  id: "",
+  setViewMode: (mode: string) => set({ viewMode: mode }),
+  setId: (id: string) => set({ id }),
+  reset: () => set({ viewMode: "table", id: "" }),
+}));
+
+// 包装函数统一管理两个状态
+export function useQueryAndViewState() {
+  const queryState = useQueryState();
+  const viewState = useViewState();
+
+  return {
+    // Query state
+    sqlContent: queryState.sqlContent,
+    variables: queryState.variables,
+    databaseId: queryState.databaseId,
+    isExecuting: queryState.isExecuting,
+    setSqlContent: queryState.setSqlContent,
+    setVariables: queryState.setVariables,
+    setDatabaseId: queryState.setDatabaseId,
+    setIsExecuting: queryState.setIsExecuting,
+
+    // View state
+    viewMode: viewState.viewMode,
+    id: queryState.id,
+    setViewMode: viewState.setViewMode,
+    setId: useCallback((id: string) => {
+      queryState.setId(id);
+      viewState.setId(id);
+    }, []),
+
+    // Reset both states
+    reset: () => {
+      queryState.reset();
+      viewState.reset();
+    },
+
+    // Load visualization data
+    loadVisualization: useCallback(async (id: string) => {
+      try {
+        const visualization = await getVisualization(id);
+        if (visualization) {
+          queryState.setSqlContent(visualization.sqlContent);
+          queryState.setVariables(visualization.sqlVariables);
+          queryState.setDatabaseId(visualization.datasourceId);
+          viewState.setViewMode(visualization.viewMode);
+          queryState.setIsExecuting(true);
+          queryState.setId(id);
+          viewState.setId(id);
+        }
+      } catch (error) {
+        console.error("Failed to load visualization:", error);
+      }
+    }, []),
+  };
+}
 
 interface VisualizationOpenStore {
   isOpen: boolean;

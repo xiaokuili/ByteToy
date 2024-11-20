@@ -18,9 +18,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import { useVisualization } from "@/hook/use-visualization";
+import { useQueryAndViewState } from "@/hook/use-visualization";
 export function TopNavComponent() {
-  const { setId } = useVisualization();
+  const { setId } = useQueryAndViewState();
   return (
     <nav className=' flex h-16 items-center justify-between px-4 py-2 bg-white  border-b '>
       <div className='flex-grow max-w-xl px-4'>
@@ -39,10 +39,14 @@ export function TopNavComponent() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end' className='w-56'>
-            <DropdownMenuItem>
-              <BarChart2 className='mr-2 h-4 w-4' />
-              <span>报告 </span>
-            </DropdownMenuItem>
+            <Link href='/dashboard' passHref>
+              <DropdownMenuItem asChild>
+                <div className='flex items-center'>
+                  <BarChart2 className='mr-2 h-4 w-4' />
+                  <span>报告</span>
+                </div>
+              </DropdownMenuItem>
+            </Link>
             <DropdownMenuItem
               onClick={() => {
                 const id = crypto.randomUUID();

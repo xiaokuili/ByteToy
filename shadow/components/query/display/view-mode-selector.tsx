@@ -4,12 +4,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { useVisualization } from "@/hook/use-visualization";
+import { useQueryAndViewState } from "@/hook/use-visualization";
 import { ViewTooltip } from "./view-tooltip";
 import { VIEW_MODES } from "./types";
 
 export function ViewModeSelector() {
-  const { viewMode, setViewMode } = useVisualization();
+  const { viewMode, setViewMode } = useQueryAndViewState();
   return (
     <Card className='h-full flex flex-col'>
       <CardHeader className='pb-3'>
@@ -68,11 +68,11 @@ function ViewModeButton({
       >
         <div
           className={cn(
-            "rounded-full p-2 h-4 w-4",
+            "rounded-full p-2 flex items-center justify-center",
             isSelected ? "bg-primary/10" : "bg-muted"
           )}
         >
-          <Icon  />
+          <Icon className='h-4 w-4' />
         </div>
         <span className='text-xs font-medium'>{mode.name}</span>
       </Button>

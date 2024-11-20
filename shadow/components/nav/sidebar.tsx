@@ -29,39 +29,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-function NavLink({
-  href,
-  icon,
-  label,
-  collapsed,
-  className,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  collapsed: boolean;
-  className?: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-gray-100",
-        "transition-colors duration-200",
-        className
-      )}
-    >
-      <span>{icon}</span>
-      {!collapsed && <span>{label}</span>}
-    </Link>
-  );
-}
-
+import { useSidebar } from "@/hook/use-sidebar";
 export function SidebarComponent() {
   const [openCollections, setOpenCollections] = useState(true);
   const [openBrowse, setOpenBrowse] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isCollapsed, setIsCollapsed } = useSidebar();
   const router = useRouter();
 
   const handleAddDatabase = () => {
@@ -245,5 +217,33 @@ export function SidebarComponent() {
         </DropdownMenu>
       </div>
     </aside>
+  );
+}
+
+function NavLink({
+  href,
+  icon,
+  label,
+  collapsed,
+  className,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  collapsed: boolean;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-gray-100",
+        "transition-colors duration-200",
+        className
+      )}
+    >
+      <span>{icon}</span>
+      {!collapsed && <span>{label}</span>}
+    </Link>
   );
 }

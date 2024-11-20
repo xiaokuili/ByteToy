@@ -1,7 +1,6 @@
 "use client";
 
-import { QueryResult, QueryResultView, ViewModeDefinition } from "./types";
-import { VisualizationErrorView } from "./views/error-view";
+import { QueryResultView, ViewModeDefinition } from "./types";
 import { VIEW_MODES } from "./types";
 import { createBarChartView } from "./views/bar-view";
 import { createTableView } from "./views/table-view";
@@ -9,7 +8,6 @@ import { createLineView } from "./views/line-view";
 import { createPieChartView } from "./views/pie-view";
 import { createNumberView } from "./views/number-view";
 import { createEmptyView } from "./views/empty-view";
-import React from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const views: Map<string, QueryResultView<any>> = new Map();

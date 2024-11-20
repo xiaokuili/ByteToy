@@ -4,12 +4,14 @@ import { DashboardCanvas } from "@/components/dashboard/dashboard-canvas";
 import { VisualizationSetting } from "@/components/dashboard/dashboard-setting";
 import { DashboardToolbar } from "@/components/dashboard/tool";
 import { DashboardHeader } from "@/components/dashboard/dashboard-head";
-import { useDashboard, useDashboardActive } from "@/hook/use-dashboard";
+import {
+  useDashboardOperations,
+  useDashboardActive,
+} from "@/hook/use-dashboard";
 
 export default function DashboardPage() {
-  const { sections, addSection, removeSection, updateSection } = useDashboard();
+  const { sections, add, remove, update } = useDashboardOperations();
   const { activeId } = useDashboardActive();
-
 
   return (
     <div className='flex h-full w-full'>
@@ -23,7 +25,7 @@ export default function DashboardPage() {
           <div className='bg-gray-50 rounded-lg min-h-full'>
             <DashboardCanvas
               dashboardSections={sections}
-              removeSection={removeSection}
+              removeSection={remove}
             />
           </div>
         </div>
@@ -32,14 +34,14 @@ export default function DashboardPage() {
       {/* Right Panel - Block Settings */}
       {activeId && (
         <div className='w-96 border-l'>
-          <VisualizationSetting onUpdateSection={updateSection} />
+          <VisualizationSetting onUpdateSection={update} />
         </div>
       )}
 
       {/* Toolbar */}
       <div className='fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white shadow-lg rounded-lg px-4 py-2 border'>
         <DashboardToolbar
-          onAddBlock={addSection}
+          onAddBlock={add}
           onAddVariable={() => {}}
           onAddHeader={() => {}}
           onAddText={() => {}}

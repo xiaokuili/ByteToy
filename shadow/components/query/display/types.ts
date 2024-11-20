@@ -13,7 +13,6 @@ import {
   HashIcon,
   GaugeIcon,
   ActivityIcon,
-  MapIcon,
 } from "lucide-react";
 
 export interface QueryResult {
@@ -32,10 +31,11 @@ export interface ProcessedData<T> {
   data?: T;
 }
 
-
-
 export interface ViewProcessor<T = unknown, C = unknown> {
-  processData?: (data: QueryResult, config?: C) => ProcessedData<T> | Promise<ProcessedData<T>>;
+  processData?: (
+    data: QueryResult,
+    config?: C
+  ) => ProcessedData<T> | Promise<ProcessedData<T>>;
   validateData?: (processedData: T) => { isValid: boolean; error?: string };
 }
 
@@ -222,16 +222,6 @@ export const VIEW_MODES: ViewModeDefinition[] = [
     tooltip: {
       description: "Display data as a progress bar",
       examples: ["Task completion tracking", "Data visualization"],
-    },
-  },
-  {
-    id: "map",
-    name: "Map",
-    icon: MapIcon,
-    category: "basic",
-    tooltip: {
-      description: "Display data as a map",
-      examples: ["Geographical data visualization", "Data mapping"],
     },
   },
 ];
