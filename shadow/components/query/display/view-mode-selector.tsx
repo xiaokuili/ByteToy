@@ -68,11 +68,11 @@ function ViewModeButton({
       >
         <div
           className={cn(
-            "rounded-full p-2 flex items-center justify-center",
+            "rounded-full p-2 flex items-center justify-center h-4 w-4",
             isSelected ? "bg-primary/10" : "bg-muted"
           )}
         >
-          <Icon className='h-4 w-4' />
+          <Icon />
         </div>
         <span className='text-xs font-medium'>{mode.name}</span>
       </Button>

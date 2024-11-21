@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { QueryResult } from "../types";
-import { views } from "../components/query/display/view-base";
+import { QueryResult } from "@/components/query/display/types";
+import { views } from "@/components/query/display/view-base";
 
 export function useViewProcessor(
   viewId: string,
@@ -8,7 +8,7 @@ export function useViewProcessor(
   llmConfig?: unknown
 ) {
   const [lifecycle, setLifecycle] = useState<
-    "init" | "processing" | "completed"
+    "init" | "executing" | "completed"
   >("init");
   const [error, setError] = useState<string | null>(null);
   const [processedData, setProcessedData] = useState<unknown>(null);
@@ -17,7 +17,7 @@ export function useViewProcessor(
     let mounted = true;
 
     // Update lifecycle state immediately
-    setLifecycle("processing");
+    setLifecycle("executing");
     setProcessedData(null);
     setError(null);
 

@@ -2,7 +2,7 @@ import { useViewProcessor } from "@/hook/use-view-processor";
 import { views } from "./view-base";
 import { useQueryExecution } from "@/hook/use-view-execution";
 import React from "react";
-import { Variable } from "@/types/variable";
+import { Variable } from "@/types/base";
 import { useQueryAndViewState } from "@/hook/use-visualization";
 // 内部组件处理实际的渲染逻辑
 export function ViewFactory({
@@ -64,9 +64,7 @@ export function ViewFactory({
         (!processedData || Object.keys(processedData).length === 0) && (
           <EmptyDataView />
         )}
-      {!queryError && !viewLifecycle === "executing" && !ViewComponent && (
-        <ViewNotFoundError viewId={viewId} />
-      )}
+      {!queryError && !ViewComponent && <ViewNotFoundError viewId={viewId} />}
       {!queryError &&
         viewLifecycle !== "executing" &&
         ViewComponent &&
@@ -79,6 +77,34 @@ export function ViewFactory({
     </>
   );
 }
+
+export function ViewNotFoundError({ viewId }: { viewId: string }) {
+  return (
+    <div className='flex h-full w-full items-center justify-center p-8 text-red-500'>
+      <div className='flex flex-col items-center gap-4'>
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='h-12 w-12'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+          />
+        </svg>
+        <div className='text-lg font-medium'>View Not Found</div>
+        <div className='text-center text-sm opacity-75'>
+          The visualization view &quot;{viewId}&quot; could not be found
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function EmptyDataView() {
   return (
     <div className='flex h-full w-full flex-col items-center justify-center rounded-md border border-dashed p-8 text-center animate-in fade-in-50'>
@@ -140,31 +166,6 @@ export function LoadingView() {
         <div className='text-sm opacity-75'>
           Please wait while we process your request...
         </div>
-      </div>
-    </div>
-  );
-}
-
-export function ViewNotFoundError({ error }: { error: string }) {
-  return (
-    <div className='flex h-full w-full items-center justify-center p-8'>
-      <div className='flex flex-col items-center gap-4'>
-        <svg
-          xmlns='http://www.w3.org/2000/svg'
-          className='h-12 w-12 text-destructive'
-          fill='none'
-          viewBox='0 0 24 24'
-          stroke='currentColor'
-        >
-          <path
-            strokeLinecap='round'
-            strokeLinejoin='round'
-            strokeWidth={2}
-            d='M6 18L18 6M6 6l12 12'
-          />
-        </svg>
-        <h3 className='text-lg font-semibold'>View Not Found</h3>
-        <p className='text-sm text-muted-foreground text-center'>{error}</p>
       </div>
     </div>
   );

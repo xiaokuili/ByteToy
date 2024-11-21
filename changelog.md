@@ -32,9 +32,9 @@ isExecuting: boolean        // 不进行真正执行，只维护状态 单独渲
 ### 核心能力
 
 - 数据展示能力
-    - 执行数据管理模块进行查询   // 依赖isExecuting控制触发,依赖sql_content, variable, datasource实际执行
-    - 选择展示类型  // 触发展示，依赖viewmode 控制执行， 但是sqlresult可能不变
-    - 基于选择类型进行展示
+  - 执行数据管理模块进行查询 // 依赖 isExecuting 控制触发,依赖 sql_content, variable, datasource 实际执行
+  - 选择展示类型 // 触发展示，依赖 viewmode 控制执行， 但是 sqlresult 可能不变
+  - 基于选择类型进行展示
 
 ### 数据管理
 
@@ -42,7 +42,7 @@ isExecuting: boolean        // 不进行真正执行，只维护状态 单独渲
 
   ```
   viewMode: ViewMode
-  
+
 
   ```
 
@@ -52,3 +52,58 @@ isExecuting: boolean        // 不进行真正执行，只维护状态 单独渲
   - 数据视图（实现数据展示能力）
   - 视图选择器（实现视图控制能力）
   - 配置面板（实现视图配置能力）
+
+# 报告系统设计
+
+## 可视化组件
+
+### 核心功能
+
+- 图表检索
+- 画布图表管理
+  - 添加图表
+  - 删除图表
+  - 图表排序
+
+### 数据结构
+
+```typescript
+interface Visualization {
+  viewId: string;
+  sqlContent: string;
+  sqlVariables: Record<string, unknown>;
+  databaseId: string;
+  llmConfig?: LLMConfig;
+}
+
+interface DashboardSection {
+  viewId: string;
+  sqlContent: string;
+  sqlVariables: Record<string, unknown>;
+  databaseId: string;
+  llmConfig?: LLMConfig;
+  order: number;
+}
+
+type DashboardSections = DashboardSection[];
+```
+
+## 文本组件
+
+### 核心功能
+
+- 文本内容管理
+  - 标题管理
+  - 段落管理
+- AI 辅助内容生成
+
+### 数据结构
+
+```typescript
+interface TextSection {
+  type: "title" | "paragraph";
+  content: string;
+  order: number;
+  aiGenerated?: boolean;
+}
+```

@@ -10,11 +10,20 @@ interface QueryState {
   databaseId: string;
   isExecuting: boolean;
   id: string;
+  setSqlContent: (sql: string) => void;
+  setVariables: (variables: Variable[]) => void;
+  setDatabaseId: (id: string) => void;
+  setIsExecuting: (isExecuting: boolean) => void;
+  setId: (id: string) => void;
+  reset: () => void;
 }
 
 interface ViewState {
   viewMode: string;
   id: string;
+  setViewMode: (mode: string) => void;
+  setId: (id: string) => void;
+  reset: () => void;
 }
 
 const useQueryState = create<QueryState>((set) => ({

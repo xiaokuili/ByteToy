@@ -31,7 +31,7 @@ register(
 export const DashboardFactory: React.FC<{
   dashboardViewId: string;
   config: DashboardSection;
-}> = ({ dashboardViewId, queryResult, config }) => {
+}> = ({ dashboardViewId, config }) => {
   // 创建并返回选中的视图
   // 添加日志来追踪 props 变化
 
@@ -45,10 +45,11 @@ export const DashboardFactory: React.FC<{
     };
   }, [factoryKey]);
   return (
-    <ViewFactory
-      viewId={dashboardViewId}
-      config={config}
-      key={`view-factory-${dashboardViewId}`} // 确保 Factory 本身不会被复用
-    />
+    // <ViewFactory
+    //   viewId={dashboardViewId}
+    //   llmConfig={config}
+    //   key={`view-factory-${dashboardViewId}`} // 确保 Factory 本身不会被复用
+    // />
+    <>  </>
   );
 };

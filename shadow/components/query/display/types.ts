@@ -16,8 +16,8 @@ import {
 } from "lucide-react";
 
 export interface QueryResult {
-  rows: Array<Record<string, unknown>>;
-  columns: Array<{
+  rows?: Array<Record<string, unknown>>;
+  columns?: Array<{
     name: string;
     type: string;
   }>;

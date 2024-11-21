@@ -5,12 +5,12 @@ import { DashboardSection } from "@/types/base";
 interface DashboardViewStore {
   views: {
     id: string;
-    visualization?: Visualization;
+    // visualization?: Visualization;
     llmConfig?: {
       llmType: "imitate" | "generate";
       prompt: string;
     };
-    type: SectionType;
+    // type: SectionType;
     content?: string;
   }[];
   addView: (section: DashboardSection) => void;
@@ -88,7 +88,7 @@ export const createDashboardSection = (
 ): DashboardSection => {
   const defaultSection: DashboardSection = {
     id: crypto.randomUUID(),
-    type: "chart",
+    // type: "chart",
     name: "New Section",
     // ... 其他默认值
   };
@@ -122,7 +122,7 @@ export const useDashboardOperations = (): DashboardOperation => {
     },
     remove: (id: string) => {
       // 检查是否存在于views中
-      const existInViews = views.some(v => v.id === id);
+      const existInViews = views.some((v) => v.id === id);
       if (existInViews) {
         removeView(id);
       }
@@ -131,7 +131,7 @@ export const useDashboardOperations = (): DashboardOperation => {
     },
     update: (id: string, section: Partial<DashboardSection>) => {
       // 检查是否存在于views中
-      const existInViews = views.some(v => v.id === id);
+      const existInViews = views.some((v) => v.id === id);
       if (existInViews) {
         // 如果section在views中存在，则更新view
         updateView(id, section);

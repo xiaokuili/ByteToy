@@ -19,7 +19,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export function QuestionHeaderComponent() {
-  const { databaseId, sqlContent, viewMode, sqlVariables, id, reset } =
+  const { databaseId, sqlContent, viewMode, variables, id, reset } =
     useQueryAndViewState();
 
   const [name, setName] = useState("");
@@ -37,7 +37,7 @@ export function QuestionHeaderComponent() {
         datasourceId: databaseId,
         sqlContent,
         viewMode,
-        sqlVariables: sqlVariables ?? [],
+        sqlVariables: variables ?? [],
       });
 
       if (success) {

@@ -15,7 +15,7 @@ export type SectionType = "Header" | "Text" | "LLM" | "OTHER";
 
 export interface DashboardSection {
   id: string;
-  type: SectionType;
+  type?: SectionType;
   content?: string; // For Header/Text content
   llmConfig?: {
     llmType: "imitate" | "generate";

@@ -7,14 +7,8 @@ import { useQueryAndViewState } from "@/hook/use-visualization";
 import { QueryViewComponent } from "@/components/query/workspace/result/result";
 export function SQLWorkbench() {
   // 查询
-  const {
-    setDatabaseId,
-    sqlVariables,
-    setSqlVariables,
-    sqlContent,
-    setSqlContent,
-    setVariables,
-  } = useQueryAndViewState();
+  const { setDatabaseId, variables, setVariables, sqlContent, setSqlContent } =
+    useQueryAndViewState();
 
   const { isExecuting } = useQueryAndViewState();
   const [isEditorVisible, setIsEditorVisible] = useState(true);
@@ -26,17 +20,16 @@ export function SQLWorkbench() {
       <SQLWorkbenchHeader
         onToggleEditor={() => setIsEditorVisible(!isEditorVisible)}
         onSelectDatabase={setDatabaseId}
-        onSetVariables={setSqlVariables}
-        variables={sqlVariables}
+        onSetVariables={setVariables}
+        variables={variables}
       />
       {/* sql editor */}
       {isEditorVisible && (
         <QuerySearchSqlEditor
-          variables={sqlVariables}
+          variables={variables}
           sqlContent={sqlContent}
           setVariables={setVariables}
           setSqlContent={setSqlContent}
-          isExecuting={isExecuting}
         />
       )}
 

@@ -6,7 +6,7 @@ import { useQueryAndViewState } from "@/hook/use-visualization";
 import { Visualization } from "@/components/query/display/visualization";
 
 export function QueryViewComponent() {
-  const { sqlContent, sqlVariables, databaseId, viewMode } =
+  const { sqlContent, variables, databaseId, viewMode } =
     useQueryAndViewState();
 
   return (
@@ -14,7 +14,7 @@ export function QueryViewComponent() {
       <Visualization
         viewId={viewMode}
         sqlContent={sqlContent}
-        sqlVariables={sqlVariables}
+        sqlVariables={variables}
         databaseId={databaseId}
       />
     </ScrollCard>

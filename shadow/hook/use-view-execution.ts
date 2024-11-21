@@ -4,6 +4,14 @@ import { getFinalSql } from "@/utils/variable-utils";
 import { executeQuery as executeQueryAction } from "@/lib/datasource-action";
 import { useCallback } from "react";
 import { useQueryAndViewState } from "@/hook/use-visualization";
+import { Variable } from "@/types/base";
+
+interface SqlParams {
+  sqlContent: string;
+  sqlVariables: Variable[];
+  databaseId: string;
+}
+
 export function useQueryState() {
   const [queryResult, setQueryResult] = useState<QueryResult>({});
   const [queryError, setQueryError] = useState<string>("");

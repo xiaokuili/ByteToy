@@ -36,7 +36,7 @@ export function DashboardCanvas({
   removeSection,
 }: DashboardCanvasProps) {
   const { activeId, setActiveId } = useDashboardActive();
-
+  console.log(dashboardSections);
   const layouts = {
     lg: dashboardSections.map((section, index) => ({
       i: section.id,

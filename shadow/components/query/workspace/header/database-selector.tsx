@@ -12,7 +12,7 @@ import { ChevronDown } from "lucide-react";
 import { Database as DatabaseIcon, Server } from "lucide-react";
 import { SelectItem } from "@/components/ui/select";
 import { useQueryAndViewState } from "@/hook/use-visualization";
-
+import { Datasource } from "@/types/base";
 interface Database {
   id: string;
   name: string;
@@ -49,7 +49,7 @@ export function DatabaseSelector({ onSelect }: DatabaseSelectorProps) {
       const response = await getMetadatas();
       if (response.success) {
         setDatabases(
-          response.data.map((db: Database) => ({
+          response.data.map((db: Datasource) => ({
             id: db.id,
             name: db.displayName,
           }))
