@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/pagination";
 import { listVisualizations } from "@/lib/visualization-actions";
 import { useEffect, useState } from "react";
-import { Visualization } from "@/types/base";
 import Link from "next/link";
+import { Visualization } from "@/lib/visualization-actions";
 
 export default function QueriesPage() {
   const [loading, setLoading] = useState(true);
