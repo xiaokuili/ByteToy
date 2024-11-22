@@ -2,8 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { Variable } from "@/types/base";
+import { Visualization } from "@/types/base";
 
-export type Visualization = Prisma.visualizationGetPayload<{}>;
 interface CreateVisualizationInput {
   id: string;
   name: string;

@@ -1,3 +1,8 @@
+import { Prisma } from "@prisma/client";
+
+// 数据源
+\
+
 export interface Datasource {
   id: string;
   type: string; // 可以扩展为 'PostgreSQL' | 'MySQL' | 'Oracle' 等
@@ -9,32 +14,6 @@ export interface Datasource {
   password: string;
   schemas: "All" | string[]; // 'All' 或者特定的 schema 列表
   useSSL: boolean;
-}
-
-export type SectionType = "Header" | "Text" | "LLM" | "OTHER";
-
-export interface DashboardSection {
-  id: string;
-  type?: SectionType;
-  content?: string; // For Header/Text content
-  llmConfig?: {
-    llmType: "imitate" | "generate";
-    prompt: string;
-  };
-  name: string;
-  visualization?: Visualization; // 添加这个属性
-}
-
-export interface Visualization {
-  id: string;
-  name: string;
-  datasourceId: string;
-  sqlContent: string;
-  viewMode: string;
-  viewParams: Record<string, unknown>;
-  sqlVariables: Variable[];
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface PostgreSQLDatasource extends Datasource {
@@ -59,6 +38,34 @@ export interface Schema {
   tables: Table[];
 }
 
+// dashboard 组件类型
+export type SectionType = "Header" | "Text" | "LLM" | "OTHER";
+
+export interface DashboardSection {
+  id: string;
+
+  viewId: string;
+  // 控制配置
+  sqlContent: string;
+  sqlVariables: Variable[];
+  databaseId: string;
+
+  // 控制展示
+  viewMode: string;
+
+  // 控制执行，这里一般为true
+  isExecuting: boolean;
+
+  llmConfig?: {
+    llmType: "imitate" | "generate";
+    prompt: string;
+  };
+}
+
+
+// 可视化组件
+export type Visualization = Prisma.visualizationGetPayload<{}>;
+
 export interface Variable {
   id: string;
   name: string;
@@ -66,7 +73,3 @@ export interface Variable {
   type: "string" | "number" | "boolean" | "date";
 }
 
-export interface DatabaseSource {
-  id: string;
-  sql: string;
-}
