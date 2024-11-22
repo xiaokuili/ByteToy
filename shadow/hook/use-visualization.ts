@@ -26,17 +26,28 @@ interface ViewState {
   reset: () => void;
 }
 
-const useQueryState = create<QueryState>((set) => ({
+interface CombinedState extends QueryState, ViewState {}
+
+const useCombinedState = create<CombinedState>((set) => ({
+  // 控制执行配置
   sqlContent: "",
   variables: [],
   databaseId: "",
-  isExecuting: false,
   id: "",
   setSqlContent: (sql: string) => set({ sqlContent: sql }),
   setVariables: (variables: Variable[]) => set({ variables }),
   setDatabaseId: (id: string) => set({ databaseId: id }),
-  setIsExecuting: (isExecuting: boolean) => set({ isExecuting }),
   setId: (id: string) => set({ id }),
+
+  // 控制执行状态
+  isExecuting: false,
+  setIsExecuting: (isExecuting: boolean) => set({ isExecuting }),
+
+  // 控制展示
+  viewMode: "table",
+  setViewMode: (mode: string) => set({ viewMode: mode }),
+
+  // Combined reset
   reset: () =>
     set({
       sqlContent: "",
@@ -44,60 +55,47 @@ const useQueryState = create<QueryState>((set) => ({
       databaseId: "",
       isExecuting: false,
       id: "",
+      viewMode: "table",
     }),
-}));
-
-const useViewState = create<ViewState>((set) => ({
-  viewMode: "table",
-  id: "",
-  setViewMode: (mode: string) => set({ viewMode: mode }),
-  setId: (id: string) => set({ id }),
-  reset: () => set({ viewMode: "table", id: "" }),
 }));
 
 // 包装函数统一管理两个状态
 export function useQueryAndViewState() {
-  const queryState = useQueryState();
-  const viewState = useViewState();
+  const state = useCombinedState();
 
   return {
     // Query state
-    sqlContent: queryState.sqlContent,
-    variables: queryState.variables,
-    databaseId: queryState.databaseId,
-    isExecuting: queryState.isExecuting,
-    setSqlContent: queryState.setSqlContent,
-    setVariables: queryState.setVariables,
-    setDatabaseId: queryState.setDatabaseId,
-    setIsExecuting: queryState.setIsExecuting,
+    sqlContent: state.sqlContent,
+    variables: state.variables,
+    databaseId: state.databaseId,
+    isExecuting: state.isExecuting,
+    setSqlContent: state.setSqlContent,
+    setVariables: state.setVariables,
+    setDatabaseId: state.setDatabaseId,
+    setIsExecuting: state.setIsExecuting,
 
     // View state
-    viewMode: viewState.viewMode,
-    id: queryState.id,
-    setViewMode: viewState.setViewMode,
+    viewMode: state.viewMode,
+    id: state.id,
+    setViewMode: state.setViewMode,
     setId: useCallback((id: string) => {
-      queryState.setId(id);
-      viewState.setId(id);
+      state.setId(id);
     }, []),
 
     // Reset both states
-    reset: () => {
-      queryState.reset();
-      viewState.reset();
-    },
+    reset: state.reset,
 
     // Load visualization data
     loadVisualization: useCallback(async (id: string) => {
       try {
         const visualization = await getVisualization(id);
         if (visualization) {
-          queryState.setSqlContent(visualization.sqlContent);
-          queryState.setVariables(visualization.sqlVariables);
-          queryState.setDatabaseId(visualization.datasourceId);
-          viewState.setViewMode(visualization.viewMode);
-          queryState.setIsExecuting(true);
-          queryState.setId(id);
-          viewState.setId(id);
+          state.setSqlContent(visualization.sqlContent);
+          state.setVariables(visualization.sqlVariables);
+          state.setDatabaseId(visualization.datasourceId);
+          state.setViewMode(visualization.viewMode);
+          state.setIsExecuting(true);
+          state.setId(id);
         }
       } catch (error) {
         console.error("Failed to load visualization:", error);
