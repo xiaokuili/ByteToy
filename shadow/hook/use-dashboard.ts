@@ -3,16 +3,7 @@ import { create } from "zustand";
 import { DashboardSection } from "@/types/base";
 
 interface DashboardViewStore {
-  views: {
-    id: string;
-    // visualization?: Visualization;
-    llmConfig?: {
-      llmType: "imitate" | "generate";
-      prompt: string;
-    };
-    // type: SectionType;
-    content?: string;
-  }[];
+  views: DashboardSection[];
   addView: (section: DashboardSection) => void;
   removeView: (id: string) => void;
   updateView: (id: string, view: Partial<DashboardSection>) => void;
@@ -44,10 +35,13 @@ export const useDashboardView = create<DashboardViewStore>((set) => ({
         ...state.views,
         {
           id: section.id,
-          visualization: section.visualization,
+          viewId: section.viewId,
+          sqlContent: section.sqlContent,
+          sqlVariables: section.sqlVariables,
+          databaseId: section.databaseId,
+          viewMode: section.viewMode,
+          isExecuting: section.isExecuting,
           llmConfig: section.llmConfig,
-          type: section.type,
-          content: section.content,
         },
       ],
     })),
@@ -88,9 +82,12 @@ export const createDashboardSection = (
 ): DashboardSection => {
   const defaultSection: DashboardSection = {
     id: crypto.randomUUID(),
-    // type: "chart",
-    name: "New Section",
-    // ... 其他默认值
+    viewId: crypto.randomUUID(),
+    sqlContent: "",
+    sqlVariables: [],
+    databaseId: "",
+    viewMode: "chart",
+    isExecuting: true,
   };
 
   return {
