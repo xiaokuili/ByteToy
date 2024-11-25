@@ -11,12 +11,14 @@ export function ViewFactory({
   sqlVariables,
   databaseId,
   llmConfig,
+  isExecuting, // 添加新参数
 }: {
   viewId: string;
   sqlContent: string;
   sqlVariables: Variable[];
   databaseId: string;
   llmConfig?: unknown;
+  isExecuting?: boolean;
 }) {
   const currentViewIdRef = React.useRef<string>(viewId);
   const processingComplete = React.useRef(false);
@@ -39,11 +41,20 @@ export function ViewFactory({
   const { setIsExecuting } = useQueryAndViewState();
 
   React.useEffect(() => {
+    // 如果外部明确设置了 isExecuting，则使用外部值
+    if (
+      queryLifecycle != "executing" &&
+      viewLifecycle != "executing" &&
+      isExecuting
+    ) {
+      setIsExecuting(true);
+    }
     if (queryLifecycle === "completed" && viewLifecycle === "completed") {
       setIsExecuting(false);
     }
   }, [queryLifecycle, viewLifecycle, setIsExecuting]);
 
+  // 防止使用旧的proscssData进行查询
   React.useEffect(() => {
     if (viewLifecycle === "completed") {
       currentViewIdRef.current = viewId;
@@ -52,27 +63,32 @@ export function ViewFactory({
       processingComplete.current = false;
     }
   }, [viewId, viewLifecycle]);
+
   const ViewComponent = views.get(viewId);
+
   return (
     <>
       {queryError && <VisualizationErrorView error={queryError} />}
       {(queryLifecycle === "executing" || viewLifecycle === "executing") && (
         <LoadingView />
       )}
-      {!queryError &&
-        viewLifecycle !== "executing" &&
-        (!processedData || Object.keys(processedData).length === 0) && (
-          <EmptyDataView />
-        )}
+
       {!queryError && !ViewComponent && <ViewNotFoundError viewId={viewId} />}
       {!queryError &&
-        viewLifecycle !== "executing" &&
-        ViewComponent &&
-        processedData &&
-        Object.keys(processedData).length > 0 &&
-        processingComplete.current &&
-        currentViewIdRef.current === viewId && (
-          <ViewComponent.Component data={processedData} />
+        queryLifecycle === "completed" &&
+        viewLifecycle === "completed" && (
+          <>
+            {ViewComponent &&
+              processedData &&
+              Object.keys(processedData).length > 0 &&
+              processingComplete.current &&
+              currentViewIdRef.current === viewId && (
+                <ViewComponent.Component data={processedData} />
+              )}
+            {(!processedData || Object.keys(processedData).length === 0) && (
+              <EmptyDataView />
+            )}
+          </>
         )}
     </>
   );

@@ -22,7 +22,6 @@ const tableProcessor: ViewProcessor = {
 };
 
 function TableViewComponent({ data }: { data: QueryResult }) {
-  console.log("data", data);
   return (
     <Table>
       <TableHeader>

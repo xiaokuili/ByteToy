@@ -31,6 +31,7 @@ export function VisualizationSetting({
   useEffect(() => {
     const fetchVisualizations = async () => {
       const visualizationResult = await listVisualizations();
+
       setVisualizations(visualizationResult.data);
     };
     fetchVisualizations();
@@ -108,8 +109,12 @@ export function VisualizationSetting({
                               className='flex items-center justify-between p-3 rounded-md border hover:bg-accent/50 transition-colors cursor-pointer'
                               onClick={() => {
                                 onUpdateSection(activeId, {
-                                  visualization: visualization,
-                                  type: "OTHER",
+                                  viewId: visualization.id,
+                                  viewMode: visualization.viewMode,
+                                  sqlContent: visualization.sqlContent,
+                                  sqlVariables: visualization.sqlVariables,
+                                  databaseId: visualization.datasourceId,
+                                  isExecuting: true,
                                 });
                               }}
                             >

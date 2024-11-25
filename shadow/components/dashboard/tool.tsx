@@ -1,8 +1,5 @@
 import { PlusSquare, Type, Heading, Variable } from "lucide-react";
-import {
-  useDashboardOperations,
-  useDashboardActive,
-} from "@/hook/use-dashboard";
+import { useDashboardActive } from "@/hook/use-dashboard";
 import { DashboardSection } from "@/types/base";
 import { createDashboardSection } from "@/hook/use-dashboard";
 

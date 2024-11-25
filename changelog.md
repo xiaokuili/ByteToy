@@ -107,3 +107,7 @@ interface TextSection {
   aiGenerated?: boolean;
 }
 ```
+
+
+v 1.1.2 
+1. 实现dashboard

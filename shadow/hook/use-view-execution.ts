@@ -70,7 +70,6 @@ export function useQueryExecution({
   useEffect(() => {
     let mounted = true;
     const execute = async () => {
-      console.log("isExecuting queryResult", queryResult);
       if (isExecuting) {
         if (mounted) {
           setLifecycle("executing");

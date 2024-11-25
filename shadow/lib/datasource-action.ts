@@ -26,7 +26,6 @@ interface ConnectionResult {
 export async function executeQuery(datasourceId: string, sql: string) {
   try {
     // 1. 获取数据源信息
-    console.log("datasourceId", datasourceId);
     const metadataResult = await getMetadata(datasourceId);
     if (!metadataResult.success || !metadataResult.data) {
       return {

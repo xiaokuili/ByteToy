@@ -1,20 +1,14 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
-import { useState } from "react";
 import { DashboardFactory } from "./dashboard-factory";
-import { executeQuery } from "@/lib/datasource-action";
-import { getFinalSql } from "@/utils/variable-utils";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { Button } from "../ui/button";
-import { useQueryExecution } from "@/hook/use-view-execution";
 import { DashboardSection } from "@/types/base";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useDashboardActive } from "@/hook/use-dashboard";
 import { Settings } from "lucide-react";
-import { QueryResult } from "../query/display/types";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -36,7 +30,6 @@ export function DashboardCanvas({
   removeSection,
 }: DashboardCanvasProps) {
   const { activeId, setActiveId } = useDashboardActive();
-  console.log(dashboardSections);
   const layouts = {
     lg: dashboardSections.map((section, index) => ({
       i: section.id,
@@ -115,14 +108,7 @@ export function DashboardGridItem({
         </div>
       </div>
       <div className='h-[calc(100%-2rem)]'>
-        <DashboardFactory
-          dashboardViewId={
-            section.type !== "OTHER"
-              ? section.type.toLowerCase()
-              : section.visualization.viewMode
-          }
-          config={section}
-        />
+        <DashboardFactory dashboardViewId={section.id} config={section} />
       </div>
     </div>
   );

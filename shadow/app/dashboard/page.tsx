@@ -12,7 +12,6 @@ import {
 export default function DashboardPage() {
   const { sections, add, remove, update } = useDashboardOperations();
   const { activeId } = useDashboardActive();
-
   return (
     <div className='flex h-full w-full'>
       {/* Left Panel - Dashboard Report */}
