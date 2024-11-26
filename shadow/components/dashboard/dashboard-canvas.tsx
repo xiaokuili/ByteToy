@@ -108,7 +108,7 @@ export function DashboardGridItem({
     <div className='h-full'>
       <div className='flex items-center justify-between mb-2 no-drag'>
         <h3 className='text-lg font-semibold'>{section.name}</h3>
-        {/* <div className='flex items-center gap-2'>
+        <div className='flex items-center gap-2'>
           <Button
             variant='ghost'
             size='icon'
@@ -130,10 +130,10 @@ export function DashboardGridItem({
           >
             <TrashIcon className='h-4 w-4' />
           </Button>
-        </div> */}
+        </div>
       </div>
       <div className='h-[calc(100%-2rem)]'>
-        {data && <ViewComponent.Component data={data} />}
+        {data ? <ViewComponent.Component data={data} /> : <Loading />}
       </div>
     </div>
   );
