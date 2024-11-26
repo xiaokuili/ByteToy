@@ -332,6 +332,7 @@ export async function getMetadata(id: string) {
     const metadata = await prisma.metadata.findUnique({
       where: { id },
     });
+    debugger;
 
     if (!metadata) {
       return {

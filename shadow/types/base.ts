@@ -45,17 +45,18 @@ export interface DashboardSection {
   id: string;
 
   viewId: string;
-  // 控制配置
+  // 获取配置，只获取不进行修改
   sqlContent: string;
   sqlVariables: Variable[];
   databaseId: string;
 
-  // 控制展示
+  // 展示
   viewMode: string;
-
+  processData?: <T = unknown>(data: T) => T;
   // 控制执行，这里一般为true
   isExecuting: boolean;
 
+  // 基于大模型生成，后期可能进行修改
   llmConfig?: {
     llmType: "imitate" | "generate";
     prompt: string;

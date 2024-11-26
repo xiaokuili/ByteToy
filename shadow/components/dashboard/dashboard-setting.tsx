@@ -114,7 +114,6 @@ export function VisualizationSetting({
                                   sqlContent: visualization.sqlContent,
                                   sqlVariables: visualization.sqlVariables,
                                   databaseId: visualization.datasourceId,
-                                  isExecuting: true,
                                 });
                               }}
                             >

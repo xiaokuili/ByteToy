@@ -1,9 +1,11 @@
 import { register } from "../query/display/view-base";
 import { ViewFactory } from "../query/display/view-factory";
 import { createLLMView } from "./views/llm-view";
+import { views } from "@/components/query/display/view-base";
 import { FileTextIcon } from "lucide-react";
 import { ViewModeDefinition } from "../query/display/types";
 import { DashboardSection } from "@/types/base";
+import React from "react";
 
 const DashboardViewModeDefinitions: ViewModeDefinition[] = [
   {
@@ -18,7 +20,7 @@ const DashboardViewModeDefinitions: ViewModeDefinition[] = [
   },
 ];
 
-register(
+views.set(
   "llm",
   createLLMView(
     DashboardViewModeDefinitions.find(
@@ -27,26 +29,35 @@ register(
   )
 );
 
+export { views };
 export const DashboardFactory: React.FC<{
   config: DashboardSection;
-}> = ({ config }) => {
-  // 创建并返回选中的视图
-  // 添加日志来追踪 props 变化
-
+  dashboardViewId: string;
+}> = ({ config, dashboardViewId }) => {
   const { sqlContent, variables, databaseId, viewId, viewMode } = config;
-  // 添加调试日志
-  return !viewId ? (
-    <div className='flex items-center justify-center h-full text-muted-foreground'>
-      请选择合适的试图进行展示
-    </div>
-  ) : (
+  const [isExecuting, setIsExecuting] = React.useState(true);
+
+  // 第一次渲染时自动执行
+  React.useEffect(() => {
+    setIsExecuting(true);
+  }, [dashboardViewId]);
+
+  // 没有选择视图时显示提示
+  if (!viewId) {
+    return (
+      <div className='flex items-center justify-center h-full text-muted-foreground'>
+        请选择合适的视图进行展示
+      </div>
+    );
+  }
+
+  return (
     <ViewFactory
+      viewId={viewId}
       sqlContent={sqlContent}
       sqlVariables={variables}
       databaseId={databaseId}
-      viewId={viewMode}
-      llmConfig={config.llmConfig}
-      isExecuting={true}
+      isExecuting={isExecuting}
     />
   );
 };

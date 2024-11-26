@@ -1,41 +1,113 @@
 import { create } from "zustand";
 
 import { DashboardSection } from "@/types/base";
+import { getFinalSql } from "@/utils/variable-utils";
+import { executeQuery as executeQueryAction } from "@/lib/datasource-action";
+import { views } from "@/components/dashboard/dashboard-factory";
+import { useCallback, useMemo } from "react";
+
 interface DashboardStore {
-  views: DashboardSection[];
-  names: Record<string, string>;
+  sections: DashboardSection[];
   addSection: (section: DashboardSection) => void;
   removeSection: (id: string) => void;
   updateSection: (id: string, section: Partial<DashboardSection>) => void;
-  updateName: (id: string, name: string) => void;
 }
 
 export const useDashboardStore = create<DashboardStore>((set) => ({
-  views: [],
-  names: {},
+  sections: [],
   addSection: (section) =>
     set((state) => ({
-      views: [...state.views, section],
-      names: { ...state.names, [section.id]: "" },
+      sections: [...state.sections, section],
     })),
   removeSection: (id) =>
     set((state) => ({
-      views: state.views.filter((view) => view.id !== id),
-      names: Object.fromEntries(
-        Object.entries(state.names).filter(([key]) => key !== id)
-      ),
+      sections: state.sections.filter((section) => section.id !== id),
     })),
   updateSection: (id, section) =>
     set((state) => ({
-      views: state.views.map((view) =>
-        view.id === id ? { ...view, ...section } : view
+      sections: state.sections.map((s) =>
+        s.id === id ? { ...s, ...section } : s
       ),
     })),
-  updateName: (id, name) =>
-    set((state) => ({
-      names: { ...state.names, [id]: name },
-    })),
 }));
+
+export const useDashboardSection = (section: DashboardSection) => {
+  const processedData = useMemo(async () => {
+    const { sqlContent, sqlVariables, databaseId } = section;
+    const finalSql = getFinalSql(sqlContent, sqlVariables);
+    const result = await executeQueryAction(finalSql, databaseId);
+    console.log("result", result);
+    if (!result.success) {
+      return null;
+    }
+
+    const view = views.get(section.viewMode);
+    if (!view) {
+      return null;
+    }
+
+    // Use the view's processor to transform the data
+    if (!view.processor.processData) {
+      return null;
+    }
+    let processedResult = view.processor.processData(result.data);
+    if (processedResult instanceof Promise) {
+      processedResult = await processedResult;
+    }
+    if (!processedResult.isValid) {
+      return null;
+    }
+    return processedResult.data;
+  }, [
+    section.sqlContent,
+    section.sqlVariables,
+    section.databaseId,
+    section.viewMode,
+  ]);
+
+  const ViewComponent = useMemo(() => {
+    console.log(section.viewMode);
+    return views.get(section.viewMode);
+  }, [section.viewMode]);
+
+  return {
+    processedData,
+    ViewComponent,
+  };
+};
+
+export const useDashboardOperations = () => {
+  const { sections, addSection, removeSection, updateSection } =
+    useDashboardStore();
+
+  const add = useCallback(
+    (section: DashboardSection) => {
+      addSection(section);
+    },
+    [addSection]
+  );
+
+  const remove = useCallback(
+    (id: string) => {
+      removeSection(id);
+    },
+    [removeSection]
+  );
+
+  const update = useCallback(
+    (id: string, section: Partial<DashboardSection>) => {
+      updateSection(id, section);
+    },
+    [updateSection]
+  );
+
+  return {
+    sections,
+    add,
+    remove,
+    update,
+  };
+};
 
 export const createDashboardSection = (
   overrides?: Partial<DashboardSection>
@@ -53,28 +125,6 @@ export const createDashboardSection = (
   return {
     ...defaultSection,
     ...overrides,
-  };
-};
-
-export const useDashboardOperations = (): DashboardOperation => {
-  const { views, addSection, removeSection, updateSection, updateName } =
-    useDashboardStore();
-
-  return {
-    sections: views,
-    add: (section) => {
-      addSection(section);
-    },
-    remove: (id) => {
-      removeSection(id);
-    },
-    update: (id, section) => {
-      if ("name" in section) {
-        updateName(id, section.name as string);
-      } else {
-        updateSection(id, section);
-      }
-    },
   };
 };
 

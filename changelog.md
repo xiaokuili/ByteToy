@@ -108,6 +108,12 @@ interface TextSection {
 }
 ```
 
+v 1.1.2
 
-v 1.1.2 
-1. 实现dashboard
+1. 实现 dashboard
+2. 列表展示存在问题，多个列表公用一套参数
+3. 解决多次渲染的问题，更新列表影响其他列表
+4. 测试是否 updatesection 的问题， 是这个的问题， 更新 viewid 开始 viewfactory 渲染就开始有问题
+5. 为什么到 view 就开始出问题， 是因为 isexecuting 导致的问题
+6. 添加一个外部暴露的 execute 函数
+7. query 需要不停的修改 view。dashboard 自己定义函数
