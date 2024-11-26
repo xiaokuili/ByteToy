@@ -14,6 +14,7 @@ import {
   useDashboardOperations,
   useDashboardSection,
 } from "@/hook/use-dashboard";
+import { useState, useEffect } from "react";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -92,9 +93,17 @@ export function DashboardGridItem({
   removeSection: (sectionId: string) => void;
   setActiveId: (id: string | null) => void;
 }) {
-  console.log(section);
+  const [data, setData] = useState<unknown>(null);
   const { ViewComponent, processedData } = useDashboardSection(section);
-  console.log(ViewComponent, processedData);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const result = await processedData;
+      console.log("result", result);
+      setData(result);
+    };
+    loadData();
+  }, [processedData]);
   return (
     <div className='h-full'>
       <div className='flex items-center justify-between mb-2 no-drag'>
@@ -124,11 +133,7 @@ export function DashboardGridItem({
         </div> */}
       </div>
       <div className='h-[calc(100%-2rem)]'>
-        {!ViewComponent ? (
-          <div>未找到对应的视图组件</div>
-        ) : (
-          <ViewComponent.Component data={processedData} />
-        )}
+        {data && <ViewComponent.Component data={data} />}
       </div>
     </div>
   );

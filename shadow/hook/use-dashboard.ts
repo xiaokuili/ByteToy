@@ -35,8 +35,7 @@ export const useDashboardSection = (section: DashboardSection) => {
   const processedData = useMemo(async () => {
     const { sqlContent, sqlVariables, databaseId } = section;
     const finalSql = getFinalSql(sqlContent, sqlVariables);
-    const result = await executeQueryAction(finalSql, databaseId);
-    console.log("result", result);
+    const result = await executeQueryAction(databaseId, finalSql);
     if (!result.success) {
       return null;
     }
@@ -50,10 +49,9 @@ export const useDashboardSection = (section: DashboardSection) => {
     if (!view.processor.processData) {
       return null;
     }
-    let processedResult = view.processor.processData(result.data);
-    if (processedResult instanceof Promise) {
-      processedResult = await processedResult;
-    }
+    const processedResult = view.processor.processData
+      ? await view.processor.processData(result.data)
+      : { isValid: true, data: result.data };
     if (!processedResult.isValid) {
       return null;
     }
