@@ -99,7 +99,6 @@ export function DashboardGridItem({
   useEffect(() => {
     const loadData = async () => {
       const result = await processedData;
-      console.log("result", result);
       setData(result);
     };
     loadData();

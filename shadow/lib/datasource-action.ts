@@ -26,7 +26,6 @@ interface ConnectionResult {
 export async function executeQuery(datasourceId: string, sql: string) {
   try {
     // 1. 获取数据源信息
-    console.log("datasourceId", datasourceId, "sql", sql);
     const metadataResult = await getMetadata(datasourceId);
     if (!metadataResult.success || !metadataResult.data) {
       console.error("Failed to get metadata:", metadataResult.error);
@@ -334,7 +333,6 @@ export async function getMetadata(id: string) {
     const metadata = await prisma.metadata.findUnique({
       where: { id },
     });
-    console.log("metadata", metadata, "id", id);
     if (!metadata) {
       return {
         success: false,

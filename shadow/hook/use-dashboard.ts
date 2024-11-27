@@ -64,7 +64,6 @@ export const useDashboardSection = (section: DashboardSection) => {
   ]);
 
   const ViewComponent = useMemo(() => {
-    console.log(section.viewMode);
     return views.get(section.viewMode);
   }, [section.viewMode]);
 
