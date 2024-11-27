@@ -4,7 +4,7 @@ import { DashboardSection } from "@/types/base";
 import { getFinalSql } from "@/utils/variable-utils";
 import { executeQuery as executeQueryAction } from "@/lib/datasource-action";
 import { views } from "@/components/dashboard/dashboard-factory";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 interface DashboardStore {
   sections: DashboardSection[];
@@ -30,35 +30,47 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
       ),
     })),
 }));
-
 export const useDashboardSection = (section: DashboardSection) => {
+  const [status, setStatus] = useState<'empty' | 'executing' | 'complete'>('empty');
+
   const processedData = useMemo(async () => {
+    if (!section.sqlContent || !section.databaseId) {
+      setStatus('empty');
+      return null;
+    }
+
+    setStatus('executing');
     const { sqlContent, sqlVariables, databaseId } = section;
     const finalSql = getFinalSql(sqlContent, sqlVariables);
     const result = await executeQueryAction(databaseId, finalSql);
     if (!result.success) {
+      setStatus('empty');
       return null;
     }
 
     const view = views.get(section.viewMode);
     if (!view) {
+      setStatus('empty');
       return null;
     }
 
     // Use the view's processor to transform the data
     if (!view.processor.processData) {
+      setStatus('empty');
       return null;
     }
     const processedResult = view.processor.processData
       ? await view.processor.processData(result.data)
       : { isValid: true, data: result.data };
     if (!processedResult.isValid) {
+      setStatus('empty');
       return null;
     }
+    setStatus('complete');
     return processedResult.data;
   }, [
     section.sqlContent,
-    section.sqlVariables,
+    section.sqlVariables, 
     section.databaseId,
     section.viewMode,
   ]);
@@ -70,6 +82,7 @@ export const useDashboardSection = (section: DashboardSection) => {
   return {
     processedData,
     ViewComponent,
+    status
   };
 };
 

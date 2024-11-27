@@ -9,6 +9,7 @@ import { DashboardSection } from "@/types/base";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useDashboardActive } from "@/hook/use-dashboard";
 import { Settings } from "lucide-react";
+import {LoadingView, EmptyDataView} from "@/components/query/display/view-factory"
 import {
   createDashboardSection,
   useDashboardOperations,
@@ -23,9 +24,6 @@ interface DashboardCanvasProps {
   removeSection: (sectionId: string) => void;
 }
 
-export function LoadingView() {
-  return <div>Loading...</div>;
-}
 
 export function QueryErrorView({ error }: { error: string }) {
   return <div>{error}</div>;
@@ -61,6 +59,7 @@ export function DashboardCanvas({
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
         rowHeight={80}
+        autoSize={true}      // 添加这个属性
         draggableCancel='.no-drag'
       >
         {sections.map((section) => (
@@ -83,7 +82,6 @@ export function DashboardCanvas({
     </div>
   );
 }
-
 export function DashboardGridItem({
   section,
   removeSection,
@@ -94,15 +92,16 @@ export function DashboardGridItem({
   setActiveId: (id: string | null) => void;
 }) {
   const [data, setData] = useState<unknown>(null);
-  const { ViewComponent, processedData } = useDashboardSection(section);
+  const { ViewComponent, processedData, status } = useDashboardSection(section);
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadData = async () => {  
       const result = await processedData;
       setData(result);
     };
     loadData();
   }, [processedData]);
+  
   return (
     <div className='h-full'>
       <div className='flex items-center justify-between mb-2 no-drag'>
@@ -132,11 +131,13 @@ export function DashboardGridItem({
         </div>
       </div>
       <div className='h-[calc(100%-2rem)]'>
-        {data ? <ViewComponent.Component data={data} /> : <Loading />}
+        {status === 'empty' && <EmptyDataView />}
+        {status === 'executing' && <LoadingView />}
+        {status === 'complete' && ViewComponent && data && (
+          <ViewComponent.Component data={data} />
+        )}
       </div>
     </div>
   );
 }
-function Loading() {
-  return <div>Loading...</div>;
-}
+
