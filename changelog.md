@@ -117,3 +117,9 @@ v 1.1.2
 5. 为什么到 view 就开始出问题， 是因为 isexecuting 导致的问题
 6. 添加一个外部暴露的 execute 函数
 7. query 需要不停的修改 view。dashboard 自己定义函数
+
+
+v 1.1.3  实现 dashboard 模块
+1. 测试dashboard section 和 内容大小关系 
+
+v 1.1.4 重写query 模块
