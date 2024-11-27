@@ -16,7 +16,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { useDashboardActive } from "@/hook/use-dashboard";
+import { useDashboardActive , useDashboardOperations} from "@/hook/use-dashboard";
 
 interface VisualizationSettingProps {
   onUpdateSection: (id: string, section: Partial<DashboardSection>) => void;
@@ -27,6 +27,9 @@ export function VisualizationSetting({
   const [visualizations, setVisualizations] = useState<Visualization[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const { activeId } = useDashboardActive();
+  const { sections } = useDashboardOperations();
+
+  const activeSection = sections.find(section => section.id === activeId);
 
   useEffect(() => {
     const fetchVisualizations = async () => {
@@ -70,10 +73,12 @@ export function VisualizationSetting({
                   <Input
                     type='text'
                     placeholder='请输入标题...'
+                    value={activeSection?.name || ''}
                     onChange={(e) => {
                       onUpdateSection(activeId, {
                         name: e.target.value,
                       });
+
                     }}
                     className='w-full'
                   />
