@@ -3,21 +3,18 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SaveIcon, ShareIcon } from "lucide-react";
-
+import { useDashboardOperations } from "@/hook/use-dashboard";
 
 interface DashboardHeaderProps {
   title?: string;
-  onTitleChange?: (title: string) => void;
-  onSave?: () => void;
-  onShare?: () => void;
+  section_id: string;
 }
 
 export function DashboardHeader({
   title = "未命名仪表盘",
-  onTitleChange,
-  onSave,
-  onShare,
+  section_id,
 }: DashboardHeaderProps) {
+  const { saveSections } = useDashboardOperations();
   return (
     <div className='flex flex-col'>
       <div className='flex items-center justify-between p-4 '>
@@ -29,11 +26,11 @@ export function DashboardHeader({
           />
         </div>
         <div className='flex items-center gap-2'>
-          <Button variant='outline' size='sm' onClick={onSave}>
+          <Button variant='outline' size='sm' onClick={() => saveSections(section_id)}>
             <SaveIcon className='w-4 h-4 mr-2' />
             保存
           </Button>
-          <Button variant='outline' size='sm' onClick={onShare}>
+          <Button variant='outline' size='sm'>
             <ShareIcon className='w-4 h-4 mr-2' />
             分享
           </Button>

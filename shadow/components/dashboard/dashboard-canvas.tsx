@@ -75,6 +75,7 @@ export function DashboardCanvas({
               section={section}
               removeSection={remove}
               setActiveId={setActiveId}
+              key={section.viewMode || section.id}
             />
           </div>
         ))}
@@ -91,17 +92,9 @@ export function DashboardGridItem({
   removeSection: (sectionId: string) => void;
   setActiveId: (id: string | null) => void;
 }) {
-  const [data, setData] = useState<unknown>(null);
   const { ViewComponent, processedData, status } = useDashboardSection(section);
 
-  useEffect(() => {
-    const loadData = async () => {  
-      const result = await processedData;
-      setData(result);
-    };
-    loadData();
-  }, [processedData]);
-  
+
   return (
     <div className='h-full'>
       <div className='flex items-center justify-between mb-2 no-drag'>
@@ -133,8 +126,8 @@ export function DashboardGridItem({
       <div className='h-[calc(100%-2rem)]'>
         {status === 'empty' && <EmptyDataView />}
         {status === 'executing' && <LoadingView />}
-        {status === 'complete' && ViewComponent && data && (
-          <ViewComponent.Component data={data} />
+        {status === 'complete' && ViewComponent && processedData && (
+          <ViewComponent.Component data={processedData} />
         )}
       </div>
     </div>

@@ -61,6 +61,12 @@ export interface DashboardSection {
     llmType: "imitate" | "generate";
     prompt: string;
   };
+
+  // location
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
 
