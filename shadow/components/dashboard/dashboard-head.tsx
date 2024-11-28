@@ -15,6 +15,7 @@ export function DashboardHeader({
   section_id,
 }: DashboardHeaderProps) {
   const { saveSections } = useDashboardOperations();
+
   return (
     <div className='flex flex-col'>
       <div className='flex items-center justify-between p-4 '>
@@ -26,7 +27,11 @@ export function DashboardHeader({
           />
         </div>
         <div className='flex items-center gap-2'>
-          <Button variant='outline' size='sm' onClick={() => saveSections(section_id)}>
+          <Button 
+            variant='outline' 
+            size='sm' 
+            onClick={saveSections}
+          >
             <SaveIcon className='w-4 h-4 mr-2' />
             保存
           </Button>

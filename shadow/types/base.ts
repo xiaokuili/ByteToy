@@ -62,13 +62,15 @@ export interface DashboardSection {
     prompt: string;
   };
 
-  // location
+
+}
+
+interface Layout {
   x: number;
   y: number;
   w: number;
   h: number;
 }
-
 
 // 可视化组件
 export type Visualization = Prisma.visualizationGetPayload<{}>;

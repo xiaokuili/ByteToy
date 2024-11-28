@@ -121,5 +121,7 @@ v 1.1.2
 
 v 1.1.3  实现 dashboard 模块
 1. 测试dashboard section 和 内容大小关系 
+2. 调整修改section name
+3. 实现保存功能
 
 v 1.1.4 重写query 模块

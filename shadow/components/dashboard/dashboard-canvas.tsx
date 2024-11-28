@@ -15,7 +15,7 @@ import {
   useDashboardOperations,
   useDashboardSection,
 } from "@/hook/use-dashboard";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -28,39 +28,32 @@ interface DashboardCanvasProps {
 export function QueryErrorView({ error }: { error: string }) {
   return <div>{error}</div>;
 }
-export function DashboardCanvas({
-  dashboardSections,
-  removeSection,
-}: DashboardCanvasProps) {
+export function DashboardCanvas() {
   const { activeId, setActiveId } = useDashboardActive();
   const { sections, add, remove, update } = useDashboardOperations();
 
-  const handleUpdateSection = (id: string) => {
-    update(id, {
-      sqlContent: "SELECT * FROM users WHERE active = true",
-    });
-  };
 
-  const layouts = {
-    lg: sections.map((section, index) => ({
-      i: section.id,
-      x: (index * 6) % 12,
-      y: Math.floor(index / 2) * 6,
-      w: 3,
-      h: 4,
-    })),
+  const { layouts, updateLayouts } = useDashboardOperations();
+
+  const onLayoutChange = (newLayout: Layout[]) => {
+    updateLayouts(newLayout);
   };
 
   return (
     <div className='flex-1 p-4'>
       <ResponsiveGridLayout
         className='layout'
-        layouts={layouts}
+        layouts={{ lg: layouts }}
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
         rowHeight={80}
         autoSize={true}      // 添加这个属性
         draggableCancel='.no-drag'
+        onLayoutChange={onLayoutChange}
+        compactType={null} // 防止自动压缩
+        preventCollision={true} // 防止元素重叠
+        // 设置默认尺寸
+        containerPadding={[0, 0]}
       >
         {sections.map((section) => (
           <div
@@ -73,8 +66,6 @@ export function DashboardCanvas({
           >
             <DashboardGridItem
               section={section}
-              removeSection={remove}
-              setActiveId={setActiveId}
               key={section.viewMode || section.id}
             />
           </div>
@@ -85,16 +76,14 @@ export function DashboardCanvas({
 }
 export function DashboardGridItem({
   section,
-  removeSection,
-  setActiveId,
 }: {
   section: DashboardSection;
-  removeSection: (sectionId: string) => void;
-  setActiveId: (id: string | null) => void;
 }) {
   const { ViewComponent, processedData, status } = useDashboardSection(section);
+  const { removeSection } = useDashboardOperations();
+  const { setActiveId } = useDashboardActive();
 
-
+  
   return (
     <div className='h-full'>
       <div className='flex items-center justify-between mb-2 no-drag'>

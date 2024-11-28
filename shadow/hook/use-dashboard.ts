@@ -1,10 +1,11 @@
 import { create } from "zustand";
 
-import { DashboardSection } from "@/types/base";
+import { DashboardSection,Layout } from "@/types/base";
 import { getFinalSql } from "@/utils/variable-utils";
 import { executeQuery as executeQueryAction } from "@/lib/datasource-action";
 import { views } from "@/components/dashboard/dashboard-factory";
 import { useCallback, useMemo, useState, useEffect } from "react";
+
 
 interface DashboardStore {
   sections: DashboardSection[];
@@ -13,6 +14,9 @@ interface DashboardStore {
   updateSection: (id: string, section: Partial<DashboardSection>) => void;
   saveSections: (sections: DashboardSection[]) => Promise<void>;
   loadSections: (id: string) => Promise<DashboardSection[]>;
+  
+  layouts: Layout[];
+  setLayouts: (layouts: Layout[]) => void;
 }
 
 // Mock database functions
@@ -43,14 +47,17 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
         s.id === id ? { ...s, ...section } : s
       ),
     })),
-  saveSections: async (sections) => {
-    await saveSectionsToDatabase(sections);
+  saveSections: async () => {
+    const currentSections = get().sections;
+    await saveSectionsToDatabase(currentSections);
   },
   loadSections: async (id: string) => {
     const sections = await loadSectionsFromDatabase(id);
     set({ sections });
     return sections;
   },
+  layouts: [],
+  setLayouts: (layouts) => set({ layouts }),
 }));
 export const useDashboardSection = (section: DashboardSection) => {
   const [status, setStatus] = useState<'empty' | 'executing' | 'complete'>('empty');
@@ -99,7 +106,6 @@ export const useDashboardSection = (section: DashboardSection) => {
           setData(null);
           return;
         }
-        console.log(processedResult.data);
         setStatus('complete');
         setData(processedResult.data);
       } catch (error) {
@@ -131,29 +137,51 @@ export const useDashboardSection = (section: DashboardSection) => {
 };
 
 export const useDashboardOperations = () => {
-  const { sections, addSection, removeSection, updateSection , saveSections, loadSections} =
+  const { sections, addSection, removeSection, updateSection , saveSections, loadSections, layouts, setLayouts} =
     useDashboardStore();
+// 添加新的 section 时自动创建默认 layout
+const add = useCallback(
+  (section: DashboardSection) => {
+    addSection(section);
+    // 为新 section 创建默认 layout
+    const currentLayouts = useDashboardStore.getState().layouts;
+    const defaultLayout = {
+      i: section.id,
+      x: (layouts.length * 2) % 12, // 每次右移2格，现在是正确的！
+      y: Math.floor(layouts.length / 6), // 每6个换一行
+      w: 2, // 改为2格宽（而不是之前的6格宽）
+      h: 4, // 高度保持不变
+      minW: 2, // 最小宽度也相应调整
+      minH: 2,
+    };
+    setLayouts([...currentLayouts, defaultLayout]);
+  },
+  [addSection, setLayouts]
+);
 
-  const add = useCallback(
-    (section: DashboardSection) => {
-      addSection(section);
-    },
-    [addSection]
-  );
-
+  // 删除 section 时同时删除对应的 layout
   const remove = useCallback(
     (id: string) => {
       removeSection(id);
+      const currentLayouts = useDashboardStore.getState().layouts;
+      setLayouts(currentLayouts.filter(layout => layout.i !== id));
     },
-    [removeSection]
+    [removeSection, setLayouts]
   );
-
+  // 处理拖拽更新
+  const updateLayouts = useCallback(
+      (newLayouts: Layout[]) => {
+        setLayouts(newLayouts);
+      },
+      [setLayouts]
+  );
   const update = useCallback(
     (id: string, section: Partial<DashboardSection>) => {
       updateSection(id, section);
     },
     [updateSection]
   );
+
 
   return {
     sections,
@@ -162,6 +190,8 @@ export const useDashboardOperations = () => {
     update,
     saveSections,
     loadSections,
+    layouts,
+    updateLayouts,
   };
 };
 
