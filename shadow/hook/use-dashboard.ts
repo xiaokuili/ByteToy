@@ -20,9 +20,15 @@ interface DashboardStore {
 }
 
 // Mock database functions
-const saveSectionsToDatabase = async (sections: DashboardSection[]) => {
+const saveSectionsToDatabase = async (sections: DashboardSection[], layouts: Layout[]) => {
   // TODO: Implement actual database save
   console.log('Saving sections to database:', sections);
+  localStorage.setItem('dashboard_sections', JSON.stringify({
+    sections,
+    layouts
+  }));
+  console.log('Saving sections to database:' , layouts);
+
 };
 
 const loadSectionsFromDatabase = async (id: string): Promise<DashboardSection[]> => {
@@ -47,11 +53,12 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
         s.id === id ? { ...s, ...section } : s
       ),
     })),
-  saveSections: async () => {
+  save: async () => {
     const currentSections = get().sections;
-    await saveSectionsToDatabase(currentSections);
+    const currentLayouts = get().layouts;
+    await saveSectionsToDatabase(currentSections, currentLayouts);
   },
-  loadSections: async (id: string) => {
+  load: async (id: string) => {
     const sections = await loadSectionsFromDatabase(id);
     set({ sections });
     return sections;
@@ -137,7 +144,7 @@ export const useDashboardSection = (section: DashboardSection) => {
 };
 
 export const useDashboardOperations = () => {
-  const { sections, addSection, removeSection, updateSection , saveSections, loadSections, layouts, setLayouts} =
+  const { sections, addSection, removeSection, updateSection , save, load, layouts, setLayouts} =
     useDashboardStore();
 // 添加新的 section 时自动创建默认 layout
 const add = useCallback(
@@ -188,8 +195,8 @@ const add = useCallback(
     add,
     remove,
     update,
-    saveSections,
-    loadSections,
+    save,
+    load,
     layouts,
     updateLayouts,
   };

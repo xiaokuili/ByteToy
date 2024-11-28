@@ -14,7 +14,7 @@ export function DashboardHeader({
   title = "未命名仪表盘",
   section_id,
 }: DashboardHeaderProps) {
-  const { saveSections } = useDashboardOperations();
+  const { save } = useDashboardOperations();
 
   return (
     <div className='flex flex-col'>
@@ -30,7 +30,7 @@ export function DashboardHeader({
           <Button 
             variant='outline' 
             size='sm' 
-            onClick={saveSections}
+            onClick={() => save()}
           >
             <SaveIcon className='w-4 h-4 mr-2' />
             保存
