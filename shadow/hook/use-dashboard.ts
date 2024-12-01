@@ -78,7 +78,6 @@ export const useDashboardSection = (section: DashboardSection) => {
 
   useEffect(() => {
     let mounted = true;
-    
     async function fetchData() {
       if (!section.sqlContent || !section.databaseId) {
         setStatus('empty');
@@ -91,23 +90,23 @@ export const useDashboardSection = (section: DashboardSection) => {
         const finalSql = getFinalSql(sqlContent, sqlVariables);
         const result = await executeQueryAction(databaseId, finalSql);
         if (!mounted) return;
-
         if (!result.success) {
           setStatus('empty'); 
           setData(null);
           return;
         }
         const view = views.get(section.viewMode);
+        console.log(view);
         if (!view || !view.processor.processData) {
           setStatus('empty');
           setData(null);
           return;
         }
+        console.log(view,section.viewMode);
         const processed = view.processor.processData(result.data);
         const processedResult = processed instanceof Promise 
           ? await processed
           : processed;
-        console.log(processedResult, processedResult.isValid);
         if (!mounted) return;
 
         if (!processedResult || !processedResult.isValid || 
@@ -130,7 +129,7 @@ export const useDashboardSection = (section: DashboardSection) => {
     return () => {
       mounted = false;
     };
-  }, [section.sqlContent, section.sqlVariables, section.databaseId, section.viewMode]);
+  }, [section.sqlContent, section.sqlVariables, section.databaseId, section.viewMode, section.llmConfig]);
 
   
 
@@ -180,6 +179,7 @@ const add = useCallback(
   );
   // 处理拖拽更新
   const updateLayouts = useCallback(
+
       (newLayouts: Layout[]) => {
         setLayouts(newLayouts);
       },
@@ -187,6 +187,7 @@ const add = useCallback(
   );
   const update = useCallback(
     (id: string, section: Partial<DashboardSection>) => {
+      console.log(section);
       updateSection(id, section);
     },
     [updateSection]
