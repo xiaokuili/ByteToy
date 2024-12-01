@@ -1,3 +1,5 @@
+"use client";
+
 import { create } from "zustand";
 
 import { DashboardSection,Layout } from "@/types/base";
@@ -5,7 +7,7 @@ import { getFinalSql } from "@/utils/variable-utils";
 import { executeQuery as executeQueryAction } from "@/lib/datasource-action";
 import { views } from "@/components/dashboard/dashboard-factory";
 import { useCallback, useMemo, useState, useEffect } from "react";
-
+import { saveDashboard, getDashboard, deleteDashboardSection } from "@/lib/dashboard-action";
 
 interface DashboardStore {
   sections: DashboardSection[];
@@ -17,25 +19,22 @@ interface DashboardStore {
   
   layouts: Layout[];
   setLayouts: (layouts: Layout[]) => void;
+
+  save: (id: string) => Promise<void>;
+  load: (id: string) => Promise<DashboardSection[]>;
 }
-
-// Mock database functions
-const saveSectionsToDatabase = async (sections: DashboardSection[], layouts: Layout[]) => {
-  // TODO: Implement actual database save
-  console.log('Saving sections to database:', sections);
-  localStorage.setItem('dashboard_sections', JSON.stringify({
-    sections,
-    layouts
-  }));
-  console.log('Saving sections to database:' , layouts);
-
+// Database functions
+const saveSectionsToDatabase = async (dashboardId: string, sections: DashboardSection[], layouts: Layout[]) => {
+  try {
+    // Save each section as a dashboard record
+    await saveDashboard(dashboardId, sections, layouts);
+  } catch (error) {
+    console.error('Error saving dashboard sections:', error);
+    throw error;
+  }
 };
 
-const loadSectionsFromDatabase = async (id: string): Promise<DashboardSection[]> => {
-  // TODO: Implement actual database load
-  console.log('Loading sections from database:', id);
-  return [];
-};
+
 
 export const useDashboardStore = create<DashboardStore>((set, get) => ({
   sections: [],
@@ -53,15 +52,15 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
         s.id === id ? { ...s, ...section } : s
       ),
     })),
-  save: async () => {
+  save: async (id: string) => {
     const currentSections = get().sections;
     const currentLayouts = get().layouts;
-    await saveSectionsToDatabase(currentSections, currentLayouts);
+    await saveSectionsToDatabase(id, currentSections, currentLayouts);
   },
   load: async (id: string) => {
-    const sections = await loadSectionsFromDatabase(id);
-    set({ sections });
-    return sections;
+    const { sections, layouts } = await getDashboard(id);
+    set({ sections, layouts });
+    return { sections, layouts };
   },
   layouts: [],
   setLayouts: (layouts) => set({ layouts }),

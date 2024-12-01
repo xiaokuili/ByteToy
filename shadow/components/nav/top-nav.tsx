@@ -39,14 +39,17 @@ export function TopNavComponent() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end' className='w-56'>
-            <Link href='/dashboard' passHref>
-              <DropdownMenuItem asChild>
-                <div className='flex items-center'>
-                  <BarChart2 className='mr-2 h-4 w-4' />
-                  <span>报告</span>
-                </div>
-              </DropdownMenuItem>
-            </Link>
+            <DropdownMenuItem
+              onClick={() => {
+                const id = crypto.randomUUID();
+                window.location.href = `/dashboard/${id}`;
+              }}
+            >
+              <div className='flex items-center'>
+                <BarChart2 className='mr-2 h-4 w-4' />
+                <span>报告</span>
+              </div>
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
                 const id = crypto.randomUUID();

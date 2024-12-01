@@ -4,17 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SaveIcon, ShareIcon } from "lucide-react";
 import { useDashboardOperations } from "@/hook/use-dashboard";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface DashboardHeaderProps {
   title?: string;
-  section_id: string;
+  dashboardId: string;
 }
 
 export function DashboardHeader({
   title = "未命名仪表盘",
-  section_id,
+  dashboardId,
 }: DashboardHeaderProps) {
   const { save } = useDashboardOperations();
+  const [saveLoading, setSaveLoading] = useState(false);
 
   return (
     <div className='flex flex-col'>
@@ -29,11 +32,22 @@ export function DashboardHeader({
         <div className='flex items-center gap-2'>
           <Button 
             variant='outline' 
-            size='sm' 
-            onClick={() => save()}
+            size='sm'
+            disabled={saveLoading}
+            onClick={async () => {
+              setSaveLoading(true);
+              try {
+                await save(dashboardId);
+                toast.success('保存成功');
+              } catch (error) {
+                toast.error('保存失败');
+              } finally {
+                setSaveLoading(false);
+              }
+            }}
           >
             <SaveIcon className='w-4 h-4 mr-2' />
-            保存
+            {saveLoading ? '保存中...' : '保存'}
           </Button>
           <Button variant='outline' size='sm'>
             <ShareIcon className='w-4 h-4 mr-2' />

@@ -55,7 +55,7 @@ export function DashboardCanvas() {
         // 设置默认尺寸
         containerPadding={[0, 0]}
       >
-        {sections.map((section) => (
+        {sections?.map((section) => (
           <div
             key={section.id}
             className={`bg-card rounded-lg p-4 transition-all duration-200 ${
