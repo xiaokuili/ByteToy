@@ -74,7 +74,7 @@ export async function getDashboard(dashboardId: string) {
       llmConfig: section.llmConfig as any,
       sqlContent: section.visualization?.sqlContent || '',
       sqlVariables: section.visualization?.sqlVariables as any || [],
-      databaseId: section.visualization?.databaseId || '',
+      databaseId: section.visualization?.datasourceId || '',
       isExecuting: false
     }));
 

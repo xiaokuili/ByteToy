@@ -58,8 +58,14 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
     await saveSectionsToDatabase(id, currentSections, currentLayouts);
   },
   load: async (id: string) => {
-    const { sections, layouts } = await getDashboard(id);
-    set({ sections, layouts });
+    const response = await getDashboard(id);
+    // 确保返回的数据是数组，如果不是则使用空数组
+    const sections = Array.isArray(response?.data?.sections) ? response.data.sections : [];
+    const layouts = Array.isArray(response?.data?.layouts) ? response.data.layouts : [];
+    set({ 
+      sections: sections,
+      layouts: layouts 
+    });
     return { sections, layouts };
   },
   layouts: [],
@@ -68,13 +74,14 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
 export const useDashboardSection = (section: DashboardSection) => {
   const [status, setStatus] = useState<'empty' | 'executing' | 'complete'>('empty');
   const [data, setData] = useState<unknown>(null);
-
   useEffect(() => {
     let mounted = true;
-
+    
     async function fetchData() {
+
       if (!section.sqlContent || !section.databaseId) {
         setStatus('empty');
+
         return;
       }
 
@@ -155,10 +162,10 @@ const add = useCallback(
       i: section.id,
       x: (layouts.length * 2) % 12, // 每次右移2格，现在是正确的！
       y: Math.floor(layouts.length / 6), // 每6个换一行
-      w: 2, // 改为2格宽（而不是之前的6格宽）
+      w: 4, // 改为2格宽（而不是之前的6格宽）
       h: 4, // 高度保持不变
-      minW: 2, // 最小宽度也相应调整
-      minH: 2,
+      minW: 4, // 最小宽度也相应调整
+      minH: 4,
     };
     setLayouts([...currentLayouts, defaultLayout]);
   },

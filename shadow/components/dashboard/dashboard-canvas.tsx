@@ -39,6 +39,7 @@ export function DashboardCanvas() {
     updateLayouts(newLayout);
   };
 
+  
   return (
     <div className='flex-1 p-4'>
       <ResponsiveGridLayout
@@ -82,7 +83,6 @@ export function DashboardGridItem({
   const { ViewComponent, processedData, status } = useDashboardSection(section);
   const { removeSection } = useDashboardOperations();
   const { setActiveId } = useDashboardActive();
-
   
   return (
     <div className='h-full'>

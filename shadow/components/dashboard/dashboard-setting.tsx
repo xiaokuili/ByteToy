@@ -28,8 +28,7 @@ export function VisualizationSetting({
   const [searchQuery, setSearchQuery] = useState("");
   const { activeId } = useDashboardActive();
   const { sections } = useDashboardOperations();
-
-  const activeSection = sections.find(section => section.id === activeId);
+  const activeSection = sections?.find(section => section.id === activeId);
 
   useEffect(() => {
     const fetchVisualizations = async () => {

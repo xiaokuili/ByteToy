@@ -37,6 +37,10 @@ export function DashboardHeader({
             onClick={async () => {
               setSaveLoading(true);
               try {
+                if (!dashboardId) {
+                  toast.error('仪表盘ID不存在');
+                  return;
+                }
                 await save(dashboardId);
                 toast.success('保存成功');
               } catch (error) {
