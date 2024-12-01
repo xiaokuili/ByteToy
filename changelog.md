@@ -119,7 +119,7 @@ v 1.1.2
 7. query 需要不停的修改 view。dashboard 自己定义函数
 
 
-v 1.1.3  实现 dashboard 模块
+v 1.1.3  实现基本功能
 1. 测试dashboard section 和 内容大小关系 
 2. 调整修改section name
 3. 实现保存功能
