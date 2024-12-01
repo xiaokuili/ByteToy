@@ -5,6 +5,8 @@ import { Datasource } from "@/types/base";
 import { revalidatePath } from "next/cache";
 import { PrismaClient } from "@prisma/client";
 import { Schema } from "@/types/base";
+import alasql from 'alasql/dist/alasql.min';
+import { Parser } from 'node-sql-parser';
 
 interface ConnectionResult {
   success: boolean;
@@ -22,9 +24,18 @@ interface ConnectionResult {
     }
   >;
 }
+
+interface SearchResult {
+  success: boolean;
+  error?: string;
+  data?: Record<string, unknown>[];
+}
+
+
 // todo: 添加缓存
 export async function executeQuery(datasourceId: string, sql: string) {
   try {
+    
     // 1. 获取数据源信息
     const metadataResult = await getMetadata(datasourceId);
     if (!metadataResult.success || !metadataResult.data) {
@@ -36,6 +47,51 @@ export async function executeQuery(datasourceId: string, sql: string) {
     }
 
     const datasource = metadataResult.data;
+ 
+    if (datasource.type === "web") {
+      try {
+        console.log(sql);
+        const { keyword, transformedSQL } = await parseSQL(sql);
+        if (!keyword) {
+          return {
+            success: false,
+            error: "Invalid SQL query. Please use: SELECT position, title, snippet FROM searchresults where keyword = 'your search term'"
+          };
+        }
+        const querySQL = transformedSQL;
+        const searchResult = await searchWeb(keyword);
+        
+        if (!searchResult.success) {
+          return searchResult;
+        }
+        console.log(querySQL);
+
+        // Create table and execute SQL query using Alasql
+        const rows = alasql(querySQL, [searchResult.data]);
+
+        // Get column names and types
+        const columns = Object.keys(rows[0] || {}).map(name => {
+          const value = rows[0]?.[name];
+          const type = typeof value === 'number' ? 'number' : 'string';
+          return { name, type };
+        });
+
+        return {
+          success: true,
+          data: {
+            rows,
+            columns,
+            rowCount: rows.length
+          }
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Query execution failed"
+        };
+      }
+    }
+
     const connectionString = buildConnectionString(datasource);
 
     // 2. 创建数据库连接
@@ -108,7 +164,7 @@ export async function executeQuery(datasourceId: string, sql: string) {
               };
             })
           : [];
-
+      console.log(formattedRows);
       return {
         success: true,
         data: {
@@ -311,12 +367,13 @@ export async function getMetadatas() {
         createdAt: "desc",
       },
     });
-
     return {
       success: true,
       data: metadatas.map((meta) => ({
         ...meta,
-        schemas: JSON.parse(meta.schemas as string),
+        schemas: typeof meta.schemas === 'string' 
+        ? meta.schemas 
+          : JSON.stringify(meta.schemas),
       })),
     };
   } catch (error) {
@@ -344,7 +401,9 @@ export async function getMetadata(id: string) {
       success: true,
       data: {
         ...metadata,
-        schemas: JSON.parse(metadata.schemas as string),
+        schemas: typeof metadata.schemas === 'string' 
+        ? metadata.schemas 
+        : JSON.stringify(metadata.schemas),
       },
     };
   } catch (error) {
@@ -390,6 +449,87 @@ export async function deleteMetadata(id: string) {
     return {
       success: false,
       error: "Failed to delete metadata",
+    };
+  }
+}
+
+
+export async function parseSQL(sql: string): { keyword: string; transformedSQL: string } {
+  try {
+    const parser = new Parser();
+    
+    // Parse SQL statement
+    const ast = parser.astify(sql);
+
+    // Extract keyword value from WHERE clause
+    let keyword = '';
+    if (ast.where && 
+        ast.where.operator === '=' && 
+        ast.where.left?.column === 'keyword') {
+      keyword = ast.where.right?.value || '';
+    }
+
+    // Remove WHERE clause to create transformed SQL
+      // Remove WHERE clause to create transformed SQL
+    if (ast.where?.left?.column === 'keyword') {
+        // Completely remove the where clause instead of just nullifying its properties
+      ast.where = null;
+    }
+
+    // Ensure from clause exists and has elements
+    if (!ast.from || !ast.from[0]) {
+      throw new Error('Invalid SQL: Missing FROM clause');
+    }
+
+    ast.from[0].table = '?';
+    const transformedSQL = parser.sqlify(ast, { quote: '' }).replace(/`/g, '');
+
+    return {
+      keyword,
+      transformedSQL
+    };
+
+  } catch (error) {
+    throw new Error(`SQL parsing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+
+
+
+export async function searchWeb(query: string): Promise<SearchResult> {
+  try {
+    const { getJson } = require("serpapi");
+
+    const json = await new Promise((resolve, reject) => {
+      getJson({
+        engine: "baidu", 
+        q: query,
+        api_key: "65d9601a1978015c7d6e49c20b1012e9c916bbb5bf9336c60f4a922bb9972515"
+      }, (result: any) => {
+        if (result.error) {
+          reject(result.error);
+        } else {
+          resolve(result);
+        }
+      });
+    });
+
+    return {
+      success: true,
+      data: json.organic_results?.map((result: any) => ({
+        position: result.position,
+        title: result.title,
+        link: result.link,
+        snippet: result.snippet
+      })) || []
+    };
+
+  } catch (error) {
+    console.error("Search failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred"
     };
   }
 }
