@@ -15,6 +15,7 @@ import {
   useDashboardOperations,
   useDashboardSection,
 } from "@/hook/use-dashboard";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect, useCallback } from "react";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -112,13 +113,13 @@ export function DashboardGridItem({
           </Button>
         </div>
       </div>
-      <div className='h-[calc(100%-2rem)]'>
+      <ScrollArea className='h-[calc(100%-2rem)]'>
         {status === 'empty' && <EmptyDataView />}
         {status === 'executing' && <LoadingView />}
         {status === 'complete' && ViewComponent && processedData && (
           <ViewComponent.Component data={processedData} />
         )}
-      </div>
+      </ScrollArea>
     </div>
   );
 }
