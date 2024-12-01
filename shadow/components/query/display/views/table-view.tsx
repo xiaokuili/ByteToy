@@ -14,6 +14,9 @@ import {
 } from "../types";
 
 const tableProcessor: ViewProcessor = {
+  processData: (data: QueryResult) => {
+    return { data: data, isValid: true };
+  },
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   validateData(data: QueryResult) {
     // 表格视图的验证逻辑

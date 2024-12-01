@@ -18,16 +18,13 @@ import {
 } from "@/components/ui/hover-card";
 import { useDashboardActive , useDashboardOperations} from "@/hook/use-dashboard";
 
-interface VisualizationSettingProps {
-  onUpdateSection: (id: string, section: Partial<DashboardSection>) => void;
-}
-export function VisualizationSetting({
-  onUpdateSection,
-}: VisualizationSettingProps) {
+
+export function VisualizationSetting() {
   const [visualizations, setVisualizations] = useState<Visualization[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const { activeId } = useDashboardActive();
-  const { sections } = useDashboardOperations();
+  const { sections, update: onUpdateSection } = useDashboardOperations();
+
   const activeSection = sections?.find(section => section.id === activeId);
 
   useEffect(() => {

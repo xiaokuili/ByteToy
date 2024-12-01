@@ -71,17 +71,17 @@ export const useDashboardStore = create<DashboardStore>((set, get) => ({
   layouts: [],
   setLayouts: (layouts) => set({ layouts }),
 }));
+
 export const useDashboardSection = (section: DashboardSection) => {
   const [status, setStatus] = useState<'empty' | 'executing' | 'complete'>('empty');
   const [data, setData] = useState<unknown>(null);
+
   useEffect(() => {
     let mounted = true;
     
     async function fetchData() {
-
       if (!section.sqlContent || !section.databaseId) {
         setStatus('empty');
-
         return;
       }
 
@@ -90,27 +90,24 @@ export const useDashboardSection = (section: DashboardSection) => {
         const { sqlContent, sqlVariables, databaseId } = section;
         const finalSql = getFinalSql(sqlContent, sqlVariables);
         const result = await executeQueryAction(databaseId, finalSql);
-        
         if (!mounted) return;
 
         if (!result.success) {
-          setStatus('empty');
+          setStatus('empty'); 
           setData(null);
           return;
         }
-
         const view = views.get(section.viewMode);
         if (!view || !view.processor.processData) {
           setStatus('empty');
           setData(null);
           return;
         }
-
         const processed = view.processor.processData(result.data);
         const processedResult = processed instanceof Promise 
           ? await processed
           : processed;
-        
+        console.log(processedResult, processedResult.isValid);
         if (!mounted) return;
 
         if (!processedResult || !processedResult.isValid || 
@@ -130,12 +127,12 @@ export const useDashboardSection = (section: DashboardSection) => {
     }
 
     fetchData();
-
     return () => {
       mounted = false;
     };
   }, [section.sqlContent, section.sqlVariables, section.databaseId, section.viewMode]);
 
+  
 
   const ViewComponent = useMemo(() => {
     return views.get(section.viewMode);
