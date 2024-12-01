@@ -18,14 +18,15 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   const { save } = useDashboardOperations();
   const [saveLoading, setSaveLoading] = useState(false);
-
+  const [title, setTitle] = useState(title);
+  
   return (
     <div className='flex flex-col'>
       <div className='flex items-center justify-between p-4 '>
         <div className='flex items-center gap-4'>
           <Input
             value={title}
-            onChange={(e) => onTitleChange?.(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
             className='text-lg font-semibold w-[300px]'
           />
         </div>
