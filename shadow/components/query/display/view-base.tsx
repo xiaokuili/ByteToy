@@ -8,7 +8,8 @@ import { createLineView } from "./views/line-view";
 import { createPieChartView } from "./views/pie-view";
 import { createNumberView } from "./views/number-view";
 import { createEmptyView } from "./views/empty-view";
-
+import { createGaugeView } from "./views/gauge-view";
+import { createMetricView } from "./views/metric-view";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const views: Map<string, QueryResultView<any>> = new Map();
 
@@ -52,6 +53,19 @@ register(
   "empty",
   createEmptyView(
     VIEW_MODES.find((mode) => mode.id === "empty") as ViewModeDefinition
+  )
+);
+
+register(
+  "gauge",
+  createGaugeView(
+    VIEW_MODES.find((mode) => mode.id === "gauge") as ViewModeDefinition
+  )
+);
+register(
+  "metric",
+  createMetricView(
+    VIEW_MODES.find((mode) => mode.id === "metric") as ViewModeDefinition
   )
 );
 
