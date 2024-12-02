@@ -50,7 +50,6 @@ export async function executeQuery(datasourceId: string, sql: string) {
  
     if (datasource.type === "web") {
       try {
-        console.log(sql);
         const { keyword, transformedSQL } = await parseSQL(sql);
         if (!keyword) {
           return {
@@ -64,7 +63,6 @@ export async function executeQuery(datasourceId: string, sql: string) {
         if (!searchResult.success) {
           return searchResult;
         }
-        console.log(querySQL);
 
         // Create table and execute SQL query using Alasql
         const rows = alasql(querySQL, [searchResult.data]);
@@ -164,7 +162,6 @@ export async function executeQuery(datasourceId: string, sql: string) {
               };
             })
           : [];
-      console.log(formattedRows);
       return {
         success: true,
         data: {

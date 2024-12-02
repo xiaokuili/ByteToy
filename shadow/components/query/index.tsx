@@ -10,15 +10,8 @@ import { useEffect } from "react";
 
 export default function Query() {
   const { isOpen } = useVisualizationOpen();
-  const { setIsCollapsed } = useSidebar();
 
-  useEffect(() => {
-    setIsCollapsed(true);
-    return () => {
-      setIsCollapsed(false);
-    };
-  }, [setIsCollapsed]);
-
+ 
   return (
     <div className='h-full flex flex-col overflow-hidden'>
       {/* Header */}

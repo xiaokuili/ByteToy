@@ -8,19 +8,19 @@ import {
   useDashboardOperations,
   useDashboardActive,
 } from "@/hook/use-dashboard";
-import { useSidebar } from "@/hook/use-sidebar";
+import { useSidebar } from "@/components/ui/sidebar"
 
 export default function DashboardPage({ params }: { params: { id: string } }) {
   const { sections, add, remove, update, load } = useDashboardOperations();
   const { activeId } = useDashboardActive();
-  const { setIsCollapsed } = useSidebar();
+  const { setOpen } = useSidebar();
 
   useEffect(() => {
-    setIsCollapsed(true);
+    setOpen(false);
     return () => {
-      setIsCollapsed(false);
+      setOpen(false);
     };
-  }, [setIsCollapsed]);
+  }, []);
 
   useEffect(() => {
     load(params.id);

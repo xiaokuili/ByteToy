@@ -19,16 +19,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { useQueryAndViewState } from "@/hook/use-visualization";
+import { SidebarTrigger, useSidebar} from "@/components/ui/sidebar";
 
 export function TopNavComponent() {
   const { setId } = useQueryAndViewState();
+  const { setOpen, open } = useSidebar();
   return (
-    <nav className="flex h-16 items-center justify-between px-4 py-2 bg-white border-b">
+    <nav className="flex items-center justify-between px-4 py-2 bg-white border-b">
       <div className="flex-grow max-w-xl px-4">
-        <div className="relative">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input type="search" placeholder="Search" className="pl-8 w-full" />
-        </div>
+      <SidebarTrigger onClick={() => setOpen(!open)} />
+       
       </div>
       <div className="flex items-center space-x-2">
         <DropdownMenu>
@@ -77,9 +77,7 @@ export function TopNavComponent() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button variant="ghost" size="icon">
-          <Settings className="h-5 w-5" />
-        </Button>
+       
       </div>
     </nav>
   );
