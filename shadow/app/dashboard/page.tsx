@@ -20,7 +20,7 @@ export default function DashboardPage() {
         <DashboardHeader />
 
         {/* Bottom Section - Scrollable */}
-        <div className='flex-1 overflow-y-auto p-4'>
+        <div className='flex-1 overflow-y-auto p-4 h-full'>
           <div className='bg-gray-50 rounded-lg min-h-full'>
             <DashboardCanvas
               dashboardSections={sections}

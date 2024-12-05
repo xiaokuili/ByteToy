@@ -56,6 +56,7 @@ export function DashboardCanvas() {
         preventCollision={true} // 防止元素重叠
         // 设置默认尺寸
         containerPadding={[0, 0]}
+        minHeight={1000}
       >
         {sections?.map((section) => (
           <div
@@ -82,7 +83,7 @@ export function DashboardGridItem({
   section: DashboardSection;
 }) {
   const { ViewComponent, processedData, status } = useDashboardSection(section);
-  const { removeSection } = useDashboardOperations();
+  const { remove: removeSection } = useDashboardOperations();
   const { setActiveId } = useDashboardActive();
   
   return (

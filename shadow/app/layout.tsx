@@ -37,7 +37,7 @@ export default function RootLayout({
             <main className="flex-1 w-full">
               <TooltipProvider>
                 <div className="h-16 "><TopNavComponent /></div>
-                <div className="p-4 w-full">{children}</div>
+                <div className="w-full h-full">{children}</div>
                 <Toaster />
               </TooltipProvider>
             </main>
