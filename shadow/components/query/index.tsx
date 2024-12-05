@@ -5,7 +5,6 @@ import { SQLWorkbench } from "@/components/query/workspace";
 import { useVisualizationOpen } from "@/hook/use-visualization";
 import { cn } from "@/lib/utils";
 import { ViewModeSelector } from "./display/view-mode-selector";
-import { useSidebar } from "@/hook/use-sidebar";
 import { useEffect } from "react";
 
 export default function Query() {
