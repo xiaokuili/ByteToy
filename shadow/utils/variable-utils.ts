@@ -24,6 +24,7 @@ export function getFinalSql(sql: string, variables: Variable[]): string {
 
   // 替换所有变量
   let finalSql = sql;
+  if (!variables || variables.length === 0) return sql;
   variables.forEach((variable) => {
     const regex = new RegExp(`\\{\\{${variable.name}\\}\\}`, "g");
     let value: string;

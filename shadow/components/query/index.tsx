@@ -10,33 +10,34 @@ import { useEffect } from "react";
 
 export default function Query() {
   const { isOpen } = useVisualizationOpen();
-  const { setIsCollapsed } = useSidebar();
 
-  useEffect(() => {
-    setIsCollapsed(true);
-    return () => {
-      setIsCollapsed(false);
-    };
-  }, [setIsCollapsed]);
-
+ 
   return (
-    <div className='flex flex-col h-full overflow-hidden'>
-      <div className='h-16'>
+    <div className='h-full flex flex-col overflow-hidden'>
+      {/* Header */}
+      <header className='h-16 shrink-0 border-b'>
         <QuestionHeaderComponent />
-      </div>
-      <div className='flex-1 min-h-0 flex'>
+      </header>
+
+      {/* Main Content */}
+      <main className='flex-1 flex overflow-hidden min-h-0'>
+        {/* SQL Workbench Area */}
         <div
-          className={cn("flex-1 transition-all", isOpen ? "w-[80%]" : "w-full")}
+          className={cn(
+            "transition-all duration-200 overflow-auto" /* 添加 overflow-auto */,
+            isOpen ? "w-4/5" : "w-full"
+          )}
         >
           <SQLWorkbench />
         </div>
 
+        {/* View Mode Selector */}
         {isOpen && (
-          <div className='w-[20%] border-l'>
+          <aside className='w-1/5 border-l overflow-auto'>
             <ViewModeSelector />
-          </div>
+          </aside>
         )}
-      </div>
+      </main>
     </div>
   );
 }

@@ -1,20 +1,22 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
-import { useState } from "react";
 import { DashboardFactory } from "./dashboard-factory";
-import { executeQuery } from "@/lib/datasource-action";
-import { getFinalSql } from "@/utils/variable-utils";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { Button } from "../ui/button";
-
 import { DashboardSection } from "@/types/base";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useDashboardActive } from "@/hook/use-dashboard";
 import { Settings } from "lucide-react";
-import { QueryResult } from "../query/display/types";
+import {LoadingView, EmptyDataView} from "@/components/query/display/view-factory"
+import {
+  createDashboardSection,
+  useDashboardOperations,
+  useDashboardSection,
+} from "@/hook/use-dashboard";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useEffect, useCallback } from "react";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -23,96 +25,39 @@ interface DashboardCanvasProps {
   removeSection: (sectionId: string) => void;
 }
 
-export function LoadingView() {
-  return <div>Loading...</div>;
-}
 
 export function QueryErrorView({ error }: { error: string }) {
   return <div>{error}</div>;
 }
-
-export function DashboardCanvas({
-  dashboardSections,
-  removeSection,
-}: DashboardCanvasProps) {
+export function DashboardCanvas() {
   const { activeId, setActiveId } = useDashboardActive();
-  const [queryResults, setQueryResults] = useState<Record<string, QueryResult>>(
-    {}
-  );
-  const [queryErrors, setQueryErrors] = useState<Record<string, string>>({});
+  const { sections, add, remove, update } = useDashboardOperations();
 
-  useEffect(() => {
-    let isMounted = true; // Prevent state updates after unmount
-    const executeQueries = async () => {
-      const results: Record<string, QueryResult> = {};
-      const errors: Record<string, string> = {};
-      for (const section of dashboardSections) {
-        // Stop execution if component is unmounted
-        if (!isMounted) return;
-        if (!section.visualization?.id) {
-          errors[section.id] = "请选择合适的数据和内容生成进行展示";
-          continue;
-        }
 
-       
-        try {
-          const finalSql = getFinalSql(
-            section.visualization.sqlContent,
-            section.visualization.sqlVariables
-          );
-          const result = await executeQuery(
-            section.visualization.datasourceId,
-            finalSql
-          );
+  const { layouts, updateLayouts } = useDashboardOperations();
 
-          if (result.success) {
-            results[section.id] = result.data;
-          } else {
-            errors[section.id] = result.error || "Unknown error";
-          }
-        } catch (error) {
-          console.error(
-            `Error executing query for block ${section.id}:`,
-            error
-          );
-          errors[section.id] = "Failed to execute query";
-        }
-      }
-      // 确保组件仍然挂载时才更新状态
-      if (isMounted) {
-        setQueryResults(results);
-        setQueryErrors(errors);
-      }
-    };
-
-    executeQueries();
-    // 清理函数
-    return () => {
-      isMounted = false;
-    };
-  }, [dashboardSections]);
-
-  const layouts = {
-    lg: dashboardSections.map((section, index) => ({
-      i: section.id,
-      x: (index * 6) % 12, // Changed from 4 to 6 to make blocks wider
-      y: Math.floor(index / 2) * 6, // Changed from 3 to 2 and height from 4 to 6
-      w: 3, // Changed from 4 to 6 for wider blocks
-      h: 4, // Changed from 4 to 6 for taller blocks
-      
-    })),
+  const onLayoutChange = (newLayout: Layout[]) => {
+    updateLayouts(newLayout);
   };
+
+  
   return (
     <div className='flex-1 p-4'>
       <ResponsiveGridLayout
         className='layout'
-        layouts={layouts}
+        layouts={{ lg: layouts }}
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-        rowHeight={80} // Reduced from 100 to 80 to compensate for taller blocks
+        rowHeight={80}
+        autoSize={true}      // 添加这个属性
         draggableCancel='.no-drag'
+        onLayoutChange={onLayoutChange}
+        compactType={null} // 防止自动压缩
+        preventCollision={true} // 防止元素重叠
+        // 设置默认尺寸
+        containerPadding={[0, 0]}
       >
-        {dashboardSections.map((section) => (
+        {sections?.map((section) => (
           <div
             key={section.id}
             className={`bg-card rounded-lg p-4 transition-all duration-200 ${
@@ -123,10 +68,7 @@ export function DashboardCanvas({
           >
             <DashboardGridItem
               section={section}
-              queryErrors={queryErrors}
-              queryResults={queryResults}
-              removeSection={removeSection}
-              setActiveId={setActiveId}
+              key={section.viewMode || section.id}
             />
           </div>
         ))}
@@ -134,32 +76,15 @@ export function DashboardCanvas({
     </div>
   );
 }
-
 export function DashboardGridItem({
   section,
-  queryErrors,
-  queryResults,
-  removeSection,
-  setActiveId,
 }: {
   section: DashboardSection;
-  queryErrors: Record<string, string>;
-  queryResults: Record<string, QueryResult>;
-  removeSection: (sectionId: string) => void;
-  setActiveId: (id: string | null) => void;
 }) {
-  const dashboardView = useMemo(() => (
-    <DashboardFactory
-      dashboardViewId={section.type !== 'OTHER' ? section.type.toLowerCase() : section.visualization.viewMode}
-      queryResult={queryResults[section.id]}
-      config={section}
-    />
-  ), [
-    section.type,
-    section.visualization?.viewMode,
-    queryResults[section.id],
-    section
-  ]);
+  const { ViewComponent, processedData, status } = useDashboardSection(section);
+  const { removeSection } = useDashboardOperations();
+  const { setActiveId } = useDashboardActive();
+  
   return (
     <div className='h-full'>
       <div className='flex items-center justify-between mb-2 no-drag'>
@@ -188,11 +113,14 @@ export function DashboardGridItem({
           </Button>
         </div>
       </div>
-      <div className='h-[calc(100%-2rem)]'>
-        {queryErrors[section.id] ? (
-          <QueryErrorView error={queryErrors[section.id]} />
-        ) : dashboardView}
-      </div>
+      <ScrollArea className='h-[calc(100%-2rem)]'>
+        {status === 'empty' && <EmptyDataView />}
+        {status === 'executing' && <LoadingView />}
+        {status === 'complete' && ViewComponent && processedData && (
+          <ViewComponent.Component data={processedData} />
+        )}
+      </ScrollArea>
     </div>
   );
 }
+

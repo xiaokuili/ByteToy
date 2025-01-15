@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { createVisualization } from "@/lib/visualization-actions";
-import { useVisualization } from "@/hook/use-visualization";
+import { useQueryAndViewState } from "@/hook/use-visualization";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,15 +19,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export function QuestionHeaderComponent() {
-  const {
-    datasourceId,
-    sqlContent,
-    viewMode,
-    sqlVariables,
-    id,
-    name,
-    setName,
-  } = useVisualization();
+  const { databaseId, sqlContent, viewMode, variables, id, reset } =
+    useQueryAndViewState();
+
+  const [name, setName] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -36,26 +31,28 @@ export function QuestionHeaderComponent() {
 
     setIsSaving(true);
     try {
-      await createVisualization({
+      const { success } = await createVisualization({
         id,
         name,
-        datasourceId,
+        datasourceId: databaseId,
         sqlContent,
         viewMode,
-        viewParams: {},
-        sqlVariables,
+        sqlVariables: variables ?? [],
       });
 
-      toast.success("保存成功", {
-        description: "可以在查询列表中查看",
-      });
-      setIsOpen(false);
-      setName("");
+      if (success) {
+        toast.success("保存成功", {
+          description: "可以在查询列表中查看",
+        });
+        setIsOpen(false);
+        setName("");
+      }
     } catch (err) {
       console.error(err);
       toast.error("保存失败", {
         description: "请稍后重试",
       });
+      setName("");
     } finally {
       setIsSaving(false);
     }

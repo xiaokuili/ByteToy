@@ -1,9 +1,11 @@
-import { QueryResult } from "../query/display/types";
-import { register, ViewFactory } from "../query/display/view-factory";
+import { register } from "../query/display/view-base";
+import { ViewFactory } from "../query/display/view-factory";
 import { createLLMView } from "./views/llm-view";
+import { views } from "@/components/query/display/view-base";
 import { FileTextIcon } from "lucide-react";
 import { ViewModeDefinition } from "../query/display/types";
 import { DashboardSection } from "@/types/base";
+import React from "react";
 
 const DashboardViewModeDefinitions: ViewModeDefinition[] = [
   {
@@ -18,7 +20,7 @@ const DashboardViewModeDefinitions: ViewModeDefinition[] = [
   },
 ];
 
-register(
+views.set(
   "llm",
   createLLMView(
     DashboardViewModeDefinitions.find(
@@ -27,23 +29,35 @@ register(
   )
 );
 
+export { views };
 export const DashboardFactory: React.FC<{
-  dashboardViewId: string;
-  queryResult: QueryResult;
   config: DashboardSection;
-}> = ({ dashboardViewId, queryResult, config }) => {
-  // 创建并返回选中的视图
-  console.log('DashboardFactory render:', {
-    dashboardViewId,
-    queryResult,
-    config,
-    timestamp: new Date().toISOString()
-  });
+  dashboardViewId: string;
+}> = ({ config, dashboardViewId }) => {
+  const { sqlContent, variables, databaseId, viewId, viewMode } = config;
+  const [isExecuting, setIsExecuting] = React.useState(true);
+
+  // 第一次渲染时自动执行
+  React.useEffect(() => {
+    setIsExecuting(true);
+  }, [dashboardViewId]);
+
+  // 没有选择视图时显示提示
+  if (!viewId) {
+    return (
+      <div className='flex items-center justify-center h-full text-muted-foreground'>
+        请选择合适的视图进行展示
+      </div>
+    );
+  }
+
   return (
     <ViewFactory
-      viewId={dashboardViewId}
-      queryResult={queryResult}
-      config={config}
+      viewId={viewId}
+      sqlContent={sqlContent}
+      sqlVariables={variables}
+      databaseId={databaseId}
+      isExecuting={isExecuting}
     />
   );
 };

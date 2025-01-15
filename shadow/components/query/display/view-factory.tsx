@@ -1,131 +1,188 @@
-"use client";
-
-import { QueryResult, QueryResultView, ViewModeDefinition } from "./types";
-import { VisualizationErrorView } from "./views/error-view";
-import { VIEW_MODES } from "./types";
-import { createBarChartView } from "./views/bar-view";
-import { createTableView } from "./views/table-view";
-import { createLineView } from "./views/line-view";
-import { createPieChartView } from "./views/pie-view";
-import { createNumberView } from "./views/number-view";
-import { createEmptyView } from "./views/empty-view";
+import { useViewProcessor } from "@/hook/use-view-processor";
+import { views } from "./view-base";
+import { useQueryExecution } from "@/hook/use-view-execution";
 import React from "react";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const views: Map<string, QueryResultView<any>> = new Map();
-
-export function register<T>(viewId: string, view: QueryResultView<T>) {
-  views.set(viewId, view);
-}
-
+import { Variable } from "@/types/base";
+import { useQueryAndViewState } from "@/hook/use-visualization";
+// 内部组件处理实际的渲染逻辑
 export function ViewFactory({
   viewId,
-  queryResult,
-  config,
+  sqlContent,
+  sqlVariables,
+  databaseId,
+  llmConfig,
+  isExecuting, // 添加新参数
 }: {
   viewId: string;
-  queryResult: QueryResult;
-  config?: unknown;
+  sqlContent: string;
+  sqlVariables: Variable[];
+  databaseId: string;
+  llmConfig?: unknown;
+  isExecuting?: boolean;
 }) {
-  const [processedData, setProcessedData] = React.useState<unknown>(null);
-  const [error, setError] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState(false);
+  const currentViewIdRef = React.useRef<string>(viewId);
+  const processingComplete = React.useRef(false);
+
+  const {
+    queryResult,
+    queryError,
+    lifecycle: queryLifecycle,
+  } = useQueryExecution({
+    sqlContent,
+    sqlVariables,
+    databaseId,
+  });
+
+  const { processedData, lifecycle: viewLifecycle } = useViewProcessor(
+    viewId,
+    queryResult,
+    llmConfig
+  );
+  const { setIsExecuting } = useQueryAndViewState();
 
   React.useEffect(() => {
-    const processData = async () => {
-      setLoading(true);
-      const view = views.get(viewId);
+    // 如果外部明确设置了 isExecuting，则使用外部值
+    if (
+      queryLifecycle != "executing" &&
+      viewLifecycle != "executing" &&
+      isExecuting
+    ) {
+      setIsExecuting(true);
+    }
+    if (queryLifecycle === "completed" && viewLifecycle === "completed") {
+      setIsExecuting(false);
+    }
+  }, [queryLifecycle, viewLifecycle, setIsExecuting]);
 
-      if (!view) {
-        setError(`View ${viewId} not found`);
-        return;
-      }
+  // 防止使用旧的proscssData进行查询
+  React.useEffect(() => {
+    if (viewLifecycle === "completed") {
+      currentViewIdRef.current = viewId;
+      processingComplete.current = true;
+    } else {
+      processingComplete.current = false;
+    }
+  }, [viewId, viewLifecycle]);
 
-      try {
-        const processedResult = view.processor.processData
-          ? await view.processor.processData(queryResult, config)
-          : { isValid: true, data: queryResult };
+  const ViewComponent = views.get(viewId);
 
-        if (!processedResult?.isValid || !processedResult?.data) {
-          setError(processedResult?.error || "Invalid data");
-          return;
-        }
+  return (
+    <>
+      {queryError && <VisualizationErrorView error={queryError} />}
+      {(queryLifecycle === "executing" || viewLifecycle === "executing") && (
+        <LoadingView />
+      )}
 
-        const validation = view.processor.validateData
-          ? view.processor.validateData(processedResult.data)
-          : { isValid: true };
+      {!queryError && !ViewComponent && <ViewNotFoundError viewId={viewId} />}
+      {!queryError &&
+        queryLifecycle === "completed" &&
+        viewLifecycle === "completed" && (
+          <>
+            {ViewComponent &&
+              processedData &&
+              Object.keys(processedData).length > 0 &&
+              processingComplete.current &&
+              currentViewIdRef.current === viewId && (
+                <ViewComponent.Component data={processedData} />
+              )}
+            {(!processedData || Object.keys(processedData).length === 0) && (
+              <EmptyDataView />
+            )}
+          </>
+        )}
+    </>
+  );
+}
 
-        if (!validation?.isValid) {
-          setError(validation?.error || "Data validation failed");
-          return;
-        }
+export function ViewNotFoundError({ viewId }: { viewId: string }) {
+  return (
+    <div className='flex h-full w-full items-center justify-center p-8 text-red-500'>
+      <div className='flex flex-col items-center gap-4'>
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='h-12 w-12'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+          />
+        </svg>
+        <div className='text-lg font-medium'>View Not Found</div>
+        <div className='text-center text-sm opacity-75'>
+          The visualization view &quot;{viewId}&quot; could not be found
+        </div>
+      </div>
+    </div>
+  );
+}
 
-        setProcessedData(processedResult.data);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
+export function EmptyDataView() {
+  return (
+    <div className='flex h-full w-full flex-col items-center justify-center rounded-md border border-dashed p-8 text-center animate-in fade-in-50'>
+      <div className='mx-auto flex max-w-[420px] flex-col items-center justify-center text-center'>
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='h-10 w-10 text-muted-foreground/60 mb-4'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4'
+          />
+        </svg>
+        <h3 className='text-lg font-semibold'>没有数据进行展示</h3>
+        <p className='mt-2 text-sm text-muted-foreground'>
+          请输入SQL语句请求数据并进行展示
+        </p>
+      </div>
+    </div>
+  );
+}
 
-    processData();
-  }, [viewId, queryResult, config]);
-
-  if (error) {
-    return <VisualizationErrorView error={error} />;
-  }
-
-  if (loading || !processedData) {
-    return <LoadingView />;
-  }
-
-  const view = views.get(viewId);
-  return <view.Component data={processedData} />;
+export function VisualizationErrorView({ error }: { error: string }) {
+  return (
+    <div className='flex h-full w-full items-center justify-center p-8 text-red-500'>
+      <div className='flex flex-col items-center gap-4'>
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='h-12 w-12'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          <path
+            strokeLinecap='round'
+            strokeLinejoin='round'
+            strokeWidth={2}
+            d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
+          />
+        </svg>
+        <div className='text-lg font-medium'>Visualization Error</div>
+        <div className='text-center text-sm opacity-75'>{error}</div>
+      </div>
+    </div>
+  );
 }
 
 export function LoadingView() {
-  return <div>Loading...</div>;
+  return (
+    <div className='flex h-full w-full items-center justify-center p-8 text-gray-500'>
+      <div className='flex flex-col items-center gap-4'>
+        <div className='h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500' />
+        <div className='text-lg font-medium'>Loading</div>
+        <div className='text-sm opacity-75'>
+          Please wait while we process your request...
+        </div>
+      </div>
+    </div>
+  );
 }
-
-
-
-// 创建工厂实例
-
-register(
-  "bar",
-  createBarChartView(
-    VIEW_MODES.find((mode) => mode.id === "bar") as ViewModeDefinition
-  )
-);
-register(
-  "table",
-  createTableView(
-    VIEW_MODES.find((mode) => mode.id === "table") as ViewModeDefinition
-  )
-);
-register(
-  "line",
-  createLineView(
-    VIEW_MODES.find((mode) => mode.id === "line") as ViewModeDefinition
-  )
-);
-register(
-  "pie",
-  createPieChartView(
-    VIEW_MODES.find((mode) => mode.id === "pie") as ViewModeDefinition
-  )
-);
-register(
-  "number",
-  createNumberView(
-    VIEW_MODES.find((mode) => mode.id === "number") as ViewModeDefinition
-  )
-);
-register(
-  "empty",
-  createEmptyView(
-    VIEW_MODES.find((mode) => mode.id === "empty") as ViewModeDefinition
-  )
-);
-

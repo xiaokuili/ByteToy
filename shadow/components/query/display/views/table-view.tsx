@@ -14,6 +14,9 @@ import {
 } from "../types";
 
 const tableProcessor: ViewProcessor = {
+  processData: (data: QueryResult) => {
+    return { data: data, isValid: true };
+  },
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   validateData(data: QueryResult) {
     // 表格视图的验证逻辑
@@ -53,7 +56,16 @@ function TableViewComponent({ data }: { data: QueryResult }) {
                 className='py-1.5 px-3 text-xs'
               >
                 <div className='max-w-[300px] truncate'>
-                {formatCellValue(row[column.name] as null | undefined | number | boolean | Date | object | string)}
+                  {formatCellValue(
+                    row[column.name] as
+                      | null
+                      | undefined
+                      | number
+                      | boolean
+                      | Date
+                      | object
+                      | string
+                  )}
                 </div>
               </TableCell>
             ))}

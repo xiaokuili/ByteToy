@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect } from "react";
 import { DashboardCanvas } from "@/components/dashboard/dashboard-canvas";
 import { VisualizationSetting } from "@/components/dashboard/dashboard-setting";
 import { DashboardToolbar } from "@/components/dashboard/tool";
@@ -8,16 +8,30 @@ import {
   useDashboardOperations,
   useDashboardActive,
 } from "@/hook/use-dashboard";
+import { useSidebar } from "@/components/ui/sidebar"
 
-export default function DashboardPage() {
-  const { sections, add, remove, update } = useDashboardOperations();
+export default function DashboardPage({ params }: { params: { id: string } }) {
+  const { sections, add, remove, update, load } = useDashboardOperations();
   const { activeId } = useDashboardActive();
+  const { setOpen } = useSidebar();
+
+  useEffect(() => {
+    setOpen(false);
+    return () => {
+      setOpen(false);
+    };
+  }, []);
+
+  useEffect(() => {
+    load(params.id);
+  }, [params.id, load]);
+
   return (
     <div className='flex h-full w-full'>
       {/* Left Panel - Dashboard Report */}
       <div className='flex-1 flex flex-col'>
         {/* Top Section */}
-        <DashboardHeader />
+        <DashboardHeader dashboardId={params.id} />
 
         {/* Bottom Section - Scrollable */}
         <div className='flex-1 overflow-y-auto p-4'>

@@ -10,7 +10,7 @@ interface CreateVisualizationInput {
   datasourceId: string;
   sqlContent: string;
   viewMode: string;
-  viewParams: Record<string, unknown>;
+  viewParams?: Record<string, unknown>;
   sqlVariables: Variable[];
 }
 interface UpdateVisualizationInput extends Partial<CreateVisualizationInput> {

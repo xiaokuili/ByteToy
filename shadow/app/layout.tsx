@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { MainNavComponent } from "@/components/nav/main-nav";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarComponent } from "@/components/nav/sidebar"
+import { TopNavComponent } from "@/components/nav/top-nav"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -23,19 +25,25 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang='en' className='h-full'>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <TooltipProvider>
-          <MainNavComponent>{children}</MainNavComponent>
-          <Toaster />
-        </TooltipProvider>
+    <html lang="en">
+      <body>
+        <SidebarProvider>
+          <div className="flex min-h-screen w-full">
+            <SidebarComponent />
+            <main className="flex-1 w-full">
+              <TooltipProvider>
+                <div className="h-16 "><TopNavComponent /></div>
+                <div className="p-4 w-full">{children}</div>
+                <Toaster />
+              </TooltipProvider>
+            </main>
+          </div>
+        </SidebarProvider>
       </body>
     </html>
-  );
+  )
 }

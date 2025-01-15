@@ -16,21 +16,24 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { useDashboardActive } from "@/hook/use-dashboard";
+import { useDashboardActive , useDashboardOperations} from "@/hook/use-dashboard";
 
-interface VisualizationSettingProps {
-  onUpdateSection: (id: string, section: Partial<DashboardSection>) => void;
-}
-export function VisualizationSetting({
-  onUpdateSection,
-}: VisualizationSettingProps) {
+
+export function VisualizationSetting() {
   const [visualizations, setVisualizations] = useState<Visualization[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const { activeId } = useDashboardActive();
+  const { sections, update: onUpdateSection } = useDashboardOperations();
+
+  const [promptValue, setPromptValue] = useState("");
+  const [llmType, setLlmType] = useState<"imitate" | "generate">("imitate");
+
+  const activeSection = sections?.find(section => section.id === activeId);
 
   useEffect(() => {
     const fetchVisualizations = async () => {
       const visualizationResult = await listVisualizations();
+
       setVisualizations(visualizationResult.data);
     };
     fetchVisualizations();
@@ -69,10 +72,12 @@ export function VisualizationSetting({
                   <Input
                     type='text'
                     placeholder='请输入标题...'
+                    value={activeSection?.name || ''}
                     onChange={(e) => {
                       onUpdateSection(activeId, {
                         name: e.target.value,
                       });
+
                     }}
                     className='w-full'
                   />
@@ -108,7 +113,11 @@ export function VisualizationSetting({
                               className='flex items-center justify-between p-3 rounded-md border hover:bg-accent/50 transition-colors cursor-pointer'
                               onClick={() => {
                                 onUpdateSection(activeId, {
-                                  visualization: visualization,
+                                  viewId: visualization.id,
+                                  viewMode: visualization.viewMode,
+                                  sqlContent: visualization.sqlContent,
+                                  sqlVariables: visualization.sqlVariables,
+                                  databaseId: visualization.datasourceId,
                                 });
                               }}
                             >
@@ -149,6 +158,8 @@ export function VisualizationSetting({
                 <div>
                   <Textarea
                     id='prompt'
+                    value={promptValue}
+                    onChange={(e) => setPromptValue(e.target.value)}
                     placeholder='请输入您的提示词，描述您想要生成的内容，或者已有内容进行仿写...'
                     className='min-h-[120px] resize-none'
                   />
@@ -160,12 +171,16 @@ export function VisualizationSetting({
                   <Label className='text-sm font-medium'>生成模式</Label>
                 </div>
                 <div>
-                  <RadioGroup defaultValue='imitate' className='pt-2'>
-                    <div className='grid grid-cols-2 gap-4'>
+                <RadioGroup 
+                  value={llmType} 
+                  onValueChange={(value) => setLlmType(value as "imitate" | "generate")}
+                  defaultValue='imitate'
+                >                   
+                 <div className='grid grid-cols-2 gap-4'>
                       <div className='flex items-center space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-accent/50 transition-colors'>
                         <RadioGroupItem value='imitate' id='imitate' />
                         <div className='space-y-1'>
-                          <Label htmlFor='imitate' className='font-medium'>
+                          <Label htmlFor='imitate' className='font-medium llm-type'>
                             仿写
                           </Label>
                           <p className='text-xs text-muted-foreground'>
@@ -197,19 +212,8 @@ export function VisualizationSetting({
                   <Button
                     className='w-full'
                     onClick={() => {
-                      const promptValue =
-                        (
-                          document.getElementById(
-                            "prompt"
-                          ) as HTMLTextAreaElement
-                        )?.value || "";
-                      const llmType = (
-                        document.querySelector(
-                          'input[name="radix-:r0:"]:checked'
-                        ) as HTMLInputElement
-                      )?.value as "imitate" | "generate";
                       onUpdateSection(activeId, {
-                        type: "LLM",
+                        viewMode: "llm",
                         llmConfig: {
                           llmType,
                           prompt: promptValue,

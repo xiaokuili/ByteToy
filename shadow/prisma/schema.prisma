@@ -41,6 +41,22 @@ model visualization {
   sqlVariables Json     @map("sql_variables")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
+  dashboards   dashboard[]  // Add this line to create the opposite relation
+
 
   @@map("visualization")
+}
+model dashboard {
+  dashboardId   String     @map("dashboard_id")    // 组 ID
+  id            String                             // 实例 ID（可重复）
+  viewMode      String     @map("view_mode")
+  llmConfig     Json?      @map("llm_config")
+  layout        Json
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  visualizationId String?  @map("visualization_id")
+  visualization   visualization? @relation(fields: [visualizationId], references: [id])
+
+  @@id([dashboardId, id])  // 复合主键：组ID + 实例ID
+  @@map("dashboard")
 }

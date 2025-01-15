@@ -39,7 +39,6 @@ export async function generateLLMResponse(
       temperature: 0.7,
       max_tokens: 1000,
     });
-    console.log("completion", completion);
     return {
       content: completion.choices[0].message.content || "",
     };
