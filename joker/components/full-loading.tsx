@@ -25,11 +25,16 @@ function LoadingText({ message }: { message: string }) {
 
 
 export function FullLoading() {
-    
-  const { isLoading: outlineLoading } = useOutlineStore()
-  const message = outlineLoading ? "正在生成大纲，请稍等..." : "正在生成报告，请稍等..."
-  if (!message) return null
   
+    // 判断大纲生成是否完成
+  const { isLoading: outlineLoading } = useOutlineStore()
+  if (!outlineLoading) return null
+
+    // 判断报告生成是否完成
+ 
+
+  
+  const message = outlineLoading ? "正在生成大纲，请稍等..." : "正在生成报告，请稍等..."
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
