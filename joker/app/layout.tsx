@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_SC } from 'next/font/google'
 import { Toaster } from 'sonner'
-
+import { FullLoading } from '@/components/full-loading'
 import "./globals.css";
 
 // 配置思源黑体
@@ -28,6 +28,7 @@ export default function RootLayout({
         <Toaster />
 
         {children}
+        <FullLoading />
       </body>
     </html>
   );

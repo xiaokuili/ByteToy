@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -10,16 +9,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useOutlineStore } from "@/hook/useOutlineGenerator"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-    DialogFooter
-} from "@/components/ui/dialog"
+
 import { useEditorStore } from "@/hook/useEditor"
 
 const formSchema = z.object({
@@ -28,10 +18,9 @@ const formSchema = z.object({
     }),
 })
 export default function RequirementDesigner() {
-    const [open, setOpen] = useState(false)
     const { editor } = useEditorStore()
 
-    const { title, setTitle, isLoading, generateOutline, error } = useOutlineStore()
+    const { title, setTitle, isLoading, generateOutline } = useOutlineStore()
 
     const insertTitle = () => {
         // 插入标题
@@ -66,7 +55,6 @@ export default function RequirementDesigner() {
         if (success) {
             toast.success("大纲生成成功！")
             insertTitle()
-            setOpen(false)
         } else {
             toast.error("生成大纲失败，请重试")
         }
@@ -105,52 +93,12 @@ export default function RequirementDesigner() {
                                 )}
                             />
 
-                            <Dialog open={open} onOpenChange={setOpen}>
-                                <DialogTrigger asChild>
-                                    <Button type="button">
-                                        开始生成
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent className="sm:max-w-md">
-                                    <DialogHeader>
-                                        <DialogTitle>确认生成</DialogTitle>
-                                        <DialogDescription>
-                                            您确定要开始生成吗？
-                                        </DialogDescription>
-                                    </DialogHeader>
-
-                                    {error && (
-                                        <div className="text-red-500 text-sm">
-                                            {error}
-                                        </div>
-                                    )}
-
-                                    <DialogFooter className="sm:justify-end">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => setOpen(false)}
-                                            disabled={isLoading}
-                                        >
-                                            取消
-                                        </Button>
-                                        <Button
-                                            type="submit"
-                                            form="outline-form"
-                                            disabled={isLoading}
-                                        >
-                                            {isLoading ? (
-                                                <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    大纲生成中...
-                                                </>
-                                            ) : (
-                                                "确认"
-                                            )}
-                                        </Button>
-                                    </DialogFooter>
-                                </DialogContent>
-                            </Dialog>
+                            <Button 
+                                type="submit"
+                                disabled={isLoading}
+                            >
+                                生成
+                            </Button>
                         </form>
                     </Form>
                 </CardContent>
