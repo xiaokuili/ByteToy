@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_SC } from 'next/font/google'
+import { Toaster } from 'sonner'
 
 import "./globals.css";
 
@@ -24,6 +25,8 @@ export default function RootLayout({
       <body
         className={`${notoSansSC.className} antialiased h-screen`}
       >
+        <Toaster />
+
         {children}
       </body>
     </html>

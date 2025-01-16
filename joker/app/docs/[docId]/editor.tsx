@@ -50,6 +50,7 @@ export default function Editor() {
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none h-full text-gray-700 leading-relaxed ',
       },
     },
+    immediatelyRender: false,
 
   });
 

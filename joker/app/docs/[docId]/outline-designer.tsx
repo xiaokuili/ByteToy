@@ -50,10 +50,25 @@ function OutlineNode({ item, depth = 0 }: { item: OutlineItem; depth?: number })
 
 
 
-
 export default function OutlineDesigner() {
-    const { outline } = useOutlineGenerator()
-    
+    const { outline, error, isLoading } = useOutlineGenerator()
+
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center p-8">
+          <div>加载中...</div>
+        </div>
+      )
+    }
+
+    if (error) {
+      return (
+        <div className="flex items-center justify-center p-8">
+          <div className="text-red-500">{error}</div>
+        </div>
+      )
+    }
+
     return (
       <div className="space-y-2 p-4">
         {outline.map(item => (

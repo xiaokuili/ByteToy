@@ -7,26 +7,41 @@ import { Button } from "@/components/ui/button"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useOutlineGenerator } from "@/hook/useOutlineGenerator"
+import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter
+} from "@/components/ui/dialog"
 
 const formSchema = z.object({
-  title: z.string().min(1, {
-    message: "报告名称不能为空",
-  }),
+    title: z.string().min(1, {
+        message: "报告名称不能为空",
+    }),
 })
 export default function RequirementDesigner() {
-     // 1. Define your form.
+    const { title, setTitle, isLoading } = useOutlineGenerator()
+    // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            title: "",
+            title: title,
         },
     })
-    
+
     // 2. Define a submit handler.
     function onSubmit(values: z.infer<typeof formSchema>) {
         // Do something with the form values.
         // ✅ This will be type-safe and validated.
-        console.log(values)
+        setTitle(values.title)
+        toast.success("报告需求配置成功")
     }
     return (
         <div className="space-y-6">
@@ -57,7 +72,46 @@ export default function RequirementDesigner() {
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit">保存</Button>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button type="button" disabled={isLoading}>
+                                        {isLoading ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                保存中
+                                            </>
+                                        ) : (
+                                            "保存"
+                                        )}
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-md">
+                                    <DialogHeader>
+                                        <DialogTitle>确认保存</DialogTitle>
+                                        <DialogDescription>
+                                            您确定要保存这些更改吗？
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter className="sm:justify-end">
+                                        <DialogClose asChild>
+                                            <Button type="button" variant="outline">
+                                                取消
+                                            </Button>
+                                        </DialogClose>
+                                        <DialogClose asChild>
+                                            <Button
+                                                type="submit"
+                                                onClick={() => {
+                                                    form.handleSubmit(onSubmit)();
+                                                }}
+                                                disabled={isLoading}
+                                            >
+                                                确认
+                                            </Button>
+                                        </DialogClose>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         </form>
                     </Form>
                 </CardContent>
