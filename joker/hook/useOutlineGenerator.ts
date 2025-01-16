@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { generateOutline, OutlineItem } from '@/server/generateOutline'
-import { useEffect, useCallback } from 'react'
 
 interface OutlineState {
   title: string
@@ -11,10 +10,10 @@ interface OutlineState {
 
 interface OutlineActions {
   setTitle: (title: string) => void
-  generateOutline: (title: string) => Promise<void>
+  generateOutline: (title: string) => Promise<boolean> // 返回是否成功
 }
 
-const useOutlineStore = create<OutlineState & OutlineActions>((set) => ({
+export  const useOutlineStore = create<OutlineState & OutlineActions>((set) => ({
   // 初始状态
   title: '',
   outline: [],
@@ -25,41 +24,23 @@ const useOutlineStore = create<OutlineState & OutlineActions>((set) => ({
   setTitle: (title) => set({ title }),
 
   generateOutline: async (title) => {
-    if (!title) return
+    if (!title) return false
 
     set({ isLoading: true, error: null })
 
     try {
       const outline = await generateOutline(title)
       set({ outline, isLoading: false })
+      return true
     } catch (err) {
       set({
         isLoading: false,
         error: err instanceof Error ? err.message : '生成大纲失败',
         outline: []
       })
+      return false
     }
   }
 }))
 
-export const useOutlineGenerator = () => {
-  const { title, generateOutline, isLoading, error, outline, setTitle } = useOutlineStore()
-  
-  const memoizedGenerateOutline = useCallback(() => {
-    if (title) {
-      generateOutline(title)
-    }
-  }, [title, generateOutline])
 
-  useEffect(() => {
-    memoizedGenerateOutline()
-  }, [memoizedGenerateOutline])
-
-  return {
-    title,
-    outline,
-    isLoading,
-    error,
-    setTitle
-  }
-}

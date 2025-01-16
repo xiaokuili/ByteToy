@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -7,12 +8,11 @@ import { Button } from "@/components/ui/button"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useOutlineGenerator } from "@/hook/useOutlineGenerator"
+import { useOutlineStore } from "@/hook/useOutlineGenerator"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogHeader,
@@ -27,7 +27,9 @@ const formSchema = z.object({
     }),
 })
 export default function RequirementDesigner() {
-    const { title, setTitle, isLoading } = useOutlineGenerator()
+    const [open, setOpen] = useState(false)
+
+    const { title, setTitle, isLoading, generateOutline, error } = useOutlineStore()
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -36,13 +38,16 @@ export default function RequirementDesigner() {
         },
     })
 
-    // 2. Define a submit handler.
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
-        setTitle(values.title)
-        toast.success("报告需求配置成功")
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        const success = await generateOutline(values.title)
+        if (success) {
+            toast.success("大纲生成成功！")
+            setOpen(false)
+        } else {
+            toast.error("生成大纲失败，请重试")
+        }
     }
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -54,8 +59,8 @@ export default function RequirementDesigner() {
                     <CardDescription>配置报告的基本信息</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <Form {...form} >
+                        <form id="outline-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <FormField
                                 control={form.control}
                                 name="title"
@@ -63,7 +68,10 @@ export default function RequirementDesigner() {
                                     <FormItem>
                                         <FormLabel>报告名称</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="请输入报告名称" {...field} />
+                                            <Input placeholder="请输入报告名称" {...field} onChange={(e) => {
+                                                field.onChange(e)
+                                                setTitle(e.target.value)
+                                            }} />
                                         </FormControl>
                                         <FormDescription>
                                             这将作为您的报告标题显示
@@ -72,17 +80,11 @@ export default function RequirementDesigner() {
                                     </FormItem>
                                 )}
                             />
-                            <Dialog>
+                           
+                           <Dialog open={open} onOpenChange={setOpen}>
                                 <DialogTrigger asChild>
-                                    <Button type="button" disabled={isLoading}>
-                                        {isLoading ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                保存中
-                                            </>
-                                        ) : (
-                                            "保存"
-                                        )}
+                                    <Button type="button">
+                                        保存
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-md">
@@ -92,23 +94,36 @@ export default function RequirementDesigner() {
                                             您确定要保存这些更改吗？
                                         </DialogDescription>
                                     </DialogHeader>
+                                    
+                                    {error && (
+                                        <div className="text-red-500 text-sm">
+                                            {error}
+                                        </div>
+                                    )}
+
                                     <DialogFooter className="sm:justify-end">
-                                        <DialogClose asChild>
-                                            <Button type="button" variant="outline">
-                                                取消
-                                            </Button>
-                                        </DialogClose>
-                                        <DialogClose asChild>
-                                            <Button
-                                                type="submit"
-                                                onClick={() => {
-                                                    form.handleSubmit(onSubmit)();
-                                                }}
-                                                disabled={isLoading}
-                                            >
-                                                确认
-                                            </Button>
-                                        </DialogClose>
+                                        <Button 
+                                            type="button" 
+                                            variant="outline" 
+                                            onClick={() => setOpen(false)}
+                                            disabled={isLoading}
+                                        >
+                                            取消
+                                        </Button>
+                                        <Button
+                                            type="submit"
+                                            form="outline-form"
+                                            disabled={isLoading}
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    大纲生成中...
+                                                </>
+                                            ) : (
+                                                "确认"
+                                            )}
+                                        </Button>
                                     </DialogFooter>
                                 </DialogContent>
                             </Dialog>

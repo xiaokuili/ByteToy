@@ -5,7 +5,7 @@ import { ListTree, MoreHorizontal, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { OutlineItem } from "@/server/generateOutline";
-import { useOutlineGenerator } from "@/hook/useOutlineGenerator";
+import { useOutlineStore } from "@/hook/useOutlineGenerator";
 
 
 
@@ -51,7 +51,7 @@ function OutlineNode({ item, depth = 0 }: { item: OutlineItem; depth?: number })
 
 
 export default function OutlineDesigner() {
-    const { outline, error, isLoading } = useOutlineGenerator()
+    const { outline, error, isLoading } = useOutlineStore()
 
     if (isLoading) {
       return (

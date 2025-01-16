@@ -1,3 +1,11 @@
+"use server"
+
+import { z } from "zod"
+import { StructuredOutputParser } from "@langchain/core/output_parsers";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { RunnableSequence } from "@langchain/core/runnables";
+import { ChatOpenAI } from "@langchain/openai";
+
 
 export interface OutlineItem {
     id: string
@@ -6,57 +14,44 @@ export interface OutlineItem {
     children?: OutlineItem[]
 }
 
-  
+const model = new ChatOpenAI({
+ 
+    model: process.env.BASE_MODEL_NAME,
+    temperature: 0
+  });
 
+  
 export const generateOutline = async (title: string) => {
-    // 根据标题生成示例大纲
-    const outline = [
-        {
-            id: '1',
-            title: '第一章：概述',
-            children: [
-                { id: '1.1', title: `1.1 ${title}简介` },
-                { id: '1.2', title: '1.2 研究背景与意义' },
-                { id: '1.3', title: '1.3 研究方法' }
-            ]
-        },
-        {
-            id: '2', 
-            title: '第二章：理论基础',
-            children: [
-                { id: '2.1', title: '2.1 基本概念' },
-                { id: '2.2', title: '2.2 相关理论' },
-                { id: '2.3', title: '2.3 研究现状' }
-            ]
-        },
-        {
-            id: '3',
-            title: '第三章：分析与设计',
-            children: [
-                { id: '3.1', title: '3.1 需求分析' },
-                { id: '3.2', title: '3.2 总体设计' },
-                { id: '3.3', title: '3.3 详细设计' }
-            ]
-        },
-        {
-            id: '4',
-            title: '第四章：实现与测试',
-            children: [
-                { id: '4.1', title: '4.1 开发环境' },
-                { id: '4.2', title: '4.2 关键功能实现' },
-                { id: '4.3', title: '4.3 测试与验证' }
-            ]
-        },
-        {
-            id: '5',
-            title: '第五章：总结与展望',
-            children: [
-                { id: '5.1', title: '5.1 主要工作总结' },
-                { id: '5.2', title: '5.2 创新点' },
-                { id: '5.3', title: '5.3 未来展望' }
-            ]
-        }
-    ]
-    
-    return outline
+    // Import required dependencies from langchain
+    const zodSchema = z.array(z.object({
+        id: z.string(),
+        title: z.string(),
+        children: z.array(z.object({
+            id: z.string(),
+            title: z.string(),
+            type: z.enum(['line', 'bar', 'pie']).optional()
+        })).optional()
+    }));
+
+    const parser = StructuredOutputParser.fromZodSchema(zodSchema);
+
+    const prompt = ChatPromptTemplate.fromTemplate(`
+        Generate a detailed outline for a report titled "${title}".
+        The outline should have 5 chapters with 3 subsections each.
+        Each section needs an ID and title.
+        
+        {format_instructions}
+    `);
+
+    const chain = RunnableSequence.from([
+        prompt,
+        model,
+        parser
+    ]);
+
+    const response = await chain.invoke({
+        format_instructions: parser.getFormatInstructions()
+    });
+    console.log(response)
+    return response;
 }
