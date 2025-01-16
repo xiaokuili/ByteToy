@@ -4,16 +4,16 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import FontFamily from '@tiptap/extension-font-family';
 import Placeholder from '@tiptap/extension-placeholder';
-import {ScrollArea} from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function Editor() {
   const editor = useEditor({
     extensions: [
-        StarterKit,
-        FontFamily,
-        Placeholder.configure({
-            placeholder: '请输入内容...',
-        }),
+      StarterKit,
+      FontFamily,
+      Placeholder.configure({
+        placeholder: '请输入内容...',
+      }),
     ],
     autofocus: 'end',
     content: `
@@ -50,14 +50,14 @@ export default function Editor() {
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none h-full text-gray-700 leading-relaxed ',
       },
     },
-    
+
   });
 
   return (
-        <div className="h-full p-4 sm:p-8 max-w-5xl mx-auto">
-            <ScrollArea className="h-full w-full rounded-lg border p-8 sm:p-16 mx-auto bg-background/50 shadow-sm">
-                <EditorContent editor={editor} />
-            </ScrollArea>
-        </div>
+    <ScrollArea className="h-full p-8">
+      <div className=" max-w-5xl mx-auto rounded-lg border bg-background/50 shadow-sm p-8 sm:p-16">
+        <EditorContent editor={editor} />
+      </div>
+    </ScrollArea>
   );
 }

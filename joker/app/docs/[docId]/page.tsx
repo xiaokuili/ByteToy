@@ -5,13 +5,15 @@ import Composer from './composer';
 
 export default function DocPage() {
   return (
-    <div className="flex w-full h-full">
-      <div className="flex-1 max-w-[75%] h-full ">
+    <div className="h-full flex ">
+      {/* 左侧可滚动区域 */}
+      <div className="w-[75%] border-r ">
         <Editor />
       </div>
-      <div className="w-[350px] max-w-[25%] border-l border-gray-200 h-screen">
+      <div className="w-[25%] min-w-0 h-full border-l">
         <Composer />
       </div>
     </div>
   );
 }
+
