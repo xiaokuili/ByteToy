@@ -32,6 +32,26 @@ export default function RequirementDesigner() {
     const { editor } = useEditorStore()
 
     const { title, setTitle, isLoading, generateOutline, error } = useOutlineStore()
+
+    const insertTitle = () => {
+        // 插入标题
+        editor?.commands.insertContent([
+            {
+                type: 'heading',
+                attrs: { level: 1 },
+                content: [
+                    {
+                        type: 'text',
+                        text: title,
+                    },
+                ],
+            }
+        
+        ])
+        editor?.commands.enter()
+
+    }
+
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -40,30 +60,12 @@ export default function RequirementDesigner() {
         },
     })
 
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const success = await generateOutline(values.title)
         if (success) {
             toast.success("大纲生成成功！")
-            editor?.commands.insertContent([
-                {
-                    type: 'paragraph',
-                    content: [
-                        {
-                            type: 'text',
-                            text: 'First paragraph',
-                        },
-                    ],
-                },
-                {
-                    type: 'paragraph',
-                    content: [
-                        {
-                            type: 'text',
-                            text: 'Second paragraph',
-                        },
-                    ],
-                },
-            ])
+            insertTitle()
             setOpen(false)
         } else {
             toast.error("生成大纲失败，请重试")

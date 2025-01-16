@@ -52,7 +52,11 @@ function OutlineNode({ item, depth = 0 }: { item: OutlineItem; depth?: number })
 
 export default function OutlineDesigner() {
     const { outline, error, isLoading } = useOutlineStore()
-
+    if (outline.length === 0) {
+      return <div className="flex items-center justify-center p-8">
+        请在需求配置中，提交报告名称，生成大纲
+      </div>
+    }
     if (isLoading) {
       return (
         <div className="flex items-center justify-center p-8">
