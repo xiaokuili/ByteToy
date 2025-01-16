@@ -20,6 +20,7 @@ import {
     DialogTrigger,
     DialogFooter
 } from "@/components/ui/dialog"
+import { useEditorStore } from "@/hook/useEditor"
 
 const formSchema = z.object({
     title: z.string().min(1, {
@@ -28,6 +29,7 @@ const formSchema = z.object({
 })
 export default function RequirementDesigner() {
     const [open, setOpen] = useState(false)
+    const { editor } = useEditorStore()
 
     const { title, setTitle, isLoading, generateOutline, error } = useOutlineStore()
     // 1. Define your form.
@@ -42,6 +44,26 @@ export default function RequirementDesigner() {
         const success = await generateOutline(values.title)
         if (success) {
             toast.success("大纲生成成功！")
+            editor?.commands.insertContent([
+                {
+                    type: 'paragraph',
+                    content: [
+                        {
+                            type: 'text',
+                            text: 'First paragraph',
+                        },
+                    ],
+                },
+                {
+                    type: 'paragraph',
+                    content: [
+                        {
+                            type: 'text',
+                            text: 'Second paragraph',
+                        },
+                    ],
+                },
+            ])
             setOpen(false)
         } else {
             toast.error("生成大纲失败，请重试")
@@ -80,21 +102,21 @@ export default function RequirementDesigner() {
                                     </FormItem>
                                 )}
                             />
-                           
-                           <Dialog open={open} onOpenChange={setOpen}>
+
+                            <Dialog open={open} onOpenChange={setOpen}>
                                 <DialogTrigger asChild>
                                     <Button type="button">
-                                        保存
+                                        开始生成
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-md">
                                     <DialogHeader>
-                                        <DialogTitle>确认保存</DialogTitle>
+                                        <DialogTitle>确认生成</DialogTitle>
                                         <DialogDescription>
-                                            您确定要保存这些更改吗？
+                                            您确定要开始生成吗？
                                         </DialogDescription>
                                     </DialogHeader>
-                                    
+
                                     {error && (
                                         <div className="text-red-500 text-sm">
                                             {error}
@@ -102,9 +124,9 @@ export default function RequirementDesigner() {
                                     )}
 
                                     <DialogFooter className="sm:justify-end">
-                                        <Button 
-                                            type="button" 
-                                            variant="outline" 
+                                        <Button
+                                            type="button"
+                                            variant="outline"
                                             onClick={() => setOpen(false)}
                                             disabled={isLoading}
                                         >

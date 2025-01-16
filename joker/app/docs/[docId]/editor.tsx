@@ -5,9 +5,49 @@ import StarterKit from '@tiptap/starter-kit';
 import FontFamily from '@tiptap/extension-font-family';
 import Placeholder from '@tiptap/extension-placeholder';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useEditorStore } from '@/hook/useEditor';
 
 export default function Editor() {
+  const {setEditor} = useEditorStore()
+
   const editor = useEditor({
+    onBeforeCreate({ editor }) {
+      // Before the view is created.
+      setEditor(editor)
+    },
+    onCreate({ editor }) {
+      // The editor is ready.
+      setEditor(editor)
+    },
+    onUpdate({ editor }) {
+      // The content has changed.
+      setEditor(editor)
+    },
+    onSelectionUpdate({ editor }) {
+      // The selection has changed.
+      setEditor(editor)
+    },
+    onTransaction({ editor }) {
+      // The editor state has changed.
+      setEditor(editor)
+    },
+    onFocus({ editor }) {
+      // The editor is focused.
+      setEditor(editor)
+    },
+    onBlur({ editor }) {
+      // The editor isn't focused anymore.
+      setEditor(editor)
+    },
+    onDestroy() {
+      // The editor is being destroyed.
+      setEditor(null)
+    },
+
+    onContentError({ editor }) {
+      // The editor content does not match the schema.
+      setEditor(editor)
+    },
     extensions: [
       StarterKit,
       FontFamily,
