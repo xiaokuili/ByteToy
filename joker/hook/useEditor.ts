@@ -1,8 +1,9 @@
+"use client"
 import { create } from 'zustand';
 import { Editor } from '@tiptap/react';
 import { persist } from 'zustand/middleware';
 import { generateOutline, OutlineItem } from '@/server/generateOutline';
-import { generateText } from '@/server/generateBlock';
+import { generateText } from '@/server/generateContent';
 
 // 将状态按职责拆分
 interface OutlineState {
@@ -92,15 +93,13 @@ export const useEditorStore = create<Store>()(
 
         try {
           const stream = await generateText(outline);
-          // 如果是流式响应
-          if (outline.type === 'ai-text') {
-            for await (const chunk of stream) {
+          
+          for await (const chunk of stream) {
+            if (chunk && typeof chunk === 'string' && chunk.trim()) {
               editor.instance.commands.insertContent(chunk);
             }
-          } else {
-            editor.instance.commands.insertContent(stream);
-            editor.instance.commands.enter();
           }
+          editor.instance.commands.enter();
         } catch (err) {
           set(state => ({ 
             editor: {

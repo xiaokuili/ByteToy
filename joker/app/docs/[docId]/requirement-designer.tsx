@@ -10,7 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import { useParams } from 'next/navigation';
 import { useEditorStore } from "@/hook/useEditor"
-
+import { OutlineItem } from "@/server/generateOutline"
+import { useState } from "react"
 
 const formSchema = z.object({
     title: z.string().min(1, {
@@ -21,7 +22,7 @@ export default function RequirementDesigner() {
     const docId = useParams().docId as string
 
     const { editor, outline, setOutlineTitle, generateContent, generateOutline, saveDoc } = useEditorStore()
-
+    const [title, setTitle] = useState(outline.title)
 
 
     const insertTitle = () => {
@@ -33,7 +34,7 @@ export default function RequirementDesigner() {
                 content: [
                     {
                         type: 'text',
-                        text: outline.title,
+                        text: title,
                     },
                 ],
             }
@@ -61,9 +62,17 @@ export default function RequirementDesigner() {
         }
         // 生成文本并且展示
         insertTitle();
-        for (const item of outline) {
-            await generateContent(item);
+        // 递归遍历大纲树结构
+        async function traverseOutline(items: OutlineItem[]) {
+            for (const item of items) {
+                await generateContent(item);
+                if (item.children?.length) {
+                    await traverseOutline(item.children);
+                }
+            }
         }
+
+        await traverseOutline(outline);
         // save
         saveDoc(docId, editor?.instance?.getHTML() || '');
     }
@@ -90,7 +99,7 @@ export default function RequirementDesigner() {
                                         <FormControl>
                                             <Input placeholder="请输入报告名称" {...field} onChange={(e) => {
                                                 field.onChange(e)
-                                                setOutlineTitle(e.target.value)
+                                                setTitle(e.target.value)
                                             }} />
                                         </FormControl>
                                         <FormDescription>
