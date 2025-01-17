@@ -10,8 +10,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useOutlineStore } from "@/hook/useOutlineGenerator"
 import { toast } from "sonner"
 import { useParams } from 'next/navigation';
-
+import { useTextStore } from "@/hook/useText"
 import { useEditorStore } from "@/hook/useEditor"
+import { OutlineItem } from "@/server/generateOutline"
 
 const formSchema = z.object({
     title: z.string().min(1, {
@@ -19,10 +20,14 @@ const formSchema = z.object({
     }),
 })
 export default function RequirementDesigner() {
-    const { editor, saveDoc } = useEditorStore()
     const docId = useParams().docId as string
 
-    const { title, setTitle, isLoading, generateOutline } = useOutlineStore()
+    const { editor, saveDoc } = useEditorStore()
+    const { generateText } = useTextStore()
+    const { title, setTitle, isLoading, generateOutline, outline } = useOutlineStore()
+
+
+
 
     const insertTitle = () => {
         // 插入标题
@@ -42,6 +47,29 @@ export default function RequirementDesigner() {
         editor?.commands.enter()
 
     }
+    const insertContent = async (items: OutlineItem[]) => {
+        try {
+            for (const item of items) {
+                const generatedText = await generateText(item)
+                editor?.commands.insertContent([
+                    {
+                        type: 'paragraph',
+                        content: [
+                            {
+                                type: 'text',
+                                text: generatedText,
+                            },
+                        ],
+                    }
+                ])
+            }
+        } catch (error) {
+            toast.error("生成内容失败，请重试")
+        }
+        finally {
+            toast.success("内容生成成功！")
+        }
+    }
 
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
@@ -57,6 +85,7 @@ export default function RequirementDesigner() {
         if (success) {
             toast.success("大纲生成成功！")
             insertTitle()
+            await insertContent(outline)
             saveDoc(docId, editor?.getHTML() || '')
         } else {
             toast.error("生成大纲失败，请重试")
