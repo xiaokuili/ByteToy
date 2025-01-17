@@ -7,12 +7,10 @@ import { Button } from "@/components/ui/button"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useOutlineStore } from "@/hook/useOutlineGenerator"
 import { toast } from "sonner"
 import { useParams } from 'next/navigation';
-import { useTextStore } from "@/hook/useText"
 import { useEditorStore } from "@/hook/useEditor"
-import { OutlineItem } from "@/server/generateOutline"
+
 
 const formSchema = z.object({
     title: z.string().min(1, {
@@ -22,9 +20,7 @@ const formSchema = z.object({
 export default function RequirementDesigner() {
     const docId = useParams().docId as string
 
-    const { editor, saveDoc } = useEditorStore()
-    const { generateText } = useTextStore()
-    const { title, setTitle, isLoading, generateOutline, outline } = useOutlineStore()
+    const { editor, saveDoc, generateOutlineFromTitle, generateTextFromOutline, outlineTitle, isGeneratingOutline, setOutlineTitle } = useEditorStore()
 
 
 
@@ -38,7 +34,7 @@ export default function RequirementDesigner() {
                 content: [
                     {
                         type: 'text',
-                        text: title,
+                        text: outlineTitle,
                     },
                 ],
             }
@@ -47,49 +43,59 @@ export default function RequirementDesigner() {
         editor?.commands.enter()
 
     }
-    const insertContent = async (items: OutlineItem[]) => {
-        try {
-            for (const item of items) {
-                const generatedText = await generateText(item)
-                editor?.commands.insertContent([
+    const insertContent = async (text: string) => {
+        editor?.commands.insertContent([
+            {
+                type: 'paragraph',
+                content: [
                     {
-                        type: 'paragraph',
-                        content: [
-                            {
-                                type: 'text',
-                                text: generatedText,
-                            },
-                        ],
-                    }
-                ])
+                        type: 'text',
+                        text: text,
+                    },
+                ],
             }
-        } catch (error) {
-            toast.error("生成内容失败，请重试")
-        }
-        finally {
-            toast.success("内容生成成功！")
-        }
+        ])
     }
 
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            title: title,
+            title: outlineTitle,
         },
     })
 
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const success = await generateOutline(values.title)
-        if (success) {
-            toast.success("大纲生成成功！")
-            insertTitle()
-            await insertContent(outline)
-            saveDoc(docId, editor?.getHTML() || '')
-        } else {
-            toast.error("生成大纲失败，请重试")
+        const outline = await generateOutlineFromTitle(values.title);
+        if (outline.length === 0) {
+            toast.error("生成大纲失败，请重试");
+            return;
         }
+        // 生成文本并且展示
+        insertTitle();
+
+        try {
+            for (const item of outline) {
+                // 生成文本
+                const text = await generateTextFromOutline(item);
+                if (!text) {
+                    continue;
+                }
+
+                // 写入内容
+                try {
+                    await insertContent(text);
+                } catch (insertError) {
+                    throw insertError;
+                }
+            }
+        } catch (error) {
+            toast.error("生成内容失败，请重试");
+            return;
+        }
+        // save
+        saveDoc(docId, editor?.getHTML() || '');
     }
 
     return (
@@ -114,7 +120,7 @@ export default function RequirementDesigner() {
                                         <FormControl>
                                             <Input placeholder="请输入报告名称" {...field} onChange={(e) => {
                                                 field.onChange(e)
-                                                setTitle(e.target.value)
+                                                setOutlineTitle(e.target.value)
                                             }} />
                                         </FormControl>
                                         <FormDescription>
@@ -127,7 +133,7 @@ export default function RequirementDesigner() {
 
                             <Button
                                 type="submit"
-                                disabled={isLoading}
+                                disabled={isGeneratingOutline}
                             >
                                 生成
                             </Button>

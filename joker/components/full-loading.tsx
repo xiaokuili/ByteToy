@@ -1,7 +1,7 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
-import { useOutlineStore } from '@/hook/useOutlineGenerator'
+import { useEditorStore } from '@/hook/useEditor'
 
 
 
@@ -9,7 +9,7 @@ function LoadingText({ message }: { message: string }) {
   return (
     <div className="text-sm text-white/90">
       {message.split('').map((char, index) => (
-        <span 
+        <span
           key={index}
           className="inline-block animate-bounce"
           style={{ animationDelay: `${index * 50}ms` }}
@@ -25,16 +25,14 @@ function LoadingText({ message }: { message: string }) {
 
 
 export function FullLoading() {
-  
-    // 判断大纲生成是否完成
-  const { isLoading: outlineLoading } = useOutlineStore()
-  if (!outlineLoading) return null
 
-    // 判断报告生成是否完成
- 
+  // 判断大纲生成是否完成
+  const { isGeneratingOutline, isGeneratingText } = useEditorStore()
+  if (!isGeneratingOutline && !isGeneratingText) return null
 
-  
-  const message = outlineLoading ? "正在生成大纲，请稍等..." : "正在生成报告，请稍等..."
+  // 判断报告生成是否完成
+
+  const message = isGeneratingOutline ? "正在生成大纲，请稍等..." : "正在生成报告，请稍等..."
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
