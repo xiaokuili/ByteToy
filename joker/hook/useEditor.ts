@@ -4,113 +4,140 @@ import { persist } from 'zustand/middleware';
 import { generateOutline, OutlineItem } from '@/server/generateOutline';
 import { generateText } from '@/server/generateBlock';
 
-interface SavedDoc {
-  id: string;
-  content: string;
+// 将状态按职责拆分
+interface OutlineState {
+  title: string;
+  items: OutlineItem[];
+  isGenerating: boolean;
+  error: string | null;
 }
 
 interface EditorState {
-  // Editor state
-  editor: Editor | null;
-  setEditor: (editor: Editor | null) => void;
-  
-  // Document storage
-  savedDocs: SavedDoc[];
-  getDoc: (id: string) => string | null;
-  saveDoc: (id: string, content: string) => void;
-  
-  // Outline generation
-  outlineTitle: string;
-  outline: OutlineItem[];
-  isGeneratingOutline: boolean;
-  outlineError: string | null;
-  setOutlineTitle: (title: string) => void;
-  generateOutlineFromTitle: (title: string) => Promise<OutlineItem[]>;
-  
-  // Text generation
-  generateTextFromOutline: (outline: OutlineItem) => Promise<string>;
-  isGeneratingText: boolean;
-  textError: string | null;
+  instance: Editor | null;
+  isGenerating: boolean;
+  error: string | null;
 }
 
-export const useEditorStore = create<EditorState>()(
-  persist<EditorState>(
+interface StorageState {
+  docs: Array<{ id: string; content: string }>;
+}
+
+interface Store {
+  // 大纲相关
+  outline: OutlineState;
+  setOutlineTitle: (title: string) => void;
+  generateOutline: (title: string) => Promise<OutlineItem[]>;
+  
+  // 编辑器相关
+  editor: EditorState;
+  setEditor: (editor: Editor | null) => void;
+  generateContent: (outline: OutlineItem) => Promise<void>;
+  
+  // 存储相关
+  storage: StorageState;
+  saveDoc: (id: string, content: string) => void;
+  getDoc: (id: string) => string;
+}
+
+export const useEditorStore = create<Store>()(
+  persist(
     (set, get) => ({
-      // Editor state
-      editor: null,
-      setEditor: (editor) => set({ editor }),
-      
-      // Document storage
-      savedDocs: [],
-      getDoc: (id) => {
-        const doc = get().savedDocs.find(doc => doc.id === id);
-        return doc ? doc.content : "";
+      // 大纲状态管理
+      outline: {
+        title: '',
+        items: [],
+        isGenerating: false,
+        error: null
+      },
+      setOutlineTitle: (title) => 
+        set(state => ({ outline: { ...state.outline, title } })),
+      generateOutline: async (title) => {
+        set(state => ({ 
+          outline: { ...state.outline, isGenerating: true, error: null } 
+        }));
+        
+        try {
+          const items = await generateOutline(title);
+          set(state => ({ 
+            outline: { ...state.outline, items, isGenerating: false }
+          }));
+          return items;
+        } catch (err) {
+          set(state => ({ 
+            outline: {
+              ...state.outline,
+              isGenerating: false,
+              error: err instanceof Error ? err.message : '生成失败'
+            }
+          }));
+          return [];
+        }
+      },
+
+      // 编辑器状态管理
+      editor: {
+        instance: null,
+        isGenerating: false,
+        error: null
+      },
+      setEditor: (instance) => 
+        set(state => ({ editor: { ...state.editor, instance } })),
+      generateContent: async (outline: OutlineItem) => {
+        const { editor } = get();
+        if (!editor.instance) return;
+
+        set(state => ({ 
+          editor: { ...state.editor, isGenerating: true, error: null }
+        }));
+
+        try {
+          const stream = await generateText(outline);
+          // 如果是流式响应
+          if (outline.type === 'ai-text') {
+            for await (const chunk of stream) {
+              editor.instance.commands.insertContent(chunk);
+            }
+          } else {
+            editor.instance.commands.insertContent(stream);
+            editor.instance.commands.enter();
+          }
+        } catch (err) {
+          set(state => ({ 
+            editor: {
+              ...state.editor,
+              error: err instanceof Error ? err.message : '生成失败'
+            }
+          }));
+        } finally {
+          set(state => ({ 
+            editor: { ...state.editor, isGenerating: false }
+          }));
+        }
+      },
+
+      // 存储状态管理
+      storage: {
+        docs: []
       },
       saveDoc: (id, content) => {
-        return set((state) => {
-          const existingDocIndex = state.savedDocs.findIndex(doc => doc.id === id);
-          
-          if (existingDocIndex >= 0) {
-            // 更新已存在的文档
-            const newDocs = [...state.savedDocs];
-            newDocs[existingDocIndex] = { id, content };
-            return { savedDocs: newDocs };
-          } else {
-            // 添加新文档
-            return { savedDocs: [...state.savedDocs, { id, content }] };
+        set(state => ({
+          storage: {
+            docs: [
+              ...state.storage.docs.filter(doc => doc.id !== id),
+              { id, content }
+            ]
           }
-        });
+        }));
       },
-
-      // Outline generation
-      outlineTitle: '',
-      outline: [],
-      isGeneratingOutline: false,
-      outlineError: null,
-      setOutlineTitle: (title) => set({ outlineTitle: title }),
-      generateOutlineFromTitle: async (title) => {
-        if (!title) {
-          set({ outlineError: '标题不能为空', outline: [] });
-          return [];
-        }
-        
-        set({ isGeneratingOutline: true, outlineError: null });
-        
-        try {
-          const outline = await generateOutline(title);
-          set({ outline, isGeneratingOutline: false });
-          return outline;
-        } catch (err) {
-          set({
-            isGeneratingOutline: false,
-            outlineError: err instanceof Error ? err.message : '生成大纲失败',
-            outline: []
-          });
-          return [];
-        }
-      },
-
-      // Text generation 
-      generateTextFromOutline: async (outline: OutlineItem) => {
-        set({ isGeneratingText: true, textError: null });
-        try {
-          const text = await generateText(outline);
-          set({ isGeneratingText: false });
-          return text;
-        } catch (err) {
-          set({ isGeneratingText: false, textError: err instanceof Error ? err.message : '生成文本失败' });
-          throw err;
-        }
-      },
-      isGeneratingText: false,
-      textError: null
+      getDoc: (id) => {
+        const doc = get().storage.docs.find(doc => doc.id === id);
+        return doc?.content ?? '';
+      }
     }),
     {
       name: 'editor-storage',
-      
-      // @ts-ignore
       partialize: (state) => ({
-        savedDocs: state.savedDocs
+        storage: state.storage
       })
     }
   )

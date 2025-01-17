@@ -51,13 +51,13 @@ function OutlineNode({ item, depth = 0 }: { item: OutlineItem; depth?: number })
 
 
 export default function OutlineDesigner() {
-  const { outline, outlineError, isGeneratingOutline } = useEditorStore()
-  if (outline.length === 0) {
+  const { outline } = useEditorStore()
+  if (outline.items.length === 0) {
     return <div className="flex items-center justify-center p-8">
       请在需求配置中，提交报告名称，生成大纲
     </div>
   }
-  if (isGeneratingOutline) {
+  if (outline.isGenerating) {
     return (
       <div className="flex items-center justify-center p-8">
         <div>加载中...</div>
@@ -65,17 +65,17 @@ export default function OutlineDesigner() {
     )
   }
 
-  if (outlineError) {
+  if (outline.error) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-red-500">{outlineError}</div>
+        <div className="text-red-500">{outline.error}</div>
       </div>
     )
   }
 
   return (
     <div className="space-y-2 p-4">
-      {outline.map(item => (
+      {outline.items.map(item => (
         <OutlineNode key={item.id} item={item} />
       ))}
     </div>

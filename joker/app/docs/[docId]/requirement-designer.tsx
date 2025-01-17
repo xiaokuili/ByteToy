@@ -20,82 +20,52 @@ const formSchema = z.object({
 export default function RequirementDesigner() {
     const docId = useParams().docId as string
 
-    const { editor, saveDoc, generateOutlineFromTitle, generateTextFromOutline, outlineTitle, isGeneratingOutline, setOutlineTitle } = useEditorStore()
-
+    const { editor, outline, setOutlineTitle, generateContent, generateOutline, saveDoc } = useEditorStore()
 
 
 
     const insertTitle = () => {
         // 插入标题
-        editor?.commands.insertContent([
+        editor?.instance?.commands.insertContent([
             {
                 type: 'heading',
                 attrs: { level: 1 },
                 content: [
                     {
                         type: 'text',
-                        text: outlineTitle,
+                        text: outline.title,
                     },
                 ],
             }
 
         ])
-        editor?.commands.enter()
+        editor?.instance?.commands.enter()
 
     }
-    const insertContent = async (text: string) => {
-        editor?.commands.insertContent([
-            {
-                type: 'paragraph',
-                content: [
-                    {
-                        type: 'text',
-                        text: text,
-                    },
-                ],
-            }
-        ])
-    }
+
 
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            title: outlineTitle,
+            title: outline.title,
         },
     })
 
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const outline = await generateOutlineFromTitle(values.title);
+        const outline = await generateOutline(values.title);
         if (outline.length === 0) {
             toast.error("生成大纲失败，请重试");
             return;
         }
         // 生成文本并且展示
         insertTitle();
-
-        try {
-            for (const item of outline) {
-                // 生成文本
-                const text = await generateTextFromOutline(item);
-                if (!text) {
-                    continue;
-                }
-
-                // 写入内容
-                try {
-                    await insertContent(text);
-                } catch (insertError) {
-                    throw insertError;
-                }
-            }
-        } catch (error) {
-            toast.error("生成内容失败，请重试");
-            return;
+        for (const item of outline) {
+            await generateContent(item);
         }
         // save
-        saveDoc(docId, editor?.getHTML() || '');
+        saveDoc(docId, editor?.instance?.getHTML() || '');
     }
 
     return (
@@ -133,7 +103,6 @@ export default function RequirementDesigner() {
 
                             <Button
                                 type="submit"
-                                disabled={isGeneratingOutline}
                             >
                                 生成
                             </Button>

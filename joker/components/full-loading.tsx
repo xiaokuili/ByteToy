@@ -27,12 +27,12 @@ function LoadingText({ message }: { message: string }) {
 export function FullLoading() {
 
   // 判断大纲生成是否完成
-  const { isGeneratingOutline, isGeneratingText } = useEditorStore()
-  if (!isGeneratingOutline && !isGeneratingText) return null
+  const { outline, editor } = useEditorStore()
+  if (!outline.isGenerating && !editor.isGenerating) return null
 
-  // 判断报告生成是否完成
 
-  const message = isGeneratingOutline ? "正在生成大纲，请稍等..." : "正在生成报告，请稍等..."
+
+  const message = outline.isGenerating ? "正在生成大纲，请稍等..." : "正在生成报告，请稍等..."
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">

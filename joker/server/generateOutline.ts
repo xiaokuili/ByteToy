@@ -6,7 +6,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { ChatOpenAI } from "@langchain/openai";
 
-export type ContentType = 'title' | 'paragraph' | 'line-chart' | 'bar-chart' | 'pie-chart';
+export type ContentType = 'title' | 'ai-text' | 'line-chart' | 'bar-chart' | 'pie-chart';
 
 export interface OutlineItem {
     id: string
@@ -27,11 +27,11 @@ export const generateOutline = async (title: string) => {
     const zodSchema = z.array(z.object({ 
         id: z.string(),
         title: z.string(),
-        type: z.enum(['title', 'paragraph', 'line-chart', 'bar-chart', 'pie-chart']).optional(),
+        type: z.enum(['title', 'ai-text', 'line-chart', 'bar-chart', 'pie-chart'] as const).optional(),
         children: z.array(z.object({
             id: z.string(),
             title: z.string(),
-            type: z.enum(['title', 'paragraph', 'line-chart', 'bar-chart', 'pie-chart']).optional()
+            type: z.enum(['title', 'ai-text', 'line-chart', 'bar-chart', 'pie-chart']).optional()
         })).optional()
     }));
 
