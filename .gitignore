@@ -3,3 +3,4 @@ app/*
 components/*
 hooks/*
 types/*
+node_modules/*
