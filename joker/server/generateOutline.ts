@@ -54,6 +54,5 @@ export const generateOutline = async (title: string) => {
     const response = await chain.invoke({
         format_instructions: parser.getFormatInstructions()
     });
-    console.log(response)
     return response;
 }

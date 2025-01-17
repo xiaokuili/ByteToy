@@ -7,7 +7,7 @@ import DataCollector from "./data-collector"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 import { cn } from "@/lib/utils"
-import { ClipboardList, Database ,ListTree} from "lucide-react"
+import { ClipboardList, Database, ListTree } from "lucide-react"
 
 interface Step {
   id: string
@@ -17,21 +17,21 @@ interface Step {
 }
 
 const steps: Step[] = [
-  { 
-    id: "requirements", 
-    title: "需求配置", 
+  {
+    id: "requirements",
+    title: "需求配置",
     component: <RequirementDesigner />,
     icon: <ClipboardList className="w-4 h-4" />,
   },
-  { 
-    id: "outline", 
-    title: "大纲配置", 
+  {
+    id: "outline",
+    title: "大纲配置",
     component: <OutlineDesigner />,
     icon: <ListTree className="w-4 h-4" />,
   },
-  { 
-    id: "data", 
-    title: "数据配置", 
+  {
+    id: "data",
+    title: "数据配置",
     component: <DataCollector />,
     icon: <Database className="w-4 h-4" />,
   },
@@ -39,7 +39,7 @@ const steps: Step[] = [
 
 export default function Composer() {
   const [currentStep, setCurrentStep] = React.useState("requirements")
-  
+
   return (
     <div className="flex flex-col h-full">
       {/* 步骤导航 */}
@@ -64,7 +64,7 @@ export default function Composer() {
                   {step.icon}
                 </span>
                 {/* 步骤标题 */}
-                <span className="font-medium">{step.title}</span>
+                <span className="font-medium text-sm 2xl:text-base">{step.title}</span>
               </button>
               {/* 添加连接线，最后一个步骤不需要 */}
               {index < steps.length - 1 && (

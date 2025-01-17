@@ -5,9 +5,11 @@ import StarterKit from '@tiptap/starter-kit';
 import FontFamily from '@tiptap/extension-font-family';
 import Placeholder from '@tiptap/extension-placeholder';
 import { useEditorStore } from '@/hook/useEditor';
+import { useParams } from 'next/navigation';
 
 export default function Editor() {
-  const {setEditor} = useEditorStore()
+  const { setEditor, getDoc } = useEditorStore()
+  const docId = useParams().docId as string
 
   const editor = useEditor({
     onBeforeCreate({ editor }) {
@@ -55,9 +57,7 @@ export default function Editor() {
       }),
     ],
     autofocus: 'end',
-    content: `
-      
-    `,
+    content: getDoc(docId) || '',
     editorProps: {
       attributes: {
         class: 'p-8 prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none  text-gray-700 leading-relaxed border rounded-lg  min-h-[297mm]',
@@ -69,7 +69,7 @@ export default function Editor() {
 
   return (
     <div className="h-full p-8 max-w-5xl mx-auto ">
-        <EditorContent editor={editor}  />
+      <EditorContent editor={editor} />
     </div>
   );
 }

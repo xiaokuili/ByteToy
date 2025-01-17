@@ -9,6 +9,7 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useOutlineStore } from "@/hook/useOutlineGenerator"
 import { toast } from "sonner"
+import { useParams } from 'next/navigation';
 
 import { useEditorStore } from "@/hook/useEditor"
 
@@ -18,7 +19,8 @@ const formSchema = z.object({
     }),
 })
 export default function RequirementDesigner() {
-    const { editor } = useEditorStore()
+    const { editor, saveDoc } = useEditorStore()
+    const docId = useParams().docId as string
 
     const { title, setTitle, isLoading, generateOutline } = useOutlineStore()
 
@@ -35,7 +37,7 @@ export default function RequirementDesigner() {
                     },
                 ],
             }
-        
+
         ])
         editor?.commands.enter()
 
@@ -55,6 +57,7 @@ export default function RequirementDesigner() {
         if (success) {
             toast.success("大纲生成成功！")
             insertTitle()
+            saveDoc(docId, editor?.getHTML() || '')
         } else {
             toast.error("生成大纲失败，请重试")
         }
@@ -93,7 +96,7 @@ export default function RequirementDesigner() {
                                 )}
                             />
 
-                            <Button 
+                            <Button
                                 type="submit"
                                 disabled={isLoading}
                             >
