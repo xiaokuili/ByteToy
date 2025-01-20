@@ -8,7 +8,7 @@ import { RunnableSequence } from "@langchain/core/runnables";
 // 方案1: 都返回 Promise<AsyncIterable>
 const textGenerators = {
     'title': async function*(title: string) {
-        yield title;
+        yield `<h2>${title}</h2>`;
     },
     'ai-text': async function*(title: string, shouldStop = { value: false }) {
         const chat = new ChatOpenAI({
@@ -17,7 +17,7 @@ const textGenerators = {
             streaming: true
         });
         const prompt = ChatPromptTemplate.fromTemplate(
-            "请写一段关于{title}的内容，大约50个汉字左右。内容要简洁明了，语言要专业。"
+            "请写一段关于{title}的内容，大约50个汉字左右。内容要简洁明了，语言要专业"
         );
         const chain = RunnableSequence.from([prompt, chat]);
         const stream = await chain.stream({ title });

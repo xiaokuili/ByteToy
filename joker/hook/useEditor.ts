@@ -87,14 +87,22 @@ export const useEditorStore = create<Store>()(
         const { editor } = get();
         if (!editor.instance) return;
 
-        set(state => ({ 
-          editor: { ...state.editor, isGenerating: true, error: null }
-        }));
-
         try {
+          set(state => ({ 
+            editor: { ...state.editor, isGenerating: true, error: null }
+          }));
+          
           const stream = await generateText(outline);
           
+          let isFirst = true;
           for await (const chunk of stream) {
+            if (isFirst) {
+              set(state => ({ 
+                editor: { ...state.editor, isGenerating: false }
+              }));
+              isFirst = false;
+            }
+            
             if (chunk && typeof chunk === 'string' && chunk.trim()) {
               editor.instance.commands.insertContent(chunk);
             }
@@ -104,12 +112,9 @@ export const useEditorStore = create<Store>()(
           set(state => ({ 
             editor: {
               ...state.editor,
-              error: err instanceof Error ? err.message : '生成失败'
+              error: err instanceof Error ? err.message : '生成失败',
+              isGenerating: false
             }
-          }));
-        } finally {
-          set(state => ({ 
-            editor: { ...state.editor, isGenerating: false }
           }));
         }
       },
