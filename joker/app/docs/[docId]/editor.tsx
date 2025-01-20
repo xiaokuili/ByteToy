@@ -6,6 +6,8 @@ import FontFamily from '@tiptap/extension-font-family';
 import Placeholder from '@tiptap/extension-placeholder';
 import { useEditorStore } from '@/hook/useEditor';
 import { useParams } from 'next/navigation';
+import ImageResize from 'tiptap-extension-resize-image';
+
 
 export default function Editor() {
   const { setEditor, getDoc } = useEditorStore()
@@ -55,6 +57,8 @@ export default function Editor() {
       Placeholder.configure({
         placeholder: '请输入内容...',
       }),
+      ImageResize,
+
     ],
     autofocus: 'end',
     content: getDoc(docId) || '',

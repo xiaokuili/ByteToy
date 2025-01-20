@@ -28,12 +28,12 @@ interface Store {
   outline: OutlineState;
   setOutlineTitle: (title: string) => void;
   generateOutline: (title: string) => Promise<OutlineItem[]>;
-  
+
   // 编辑器相关
   editor: EditorState;
   setEditor: (editor: Editor | null) => void;
   generateContent: (outline: OutlineItem) => Promise<void>;
-  
+
   // 存储相关
   storage: StorageState;
   saveDoc: (id: string, content: string) => void;
@@ -50,21 +50,21 @@ export const useEditorStore = create<Store>()(
         isGenerating: false,
         error: null
       },
-      setOutlineTitle: (title) => 
+      setOutlineTitle: (title) =>
         set(state => ({ outline: { ...state.outline, title } })),
       generateOutline: async (title) => {
-        set(state => ({ 
-          outline: { ...state.outline, isGenerating: true, error: null } 
+        set(state => ({
+          outline: { ...state.outline, isGenerating: true, error: null }
         }));
-        
+
         try {
           const items = await generateOutline(title);
-          set(state => ({ 
+          set(state => ({
             outline: { ...state.outline, items, isGenerating: false }
           }));
           return items;
         } catch (err) {
-          set(state => ({ 
+          set(state => ({
             outline: {
               ...state.outline,
               isGenerating: false,
@@ -81,35 +81,36 @@ export const useEditorStore = create<Store>()(
         isGenerating: false,
         error: null
       },
-      setEditor: (instance) => 
+      setEditor: (instance) =>
         set(state => ({ editor: { ...state.editor, instance } })),
       generateContent: async (outline: OutlineItem) => {
         const { editor } = get();
         if (!editor.instance) return;
 
         try {
-          set(state => ({ 
+          set(state => ({
             editor: { ...state.editor, isGenerating: true, error: null }
           }));
-          
+
           const stream = await generateText(outline);
-          
+
           let isFirst = true;
           for await (const chunk of stream) {
+
             if (isFirst) {
-              set(state => ({ 
+              set(state => ({
                 editor: { ...state.editor, isGenerating: false }
               }));
               isFirst = false;
             }
-            
+
             if (chunk && typeof chunk === 'string' && chunk.trim()) {
               editor.instance.commands.insertContent(chunk);
             }
           }
           editor.instance.commands.enter();
         } catch (err) {
-          set(state => ({ 
+          set(state => ({
             editor: {
               ...state.editor,
               error: err instanceof Error ? err.message : '生成失败',
