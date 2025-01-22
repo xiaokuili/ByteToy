@@ -3,15 +3,18 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { FileText, GripVertical, Loader2, Pencil, Send, Settings, Trash2, Upload } from "lucide-react";
+import { Send,  Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useOutline } from "@/hook/useOutline";
-import { OutlineItem } from "@/server/generateOutline";
+import { useInput } from "@/hook/useInput";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { parseTemplate } from "@/actions";
+import { nanoid } from 'nanoid'
+import { useEffect } from "react";
+import { useState } from "react";
 
 
 export default function Home() {
-  const { title, setTitle, generate, isGenerating, error, items } = useOutline();
 
   return (
     <div className="container mx-auto max-w-3xl p-6">
@@ -20,53 +23,22 @@ export default function Home() {
         <p className="text-muted-foreground">输入报告主题，AI将为您生成专业的商业报告</p>
       </div>
 
-      <InputCard title={title} setTitle={setTitle} generate={generate} />
-
-      {/* 大纲展示区域 */}
-      {isGenerating && (
-        <div className="mt-8 flex justify-center items-center gap-3">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          <span className="text-muted-foreground">正在生成大纲...</span>
-        </div>
-      )}
-
-      {error && (
-        <div className="mt-8 p-4 rounded-lg bg-destructive/10 text-destructive">
-          <p className="text-sm">{error}</p>
-        </div>
-      )}
-
-      {!isGenerating && !error && items.length > 0 && (
-        <div className="space-y-4">
-          <OutlineCard items={items} />
-          <motion.div
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            className="w-full"
-          >
-            <Button
-              className="w-full px-6 py-2.5 rounded-lg shadow-sm
-                   transition duration-200 ease-in-out
-                   disabled:opacity-50 disabled:cursor-not-allowed"
-
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              生成报告正文
-            </Button>
-          </motion.div>
-        </div>
-      )}
+      <InputCard  />
 
     </div>
   );
 }
 
 
-function InputCard({ title, setTitle, generate }: {
-  title: string;
-  setTitle: (title: string) => void;
-  generate: () => void;
-}) {
+function InputCard() {
+  const { title, setTitle, setTemplate } = useInput()
+  const router = useRouter();
+  const [id, setId] = useState<string>('')
+
+  useEffect(() => {
+    setId(nanoid(16))
+  }, [])
+
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-background to-muted/80 backdrop-blur-sm">
       <CardContent className="p-8">
@@ -86,15 +58,48 @@ function InputCard({ title, setTitle, generate }: {
               />
             </div>
 
-            <Button
-              variant="outline"
-              className="px-6 py-2.5 rounded-lg border border-input
-                   hover:bg-accent
-                   transition duration-200 ease-in-out"
-            >
-              <Upload className="h-4 w-4 mr-2" />
-              上传模板
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="px-6 py-2.5 rounded-lg border border-input
+                       hover:bg-accent
+                       transition duration-200 ease-in-out"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  上传模板
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>上传模板</DialogTitle>
+                  <DialogDescription>
+                    上传您的报告模板，AI将根据模板生成大纲
+                  </DialogDescription>
+                </DialogHeader>
+                <form action={async (formData: FormData) => {
+                  const result = await parseTemplate(formData);
+                  if (result.success) {
+                    setTemplate(result.data);
+                  }
+                }}>
+                    <Input
+                      id="template" 
+                      type="file"
+                      name="file"
+                      accept=".txt,.doc,.docx"
+                      className="cursor-pointer w-full h-12 file:mr-4 file:py-2 file:px-4
+                        file:rounded-md file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-primary file:text-primary-foreground
+                        hover:file:bg-primary/90"
+                    />
+                  <DialogFooter className="mt-4 flex justify-end gap-4">
+                    <Button type="submit" className="w-32">确认上传</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* 提交按钮 */}
@@ -107,10 +112,12 @@ function InputCard({ title, setTitle, generate }: {
               className="w-full px-6 py-2.5 rounded-lg shadow-sm
                    transition duration-200 ease-in-out
                    disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() => generate()}
+              onClick={() => {
+                router.push(`/generater/${id}`);
+              }}
             >
               <Send className="h-4 w-4 mr-2" />
-              开始生成...
+              开始生成
             </Button>
           </motion.div>
         </div>
@@ -119,123 +126,3 @@ function InputCard({ title, setTitle, generate }: {
   );
 }
 
-
-interface OutlineCardProps {
-  items: OutlineItem[]
-}
-
-function OutlineCard({ items }: OutlineCardProps) {
-  return (
-    <Card className="mt-8 border-0 shadow-lg">
-      <CardContent className="p-6">
-        <div className="space-y-4">
-          {items.map((item) => (
-            <div key={item.id} className="space-y-3 group">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <GripVertical className="h-4 w-4 text-muted-foreground/40 opacity-0 group-hover:opacity-100 cursor-move" />
-                  <h3 className="text-lg font-medium">{item.title}</h3>
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 flex items-center gap-2">
-                  <Button variant="ghost" size="sm">
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              {item.children && (
-                <div className="pl-6 space-y-2">
-                  {item.children.map((child) => (
-                    <div key={child.id} className="flex items-center justify-between group/item">
-                      <div className="flex items-center gap-2">
-                        <GripVertical className="h-3 w-3 text-muted-foreground/40 opacity-0 group-hover/item:opacity-100 cursor-move" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40" />
-                        <p className="text-sm text-muted-foreground">{child.title}</p>
-                      </div>
-                      <div className="opacity-0 group-hover/item:opacity-100 flex items-center gap-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                              <Settings className="h-3 w-3" />
-                              <span className="text-xs">数据配置</span>
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>数据配置</DialogTitle>
-                              <DialogDescription>
-                                配置此节点的数据来源和展示方式
-                              </DialogDescription>
-                            </DialogHeader>
-
-                            <ReportDataConfigDialog item={child} />
-
-                            <DialogFooter>
-                              <Button type="submit">保存更改</Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-                        <Button variant="ghost" size="sm">
-                          <Pencil className="h-3 w-3" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-
-interface ReportDataConfigDialogProps {
-  item: OutlineItem
-
-}
-
-
-
-function ReportDataConfigDialog({ item }: ReportDataConfigDialogProps) {
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Input
-          placeholder="搜索数据源..."
-          className="flex-1"
-        />
-        <Button variant="outline" size="sm">
-          <Upload className="h-4 w-4 mr-1" />
-          添加数据源
-        </Button>
-      </div>
-
-      <div className="space-y-2">
-        {item.data?.map((data, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-2 rounded-lg border hover:bg-muted/50"
-          >
-            <div>
-              <p className="font-medium">{data.name}</p>
-              <p className="text-sm text-muted-foreground">{data.description}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}

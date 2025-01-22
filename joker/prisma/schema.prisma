@@ -36,3 +36,29 @@ model Template {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model DataSource {
+  id          String   @id @default(cuid())
+  name        String   // 数据源名称
+  category    String   // 分类：'rag' | 'api' | 'database'
+  description String   // 描述
+  
+  // 接口定义
+  input       Json     // 入参定义 { name: string, type: string, required: boolean }[]
+  output      Json     // 出参定义 { name: string, type: string }[]
+  example     Json     // 示例数据
+  
+  // 补充字段
+  config      Json?    // 配置信息（如 API endpoint, RAG collection 等）
+  version     String   // 版本号，用于兼容性管理
+  status      String   // 状态：'active' | 'deprecated' | 'testing'
+  tags        String[] // 标签，用于搜索和分类
+  
+  // 使用统计
+  usage_count Int      @default(0)    // 使用次数
+  last_used   DateTime @updatedAt     // 最后使用时间
+  
+  // 元数据
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

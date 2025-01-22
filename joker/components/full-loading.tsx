@@ -1,6 +1,5 @@
 'use client'
 
-import { useEditorStore } from '@/hook/useEditor'
 import { useEffect, useState } from 'react'
 import { Progress } from "@/components/ui/progress"
 
@@ -26,35 +25,13 @@ function LoadingText({ message }: { message: string }) {
   )
 }
 
-export function FullLoading() {
-  const { outline } = useEditorStore()
-  const [message, setMessage] = useState("")
+export function FullLoading({show, message}: {show: boolean, message: string}) {
   const [progress, setProgress] = useState(13)
 
   useEffect(() => {
     let timer: NodeJS.Timeout
     let progressTimer: NodeJS.Timeout
 
-    const updateMessage = () => {
-      if (!outline.isGenerating) {
-        setMessage("")
-        setProgress(13)
-        return
-      }
-
-      setMessage("正在生成大纲...")
-      setProgress(13)
-
-      timer = setTimeout(() => {
-        setMessage("收集筛选数据中...")
-        setProgress(45)
-
-        timer = setTimeout(() => {
-          setMessage("报告正文生成中...")
-          setProgress(78)
-        }, 1500)
-      }, 1000)
-    }
 
     const animateProgress = () => {
       progressTimer = setInterval(() => {
@@ -65,8 +42,7 @@ export function FullLoading() {
       }, 300)
     }
 
-    updateMessage()
-    if (outline.isGenerating) {
+    if (show) {
       animateProgress()
     }
 
@@ -74,9 +50,9 @@ export function FullLoading() {
       if (timer) clearTimeout(timer)
       if (progressTimer) clearInterval(progressTimer)
     }
-  }, [outline.isGenerating])
+  }, [show])
 
-  if (message === "") return null
+  if (!show) return null
 
   return (
     <div className="fixed inset-0 bg-background/60 backdrop-blur-md flex items-center justify-center z-50 transition-all duration-300">
