@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Template {
+  id        String   @id @default(cuid())
+  title     String   // 模板标题
+  variables Json     // 模板变量 { name: string, type: string, default?: any }[]
+  
+  // 模板结构
+  sections  Json[]   // 每个部分的配置
+  // 示例 section 结构:
+  // {
+  //   id: string
+  //   title: string
+  //   type: 'text' | 'chart' | 'table'
+  //   dataConfig: {
+  //     sourceId: string
+  //     input: Record<string, any>
+  //     output: Record<string, any>
+  //     transform?: string  // 存储转换函数的代码
+  //   }
+  // }
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

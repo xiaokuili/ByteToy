@@ -4,8 +4,8 @@ import type { OutlineItem } from '@/server/generateOutline'
 
 interface OutlineState {
     title: string
-    template?: string
-    items: OutlineItem[]
+    template?: string // 报告模板
+    items: OutlineItem[]  
     isGenerating: boolean
     error: string | null
     setTitle: (title: string) => void
@@ -25,7 +25,7 @@ export const useOutline = create<OutlineState>((set, get) => ({
     setTemplate: (template?: string) => set({ template }),
 
     generate: async () => {
-        const { title } = get()
+        const { title, template } = get()
 
         if (!title) {
             set({ error: '请输入标题' })
@@ -35,7 +35,7 @@ export const useOutline = create<OutlineState>((set, get) => ({
         set({ isGenerating: true, error: null })
 
         try {
-            const items = await generateOutline(title)
+            const items = await generateOutline(title, template)
             set({ items, isGenerating: false })
             return items
         } catch (err) {

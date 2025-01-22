@@ -8,52 +8,43 @@ import { ChatOpenAI } from "@langchain/openai";
 
 export type ContentType = 'title' | 'ai-text' | 'line-chart';
 
-export interface ReportData {
-    name: string;
-    description: string;
-    args: Record<string, string>;
-    return?: Record<string, string>[];
-}
 
-export interface OutlineItem {
-    id: string
-    title: string
-    type?: ContentType
-    children?: OutlineItem[]
-    data?: ReportData[]
-}
+// Export the type
+export type OutlineItem = {
+    id: string;
+    title: string;
+    type?: 'title' | 'ai-text' | 'line-chart';
+    children?: OutlineItem[];
+    data?: Array<{
+        name: string;
+        description: string;
+    }>;
+};
+// Define the schema first
+const outlineItemSchema: z.ZodType<OutlineItem> = z.object({
+    id: z.string(),
+    title: z.string(), 
+    type: z.enum(['title', 'ai-text', 'line-chart'] as const).optional(),
+    children: z.array(z.lazy(() => outlineItemSchema)).optional(),
+    data: z.array(z.object({
+        name: z.string(),
+        description: z.string()
+    })).optional()
+});
+
+
 
 const model = new ChatOpenAI({
-
     model: process.env.BASE_MODEL_NAME,
     temperature: 0
 });
 
 
-export const generateOutline = async (title: string) => {
-    // Import required dependencies from langchain
-    const zodSchema = z.array(z.object({
-        id: z.string(),
-        title: z.string(),
-        type: z.enum(['title', 'ai-text', 'line-chart'] as const).optional(),
-        data: z.array(z.object({
-            name: z.string(),
-            description: z.string(),
-            args: z.record(z.string(), z.string()),
-            return: z.record(z.string(), z.string()).optional()
-        })).optional(),
-        children: z.array(z.object({
-            id: z.string(),
-            title: z.string(),
-            type: z.enum(['title', 'ai-text', 'line-chart']).optional(),
-            data: z.array(z.object({
-                name: z.string(),
-                description: z.string(),
-                args: z.record(z.string(), z.string()),
-                return: z.record(z.string(), z.string()).optional()
-            })).optional()
-        })).optional()
-    }));
+export const generateOutline = async (title: string, template?: string) => {
+    console.log(template)
+    // Use the schema directly
+    // TODO: 两个难点，1. 模板切分， 2. 数据路由到合适的数据集合中 
+    const zodSchema = z.array(outlineItemSchema);
 
     const parser = StructuredOutputParser.fromZodSchema(zodSchema);
 

@@ -60,7 +60,7 @@ export const useEditorStore = create<Store>()(
         try {
           const items = await generateOutline(title);
           set(state => ({
-            outline: { ...state.outline, items, isGenerating: false }
+            outline: { ...state.outline, items, isGenerating: false, data: items }
           }));
           return items;
         } catch (err) {

@@ -1,6 +1,6 @@
 "use server"
 
-import { ContentType, OutlineItem } from "./generateOutline"
+import {  OutlineItem } from "./generateOutline"
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
