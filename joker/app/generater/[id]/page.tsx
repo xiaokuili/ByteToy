@@ -9,6 +9,7 @@ import { useInput } from "@/hook/useInput";
 import { useEffect, useState } from "react";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
+import { cn } from "@/lib/utils";
 
 interface OutlineItem {
   id: string;
@@ -31,9 +32,12 @@ export default function Page() {
       onHighlighted: (element) => {
         element?.classList.add('demo-highlight');
       },
-      onDeselected: (element) => {
-        element?.classList.remove('demo-highlight');
-      },
+     onDestroyed: () => {
+      // 清除所有带有 demo-highlight 类的元素
+      document.querySelectorAll('.demo-highlight').forEach(element => {
+        element.classList.remove('demo-highlight');
+      });
+    },
       steps: [
         {
           // 首先高亮整个操作区域
@@ -82,7 +86,7 @@ export default function Page() {
     // 2. 不在生成中
     // 3. 已经有items数据
     if ((title || template) && !isGenerating && items.length > 0) {
-      const hasShownDemo = false; // 或者使用 localStorage
+      const hasShownDemo = localStorage.getItem('has-shown-demo') === 'true';
 
       if (!hasShownDemo) {
         setTimeout(() => {
@@ -137,53 +141,35 @@ interface OutlineCardProps {
 }
 
 function OutlineCard({ items, updateItem, deleteItem }: OutlineCardProps) {
-  const [displayCount, setDisplayCount] = useState(1);
-  const totalItems = items.length;
 
-  const showMore = (count: number) => {
-    setDisplayCount(Math.min(totalItems, displayCount + count));
-  };
 
   return (
     <Card className="mt-8 border-0 shadow-lg min-h-[200px]">
       <CardContent className="p-6">
         <div className="space-y-4">
-          {items.slice(0, displayCount).map((item, index) => (
+          {items.map((item) => (
             <OutlineItem
               key={item.id}
               item={item}
               updateItem={updateItem}
               deleteItem={deleteItem}
               level={0}
-              itemIndex={index}
+              items={items}
             />
           ))}
 
-          {displayCount < totalItems && (
-            <div className="flex gap-2 justify-center mt-4">
-              <Button onClick={() => showMore(1)}>
-                加载一个
-              </Button>
-              <Button onClick={() => showMore(3)}>
-                加载三个
-              </Button>
-              <Button onClick={() => setDisplayCount(totalItems)}>
-                加载全部
-              </Button>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
   );
 }
 
-function OutlineItem({ item, updateItem, deleteItem, level = 0}: {
+function OutlineItem({ item, updateItem, deleteItem, level = 0, items }: {
   item: OutlineItem;
   updateItem: (id: string, updates: Partial<OutlineItem>) => void;
   deleteItem: (id: string) => void;
   level?: number;
-  itemIndex?: number;
+  items: OutlineItem[];
 }) {
   console.log(`Rendering OutlineItem "${item.title}" with level ${level}`);
 
@@ -194,6 +180,7 @@ function OutlineItem({ item, updateItem, deleteItem, level = 0}: {
         <ItemTitle item={item} />
         <ItemActions
           item={item}
+          items={items}
           onUpdate={updateItem}
           onDelete={deleteItem}
         />
@@ -210,6 +197,7 @@ function OutlineItem({ item, updateItem, deleteItem, level = 0}: {
                 updateItem={updateItem}
                 deleteItem={deleteItem}
                 level={nextLevel}
+                items={items} 
               />
             );
           })}
@@ -222,6 +210,7 @@ function OutlineItem({ item, updateItem, deleteItem, level = 0}: {
 function ItemTitle({ item }: {
   item: OutlineItem;
 }) {
+
   return (
     <div className="flex items-center gap-2">
       <GripVertical className={`h-4 w-4 text-muted-foreground/40 opacity-0 group-hover:opacity-100 cursor-move`} />
@@ -237,24 +226,29 @@ function ItemTitle({ item }: {
   );
 }
 
-function ItemActions({ item , isDemo}: {
+function ItemActions({ item, items}: {
   item: OutlineItem;
-  isDemo?: boolean;
+  items: OutlineItem[];
   onUpdate: (id: string, updates: Partial<OutlineItem>) => void;
   onDelete: (id: string) => void;
 }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  console.log('isDemo', isDemo, item);
 
   return (
-    <div className="opacity-0 flex items-center gap-2 group-hover:opacity-100 [&.demo-highlight]:opacity-100" {...(isDemo ? { 'data-demo': 'actions-container' } : {})}>
+    <div 
+      className="opacity-0 flex items-center gap-2 group-hover:opacity-100 [&.demo-highlight]:opacity-100"
+      {...(items[0]?.children?.[0]?.id === item.id ? { 'data-demo': 'actions-container' } : {})}
+    >
       {!item.children && (
         <>
           <Button
             variant="ghost"
             size="sm"
-            className="flex items-center gap-1" data-demo="config-button"
+            className={cn(
+              "flex items-center gap-1",
+            )}
+            {...(items[0]?.children?.[0]?.id === item.id ? { 'data-demo': 'config-button' } : {})}
             onClick={() => setIsDialogOpen(true)}
           >
             <Settings className="h-3 w-3" />
@@ -262,10 +256,12 @@ function ItemActions({ item , isDemo}: {
           </Button>
 
           <Button
-            variant="ghost"
+            variant="ghost" 
             size="sm"
-            className="flex items-center gap-1"
-            data-demo="preview-button"
+            className={cn(
+              "flex items-center gap-1",
+            )}
+            {...(items[0]?.children?.[0]?.id === item.id ? { 'data-demo': 'preview-button' } : {})}
           >
             <Eye className="h-3 w-3" />
             <span className="text-xs">预览</span>
