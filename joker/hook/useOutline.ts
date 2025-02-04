@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { generateOutline } from '@/server/generateOutline'
 import type { OutlineItem } from '@/server/generateOutline'
+
 interface OutlineState {
     items: OutlineItem[]  
     isGenerating : boolean
