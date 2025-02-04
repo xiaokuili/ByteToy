@@ -52,12 +52,6 @@ export const useOutline = create<OutlineState>((set, get) => ({
                 if (item.id === id) {
                     return { ...item, ...updates }
                 }
-                if (item.children) {
-                    return {
-                        ...item,
-                        children: updateItemRecursive(item.children)
-                    }
-                }
                 return item
             })
         }
@@ -69,9 +63,6 @@ export const useOutline = create<OutlineState>((set, get) => ({
         const deleteItemRecursive = (items: OutlineItem[]): OutlineItem[] => {
             return items.filter(item => {
                 if (item.id === id) return false
-                if (item.children) {
-                    item.children = deleteItemRecursive(item.children)
-                }
                 return true
             })
         }

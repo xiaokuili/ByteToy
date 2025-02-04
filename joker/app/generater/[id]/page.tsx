@@ -8,7 +8,7 @@ import ReportEditor from "./editor";
 export default function Page() {
 
   return <div className="flex gap-4 p-4 h-full">
-    <div className="w-[256px]  bg-[rgb(247,247,246)] rounded-[12px] h-full">
+    <div className="min-w-[256px]  bg-[rgb(247,247,246)] rounded-[12px] h-full">
       <ReportTemplater />
     </div>
     <div className="flex-1 flex flex-col gap-2">
