@@ -20,9 +20,15 @@ export default function ReportTemplater() {
   const { generate, generateMessage, isGenerating, error } = useOutline();
 
   useEffect(() => {
+    if (!title.trim()) return;
+    console.log('Effect triggered');  // 这个日志会打印两次
+
     const generateOutlines = async () => {
-      const outlines = await generate({ title: title });
-      setOutlines(outlines);
+      try {
+        const outlines = await generate({ title });
+        setOutlines(outlines);
+      } catch (error) {
+      }
     };
     generateOutlines();
   }, [generate, title]);
