@@ -7,13 +7,10 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { FileText, Table, BarChart, List, LucideIcon, FileIcon as File, ImageIcon as Image, PlusIcon, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 export default function ReportTemplater() {
   const [outlines, setOutlines] = useState<OutlineItem[]>([]);
-  const [isEditingId, setIsEditingId] = useState<string | null>(null);
 
   const { title } = useInput();
 
@@ -28,6 +25,7 @@ export default function ReportTemplater() {
         const outlines = await generate({ title });
         setOutlines(outlines);
       } catch (error) {
+        console.error(error);
       }
     };
     generateOutlines();
@@ -62,6 +60,7 @@ export default function ReportTemplater() {
 
 
   return <div className="flex flex-col gap-1 p-4">
+    <div className="text-lg font-medium mb-2">大纲</div>
     {isGenerating ? (
       <div>生成中...{generateMessage}</div>
     ) : error ? (
