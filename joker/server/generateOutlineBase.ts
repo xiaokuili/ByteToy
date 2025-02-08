@@ -5,58 +5,15 @@ import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { ChatOpenAI } from "@langchain/openai";
-import  db  from "@/lib/drizzle"
-import { dataSources } from "@/schema"
-import { eq,and,like } from "drizzle-orm"
+import { getDataSources } from "./datasource";
 
-export async function getDataSources() {
-  // Get all active data sources
-  const sources = await db.select({
-    id: dataSources.id,
-    name: dataSources.name,
-    category: dataSources.category,
-    description: dataSources.description,
-    input: dataSources.input,
-    output: dataSources.output,
-    tags: dataSources.tags,
-    status: dataSources.status
-  })
-  .from(dataSources)
-  .where(eq(dataSources.status, 'active'));
-
-  return sources;
-}
-
-
-export async function getDataSourcesByName(name: string) {
-    // Get active data sources matching the name
-    const sources = await db.select({
-      id: dataSources.id,
-      name: dataSources.name, 
-      category: dataSources.category,
-      description: dataSources.description,
-      input: dataSources.input,
-      output: dataSources.output,
-      tags: dataSources.tags,
-      status: dataSources.status
-    })
-    .from(dataSources)
-    .where(
-        and(
-          eq(dataSources.status, 'active'),
-          like(dataSources.name, `%${name}%`)
-        )
-      );
-  
-    return sources;
-  }
 
 export type ContentType = 'title' | 'ai-text' | 'line-chart';
 
 // Export the type
 export type OutlineBase = {
     
-    id: string;
+    outlineID: string;
     outlineTitle: string;
     type: string;
     level: number;
@@ -67,7 +24,7 @@ export type OutlineBase = {
 
 // Define the schema first
 const outlineItemSchema: z.ZodType<OutlineBase> = z.object({
-    id: z.string(),
+    outlineID: z.string(),
     outlineTitle: z.string(), 
     type: z.string(),
     level: z.number(),
@@ -79,7 +36,9 @@ const model = new ChatOpenAI({
     temperature: 0
 });
 
-export const aigenerateOutline = async (title: string, template?: string) => {
+// 基于title 和 history 生成大纲
+// TODO: usehook 进行引用，然后在组件中具体传参， 我觉得应该在这里进行定义，让组件引用，因为后续入参可能是变动
+export const aigenerateOutline = async (title: string, history?: string) => {
     // Get available data sources
     const dataSources = await getDataSources();
     
@@ -99,7 +58,7 @@ export const aigenerateOutline = async (title: string, template?: string) => {
         可使用的数据源如下：
         ${dataSourcesContext}
 
-        ${template ? `请按照以下模板结构：${template}` : `
+        ${history ? `请按照以下模板结构：${history}` : `
             大纲应包含5个章节，每个章节包含3个子章节。
             每个章节需要包含ID、标题、type、nextId和level字段。
             每个章节通过nextId字段链接到下一个章节。
@@ -127,7 +86,6 @@ export const aigenerateOutline = async (title: string, template?: string) => {
     const response = await chain.invoke({
         format_instructions: parser.getFormatInstructions()
     });
-    console.log(response)
 
     return response;
 }

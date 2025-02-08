@@ -12,20 +12,19 @@ import { OutlineItem } from "@/hook/useOutline";
 
 export default function ReportOutline() {
   const {items, updateItem, addItem, deleteItem} = useOutline()
-  const { title } = useInput();
+  const { title , report_id} = useInput();
 
   const { generate, initGenerateMessage: generateMessage, isInitGenerating: isGenerating, error } = useOutline();
 
   useEffect(() => {
     if (!title.trim()) return;
-    console.log('Effect triggered');  // 这个日志会打印两次
 
     const generateOutlines = async () => {
       try {
         const outlines = await generate({ report_title: title });
         outlines.forEach((outline: OutlineItem) => {
-          updateItem(outline.id, {
-            reportTitle: title,
+          updateItem(outline.outlineID, {
+            reportID: report_id ,
           })
         })
         
@@ -34,24 +33,24 @@ export default function ReportOutline() {
       }
     };
     generateOutlines();
-  }, [generate, title, updateItem]);
+  }, [generate, report_id, title, updateItem]);
 
   const onAdd = (item: OutlineBase) => {
     addItem({
-      id: Math.random().toString(),
+      outlineID: Math.random().toString(),
       outlineTitle: "新章节",
       type: "text",
       level: item.level,
-      reportTitle: title
+      reportID: title
     });
   }
   const onEdit = (item: OutlineBase) => {
-    updateItem(item.id, {
+    updateItem(item.outlineID, {
       outlineTitle: item.outlineTitle
     });
   }
   const onDelete = (item: OutlineBase) => {
-    deleteItem(item.id);
+    deleteItem(item.outlineID);
   }
 
 
@@ -63,7 +62,7 @@ export default function ReportOutline() {
       <div className="text-red-500">{error}</div>
     ) : (
       items.map((item) => (
-        <OutlineItemButton key={item.id} item={item} onAdd={onAdd} onEdit={onEdit} onDelete={onDelete} />
+        <OutlineItemButton key={item.outlineID} item={item} onAdd={onAdd} onEdit={onEdit} onDelete={onDelete} />
       ))
     )}
   </div>;
@@ -92,9 +91,7 @@ function OutlineItemButton({ item, onAdd, onEdit, onDelete }: {
   const [isEditing, setIsEditing] = useState(false);
   const {setCurrentOutline} = useOutline()
   const Icon = outlineTypeIcons[item.type as keyof typeof outlineTypeIcons] || File;
-  const handleClick = () => {
-    setCurrentOutline(item)
-  }
+
 
   return (
     <div
@@ -107,7 +104,7 @@ function OutlineItemButton({ item, onAdd, onEdit, onDelete }: {
       }}
     >
       <Icon className="w-4 h-4 opacity-60" />
-      <button className="flex-1 truncate text-left" onClick={handleClick}>
+      <button className="flex-1 truncate text-left" onClick={() => setCurrentOutline(item)}>
         {item.outlineTitle}
       </button>
 
@@ -165,7 +162,6 @@ function OutlineItemOperator(
         <DropdownMenuContent>
           <DropdownMenuItem className="truncate text-xs opacity-80" onClick={() => {
             setIsEditing(true);
-            console.log("编辑", item)
           }}>
             <Pencil className="h-3 w-3 mr-2" />
             编辑

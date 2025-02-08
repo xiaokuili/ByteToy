@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { getDataSourcesByName } from "@/server/generateOutlineBase";
+import { getDataSourcesByName } from "@/server/datasource";
 import { DataConfig } from "@/server/generateOutlineSetting";
 import { useOutline} from '@/hook/useOutline'
 import { ChevronDown } from "lucide-react";
@@ -98,20 +98,21 @@ function DataSettingItem() {
   const {report_id, title} = useInput()
   const {generateDataConfig, currentOutline} = useOutline()
   const [dataConfig, setDataConfig] = useState<DataConfig[]>([])
+  console.log(currentOutline)
 
   useEffect(() => {
     const generate = async () => {
       const dataConfig = await generateDataConfig({
         report_title: title, 
         report_id: report_id || "", 
-        outline_id: currentOutline?.id || "", 
+        outline_id: currentOutline?.outlineID || "", 
         outline_title: title, 
         dataSource: []
       })
       setDataConfig(dataConfig)
     }
     generate()
-  }, [report_id, title, currentOutline?.id, generateDataConfig])
+  }, [report_id, title, currentOutline?.outlineID, generateDataConfig])
 
   return (
     <div className="flex flex-col gap-2">

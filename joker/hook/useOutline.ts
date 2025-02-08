@@ -6,8 +6,9 @@ import type {DataConfig, GenerateConfig} from '@/server/generateOutlineSetting'
 import { aigenerateDataConfig,dbgenerateDataConfig } from '@/server/generateOutlineSetting'
 
 export interface OutlineItem  extends OutlineBase  {
-    reportTitle?: string 
-
+    
+    reportID?: string 
+    reportTitle?:string 
     // 数据配置
     dataConfig?: DataConfig[]
     generateConfig?: GenerateConfig
@@ -40,13 +41,12 @@ interface OutlineState {
 
 const debouncedGenerateOutline = debounce(async (
     title: string,
-    template: string | undefined,
+    history: string | undefined,
     resolve: (value: OutlineItem[]) => void,
     reject: (error: Error) => void
 ) => {
-    console.log('Actually generating for:', title);
     try {
-        const result = await aigenerateOutline(title, template);
+        const result = await aigenerateOutline(title, history);
         resolve(result);
     } catch (error) {
         reject(error as Error);
@@ -54,9 +54,9 @@ const debouncedGenerateOutline = debounce(async (
 }, 300);
 
 // 包装函数
-const generateWithDebounce = (title: string, template?: string) => {
+const generateWithDebounce = (title: string, history?: string) => {
     return new Promise<OutlineItem[]>((resolve, reject) => {
-        debouncedGenerateOutline(title, template, resolve, reject);
+        debouncedGenerateOutline(title, history, resolve, reject);
     });
 };
 
@@ -96,16 +96,20 @@ export const useOutline = create<OutlineState>((set, get) => ({
             return [];
         }
     },
-    generateDataConfig: async ({ report_title, report_id, outline_id, outline_title, dataSource }: 
+    generateDataConfig: async ({ report_title, report_id, outline_id, outline_title }: 
         { report_title: string, report_id: string, outline_id: string, outline_title: string, dataSource: DataConfig[] }): Promise<DataConfig[]> => {
+            if (get().currentOutline == null) {
+                return [];
+            }
             set({ isDataConfigGenerating: true, DataConfigMessage: '' });
             try {
+                
                 const dataConfig = await dbgenerateDataConfig(report_id, outline_id);
                 if (dataConfig) {
                     set({ isDataConfigGenerating: false });
                     return dataConfig;
                 } else {
-                    const result = await aigenerateDataConfig({report_title, template_name: outline_title, data_srouces: dataSource});
+                    const result = await aigenerateDataConfig({report_title, outline_title});
                     set({ isDataConfigGenerating: false });
                     return result;
                 }
@@ -122,7 +126,7 @@ export const useOutline = create<OutlineState>((set, get) => ({
         const { items } = get()
         const updateItemRecursive = (items: OutlineItem[]): OutlineItem[] => {
             return items.map(item => {
-                if (item.id === id) {
+                if (item.outlineID === id) {
                     return { ...item, ...updates }
                 }
                 return item
@@ -135,7 +139,7 @@ export const useOutline = create<OutlineState>((set, get) => ({
         const { items } = get()
         const deleteItemRecursive = (items: OutlineItem[]): OutlineItem[] => {
             return items.filter(item => {
-                if (item.id === id) return false
+                if (item.outlineID === id) return false
                 return true
             })
         }

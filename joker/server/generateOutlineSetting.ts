@@ -10,7 +10,7 @@ import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
 import { ChatOpenAI } from "@langchain/openai";
-
+import { getDataSources } from "./datasource";
 
 
 
@@ -46,7 +46,7 @@ export async function dbgenerateDataConfig(reportId: string, outlineId: string) 
         )
         .limit(1);
 
-    return setting[0].dataConfig as DataConfig[];
+    return setting[0]?.dataConfig as DataConfig[];
 }
 
 
@@ -54,9 +54,12 @@ const model = new ChatOpenAI({
     model: process.env.BASE_MODEL_NAME,
     temperature: 0
 });
-export async function aigenerateDataConfig({report_title, template_name, data_srouces} : {report_title: string, template_name: string, data_srouces: DataConfig[]}) {
+
+// 基于report_title 和 outline_title 以及data_sources 生成数据源
+export async function aigenerateDataConfig({report_title,  outline_title} : {report_title: string, outline_title: string}) {
+    const data_srouces = await getDataSources()
     const prompt = ChatPromptTemplate.fromTemplate(`
-        为标题为"${report_title}"的报告，使用模板"${template_name}"，推荐需要绑定的数据源。
+        为标题为"${report_title}"的报告，使用模板"${outline_title}"，推荐需要绑定的数据源。
 
         可使用的数据源如下：
         ${data_srouces.map(ds => `
