@@ -1,33 +1,55 @@
 import { create } from 'zustand'
 import { debounce } from 'lodash-es'
-import { generateOutline } from '@/server/generateOutline'
-import type { OutlineItem } from '@/server/generateOutline'
+import { aigenerateOutline } from '@/server/generateOutlineBase'
+import type { OutlineBase } from '@/server/generateOutlineBase'
+import type {DataConfig, GenerateConfig} from '@/server/generateOutlineSetting'
+import { aigenerateDataConfig,dbgenerateDataConfig } from '@/server/generateOutlineSetting'
+
+export interface OutlineItem  extends OutlineBase  {
+    reportTitle?: string 
+
+    // 数据配置
+    dataConfig?: DataConfig[]
+    generateConfig?: GenerateConfig
+}
+
 
 interface OutlineState {
     items: OutlineItem[]
-    isGenerating: boolean
+    isInitGenerating: boolean
     error: string | null
-    generateMessage: string
-    generate: ({ title, template }: { title: string, template?: string }) => Promise<OutlineItem[]>
+    initGenerateMessage: string
+
+    isDataConfigGenerating: boolean
+    DataConfigMessage: string 
+
+    currentOutline: OutlineItem | null
+    setCurrentOutline: (outline: OutlineItem) => void
+
+    generate: ({ report_title, history }: { report_title: string, history?: string }) => Promise<OutlineItem[]>
+    generateDataConfig: ({ report_title, report_id, outline_id,outline_title, dataSource }: 
+        { report_title: string, report_id: string, outline_id: string,outline_title: string, dataSource: DataConfig[] }) => Promise<DataConfig[]>
 
     updateItem: (id: string, updates: Partial<OutlineItem>) => void
     deleteItem: (id: string) => void
     addItem: (item: OutlineItem) => void
     reorderItems: (items: OutlineItem[]) => void
+
+
 }
 
 const debouncedGenerateOutline = debounce(async (
     title: string,
     template: string | undefined,
     resolve: (value: OutlineItem[]) => void,
-    reject: (error: any) => void
+    reject: (error: Error) => void
 ) => {
     console.log('Actually generating for:', title);
     try {
-        const result = await generateOutline(title, template);
+        const result = await aigenerateOutline(title, template);
         resolve(result);
     } catch (error) {
-        reject(error);
+        reject(error as Error);
     }
 }, 300);
 
@@ -39,32 +61,61 @@ const generateWithDebounce = (title: string, template?: string) => {
 };
 
 
+
+
 export const useOutline = create<OutlineState>((set, get) => ({
     items: [],
-    isGenerating: false,
+    isInitGenerating: false,
     error: null,
-    generateMessage: '',
+    initGenerateMessage: '',
 
-    generate: async ({ title, template }: { title: string, template?: string }) => {
-        if (!title) {
+    isDataConfigGenerating: false,
+    DataConfigMessage: '',
+    currentOutline: null,
+    setCurrentOutline: (outline) => set({ currentOutline: outline }),
+
+
+    generate: async ({  report_title, history }: { report_title: string, history?: string }) => {
+        if (!report_title) {
             set({ error: '请输入标题' });
             return [];
         }
 
 
-        set({ isGenerating: true, error: null });
+        set({ isInitGenerating: true, error: null });
         try {
 
-            const items = await generateWithDebounce(title, template)
-            set({ items, isGenerating: false });
+            const items = await generateWithDebounce(report_title, history)
+            set({ items, isInitGenerating: false });
             return items || [];
         } catch (err) {
             set({
-                isGenerating: false,
+                isInitGenerating: false,
                 error: err instanceof Error ? err.message : '生成失败'
             });
             return [];
         }
+    },
+    generateDataConfig: async ({ report_title, report_id, outline_id, outline_title, dataSource }: 
+        { report_title: string, report_id: string, outline_id: string, outline_title: string, dataSource: DataConfig[] }): Promise<DataConfig[]> => {
+            set({ isDataConfigGenerating: true, DataConfigMessage: '' });
+            try {
+                const dataConfig = await dbgenerateDataConfig(report_id, outline_id);
+                if (dataConfig) {
+                    set({ isDataConfigGenerating: false });
+                    return dataConfig;
+                } else {
+                    const result = await aigenerateDataConfig({report_title, template_name: outline_title, data_srouces: dataSource});
+                    set({ isDataConfigGenerating: false });
+                    return result;
+                }
+            } catch (error) {
+                set({ 
+                    isDataConfigGenerating: false,
+                    DataConfigMessage: error instanceof Error ? error.message : '生成失败'
+                });
+                return [];
+            }
     },
 
     updateItem: (id: string, updates: Partial<OutlineItem>) => {
@@ -98,5 +149,6 @@ export const useOutline = create<OutlineState>((set, get) => ({
 
     reorderItems: (newItems: OutlineItem[]) => {
         set({ items: newItems })
-    }
+    },
+    
 }))

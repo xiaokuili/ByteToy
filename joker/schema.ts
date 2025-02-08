@@ -1,16 +1,18 @@
 import { pgTable, text, json, timestamp, integer } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
-export const templates = pgTable('templates', {
+export const outlineItems = pgTable('outline_items', {
     id: text('id').primaryKey().notNull(),
+    reportId: text('report_id').notNull(), // Foreign key to reports table
     title: text('title').notNull(),
-    type: text('type').notNull(),
-    variables: json('variables').notNull(),
-    dataConfig: json('data_config').notNull(),
+    type: text('type').notNull(), // 'title' | 'ai-text' | 'line-chart' etc
+    variables: json('variables').notNull(), // Template variables
+    dataConfig: json('data_config').notNull(), // Data source configuration
+    generateConfig: json('generate_config').notNull(), // Generation parameters
     createdAt: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
     updatedAt: timestamp('updated_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
-    nextId: text('next_id'),
-    level: integer('level').default(0).notNull(),
+    nextId: text('next_id'), // For ordering items within a report
+    level: integer('level').default(0).notNull(), // Heading level/hierarchy
 });
 
 export const dataSources = pgTable('data_sources', {

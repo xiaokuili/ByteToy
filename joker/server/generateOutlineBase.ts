@@ -7,7 +7,7 @@ import { RunnableSequence } from "@langchain/core/runnables";
 import { ChatOpenAI } from "@langchain/openai";
 import  db  from "@/lib/drizzle"
 import { dataSources } from "@/schema"
-import { eq } from "drizzle-orm"
+import { eq,and,like } from "drizzle-orm"
 
 export async function getDataSources() {
   // Get all active data sources
@@ -28,22 +28,47 @@ export async function getDataSources() {
 }
 
 
+export async function getDataSourcesByName(name: string) {
+    // Get active data sources matching the name
+    const sources = await db.select({
+      id: dataSources.id,
+      name: dataSources.name, 
+      category: dataSources.category,
+      description: dataSources.description,
+      input: dataSources.input,
+      output: dataSources.output,
+      tags: dataSources.tags,
+      status: dataSources.status
+    })
+    .from(dataSources)
+    .where(
+        and(
+          eq(dataSources.status, 'active'),
+          like(dataSources.name, `%${name}%`)
+        )
+      );
+  
+    return sources;
+  }
 
 export type ContentType = 'title' | 'ai-text' | 'line-chart';
 
 // Export the type
-export type OutlineItem = {
+export type OutlineBase = {
+    
     id: string;
-    title: string;
+    outlineTitle: string;
     type: string;
     level: number;
     nextId?: string | null;
+    
+
 };
 
 // Define the schema first
-const outlineItemSchema: z.ZodType<OutlineItem> = z.object({
+const outlineItemSchema: z.ZodType<OutlineBase> = z.object({
     id: z.string(),
-    title: z.string(), 
+    outlineTitle: z.string(), 
     type: z.string(),
     level: z.number(),
     nextId: z.string().nullable().optional()
@@ -54,7 +79,7 @@ const model = new ChatOpenAI({
     temperature: 0
 });
 
-export const generateOutline = async (title: string, template?: string) => {
+export const aigenerateOutline = async (title: string, template?: string) => {
     // Get available data sources
     const dataSources = await getDataSources();
     
@@ -106,3 +131,5 @@ export const generateOutline = async (title: string, template?: string) => {
 
     return response;
 }
+
+

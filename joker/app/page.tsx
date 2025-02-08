@@ -31,7 +31,7 @@ export default function Home() {
 
 
 function InputCard() {
-  const { title, setTitle, setTemplate } = useInput()
+  const { title, setTitle, setHistory: setTemplate, setReportId } = useInput()
   const router = useRouter();
   const [id, setId] = useState<string>('')
 
@@ -114,6 +114,7 @@ function InputCard() {
                    disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => {
                 router.push(`/generater/${id}`);
+                setReportId(id)
               }}
             >
               <Send className="h-4 w-4 mr-2" />

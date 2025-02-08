@@ -2,19 +2,19 @@
 import { useOutline } from "@/hook/useOutline";
 import { useInput } from "@/hook/useInput";
 import { useEffect, useState } from "react";
-import { OutlineItem } from "@/server/generateOutline";
+import { OutlineBase } from "@/server/generateOutlineBase";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { FileText, Table, BarChart, List, LucideIcon, FileIcon as File, ImageIcon as Image, PlusIcon, MoreHorizontal, Pencil, Trash } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { OutlineItem } from "@/hook/useOutline";
 
-export default function ReportTemplater() {
-  const [outlines, setOutlines] = useState<OutlineItem[]>([]);
-
+export default function ReportOutline() {
+  const {items, updateItem, addItem, deleteItem} = useOutline()
   const { title } = useInput();
 
-  const { generate, generateMessage, isGenerating, error } = useOutline();
+  const { generate, initGenerateMessage: generateMessage, isInitGenerating: isGenerating, error } = useOutline();
 
   useEffect(() => {
     if (!title.trim()) return;
@@ -22,40 +22,36 @@ export default function ReportTemplater() {
 
     const generateOutlines = async () => {
       try {
-        const outlines = await generate({ title });
-        setOutlines(outlines);
+        const outlines = await generate({ report_title: title });
+        outlines.forEach((outline: OutlineItem) => {
+          updateItem(outline.id, {
+            reportTitle: title,
+          })
+        })
+        
       } catch (error) {
         console.error(error);
       }
     };
     generateOutlines();
-  }, [generate, title]);
+  }, [generate, title, updateItem]);
 
-  const onAdd = (item: OutlineItem) => {
-    setOutlines(outlines => {
-      const index = outlines.findIndex(outline => outline.id === item.id);
-      const newOutlines = [...outlines];
-      newOutlines.splice(index + 1, 0, {
-        id: Math.random().toString(),
-        title: "新章节",
-        type: "text",
-        level: item.level
-      });
-      return newOutlines;
+  const onAdd = (item: OutlineBase) => {
+    addItem({
+      id: Math.random().toString(),
+      outlineTitle: "新章节",
+      type: "text",
+      level: item.level,
+      reportTitle: title
     });
   }
-  const onEdit = (item: OutlineItem) => {
-    setOutlines(outlines => {
-      return outlines.map(outline => {
-        if (outline.id === item.id) {
-          return item;
-        }
-        return outline;
-      });
+  const onEdit = (item: OutlineBase) => {
+    updateItem(item.id, {
+      outlineTitle: item.outlineTitle
     });
   }
-  const onDelete = (item: OutlineItem) => {
-    setOutlines(outlines => outlines.filter(outline => outline.id !== item.id));
+  const onDelete = (item: OutlineBase) => {
+    deleteItem(item.id);
   }
 
 
@@ -66,7 +62,7 @@ export default function ReportTemplater() {
     ) : error ? (
       <div className="text-red-500">{error}</div>
     ) : (
-      outlines.map((item) => (
+      items.map((item) => (
         <OutlineItemButton key={item.id} item={item} onAdd={onAdd} onEdit={onEdit} onDelete={onDelete} />
       ))
     )}
@@ -88,13 +84,17 @@ const outlineTypeIcons: Record<string, LucideIcon> = {
 
 // 层级 icon表示类型  operator   
 function OutlineItemButton({ item, onAdd, onEdit, onDelete }: {
-  item: OutlineItem,
-  onAdd: (item: OutlineItem) => void,
-  onEdit: (item: OutlineItem) => void,
-  onDelete: (item: OutlineItem) => void,
+  item: OutlineBase,
+  onAdd: (item: OutlineBase) => void,
+  onEdit: (item: OutlineBase) => void,
+  onDelete: (item: OutlineBase) => void,
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const {setCurrentOutline} = useOutline()
   const Icon = outlineTypeIcons[item.type as keyof typeof outlineTypeIcons] || File;
+  const handleClick = () => {
+    setCurrentOutline(item)
+  }
 
   return (
     <div
@@ -107,9 +107,9 @@ function OutlineItemButton({ item, onAdd, onEdit, onDelete }: {
       }}
     >
       <Icon className="w-4 h-4 opacity-60" />
-      <div className="flex-1 truncate text-left">
-        {item.title}
-      </div>
+      <button className="flex-1 truncate text-left" onClick={handleClick}>
+        {item.outlineTitle}
+      </button>
 
       <div className="opacity-0 group-hover:opacity-100 transition-opacity">
         <OutlineItemOperator item={item} onAdd={onAdd} onDelete={onDelete} setIsEditing={setIsEditing} />
@@ -119,11 +119,11 @@ function OutlineItemButton({ item, onAdd, onEdit, onDelete }: {
         <div className="absolute left-[64px] right-2 top-full mt-1 z-50">
           <Input
             autoFocus
-            defaultValue={item.title}
+            defaultValue={item.outlineTitle}
             className="w-full border-blue-500 ring-2 ring-blue-500 ring-opacity-50 shadow-sm bg-white text-xs py-1"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
-                onEdit({ ...item, title: e.currentTarget.value });
+                onEdit({ ...item, outlineTitle: e.currentTarget.value });
                 setIsEditing(false);
               }
               if (e.key === 'Escape') {
@@ -131,7 +131,7 @@ function OutlineItemButton({ item, onAdd, onEdit, onDelete }: {
               }
             }}
             onBlur={(e) => {
-              onEdit({ ...item, title: e.currentTarget.value });
+              onEdit({ ...item, outlineTitle: e.currentTarget.value });
               setIsEditing(false);
             }}
           />
@@ -145,9 +145,9 @@ function OutlineItemButton({ item, onAdd, onEdit, onDelete }: {
 function OutlineItemOperator(
   { item, onAdd, onDelete, setIsEditing }:
     {
-      item: OutlineItem,
-      onAdd: (item: OutlineItem) => void,
-      onDelete: (item: OutlineItem) => void,
+      item: OutlineBase,
+      onAdd: (item: OutlineBase) => void,
+      onDelete: (item: OutlineBase) => void,
       setIsEditing: (isEditing: boolean) => void,
     }) {
   return <div>

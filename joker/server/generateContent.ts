@@ -1,6 +1,6 @@
 "use server"
 
-import { OutlineItem } from "./generateOutline"
+import { OutlineBase } from "./generateOutlineBase"
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
@@ -57,14 +57,14 @@ const textGenerators = {
 
 };
 
-export const generateText = async function* (outline: OutlineItem) {
+export const generateText = async function* (outline: OutlineBase) {
     const generator = textGenerators[outline?.type as keyof typeof textGenerators]
     if (!generator) {
-        yield outline.title;
+        yield outline.outlineTitle;
         return;
     }
 
-    const stream = await generator(outline.title);
+    const stream = await generator(outline.outlineTitle);
 
     for await (const chunk of stream) {
         yield chunk

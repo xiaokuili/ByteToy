@@ -1,4 +1,4 @@
 "use client";
-export default function ReportPreview() {
+export default function ReportTool() {
   return <div>ReportPreview</div>;
 }

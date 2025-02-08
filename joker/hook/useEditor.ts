@@ -2,13 +2,13 @@
 import { create } from 'zustand';
 import { Editor } from '@tiptap/react';
 import { persist } from 'zustand/middleware';
-import { generateOutline, OutlineItem } from '@/server/generateOutline';
+import { aigenerateOutline, OutlineBase } from '@/server/generateOutline';
 import { generateText } from '@/server/generateContent';
 
 // 将状态按职责拆分
 interface OutlineState {
   title: string;
-  items: OutlineItem[];
+  items: OutlineBase[];
   isGenerating: boolean;
   error: string | null;
 }
@@ -27,12 +27,12 @@ interface Store {
   // 大纲相关
   outline: OutlineState;
   setOutlineTitle: (title: string) => void;
-  generateOutline: (title: string) => Promise<OutlineItem[]>;
+  generateOutline: (title: string) => Promise<OutlineBase[]>;
 
   // 编辑器相关
   editor: EditorState;
   setEditor: (editor: Editor | null) => void;
-  generateContent: (outline: OutlineItem) => Promise<void>;
+  generateContent: (outline: OutlineBase) => Promise<void>;
 
   // 存储相关
   storage: StorageState;
@@ -58,7 +58,7 @@ export const useEditorStore = create<Store>()(
         }));
 
         try {
-          const items = await generateOutline(title);
+          const items = await aigenerateOutline(title);
           set(state => ({
             outline: { ...state.outline, items, isGenerating: false, data: items }
           }));
@@ -83,7 +83,7 @@ export const useEditorStore = create<Store>()(
       },
       setEditor: (instance) =>
         set(state => ({ editor: { ...state.editor, instance } })),
-      generateContent: async (outline: OutlineItem) => {
+      generateContent: async (outline: OutlineBase) => {
         const { editor } = get();
         if (!editor.instance) return;
 
