@@ -28,8 +28,8 @@ interface OutlineState {
     setCurrentOutline: (outline: OutlineItem) => void
 
     generate: ({ report_title, history }: { report_title: string, history?: string }) => Promise<OutlineItem[]>
-    generateDataConfig: ({ report_title, report_id, outline_id,outline_title, dataSource }: 
-        { report_title: string, report_id: string, outline_id: string,outline_title: string, dataSource: DataConfig[] }) => Promise<DataConfig[]>
+    generateDataConfig: ({ report_title, report_id, outline_id,outline_title }: 
+        { report_title: string, report_id: string, outline_id: string,outline_title: string}) => Promise<DataConfig[]>
 
     updateItem: (id: string, updates: Partial<OutlineItem>) => void
     deleteItem: (id: string) => void
@@ -97,7 +97,7 @@ export const useOutline = create<OutlineState>((set, get) => ({
         }
     },
     generateDataConfig: async ({ report_title, report_id, outline_id, outline_title }: 
-        { report_title: string, report_id: string, outline_id: string, outline_title: string, dataSource: DataConfig[] }): Promise<DataConfig[]> => {
+        { report_title: string, report_id: string, outline_id: string, outline_title: string}): Promise<DataConfig[]> => {
             if (get().currentOutline == null) {
                 return [];
             }

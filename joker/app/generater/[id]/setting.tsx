@@ -96,9 +96,8 @@ function DataSettingSearch() {
 }
 function DataSettingItem() {
   const {report_id, title} = useInput()
-  const {generateDataConfig, currentOutline} = useOutline()
+  const {generateDataConfig, currentOutline, DataConfigMessage, isDataConfigGenerating} = useOutline()
   const [dataConfig, setDataConfig] = useState<DataConfig[]>([])
-  console.log(currentOutline)
 
   useEffect(() => {
     const generate = async () => {
@@ -106,19 +105,48 @@ function DataSettingItem() {
         report_title: title, 
         report_id: report_id || "", 
         outline_id: currentOutline?.outlineID || "", 
-        outline_title: title, 
-        dataSource: []
+        outline_title: currentOutline?.outlineTitle || "", 
       })
       setDataConfig(dataConfig)
     }
     generate()
-  }, [report_id, title, currentOutline?.outlineID, generateDataConfig])
+  }, [report_id, title, currentOutline?.outlineID, currentOutline?.outlineTitle, generateDataConfig])
+
+  if (!currentOutline) {
+    return (
+      <div className="text-sm text-gray-500 p-4">
+        请先选择一个大纲项
+      </div>
+    )
+  }
+
+  if (isDataConfigGenerating) {
+    return (
+      <div className="text-sm text-gray-500 p-4">
+        正在生成数据配置...
+      </div>
+    )
+  }
+
+  if (DataConfigMessage) {
+    return (
+      <div className="text-sm text-red-500 p-4">
+        {DataConfigMessage}
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-2">
-      {dataConfig.map((config) => (
-        <DataConfigItem key={config.id} config={config} />
-      ))}
+      {dataConfig.length === 0 ? (
+        <div className="text-sm text-gray-500 p-4">
+          暂无数据配置
+        </div>
+      ) : (
+        dataConfig.map((config) => (
+          <DataConfigItem key={config.id} config={config} />
+        ))
+      )}
     </div>
   )
 }

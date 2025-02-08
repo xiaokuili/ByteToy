@@ -80,7 +80,6 @@ const outlineTypeIcons: Record<string, LucideIcon> = {
 
 
 
-
 // 层级 icon表示类型  operator   
 function OutlineItemButton({ item, onAdd, onEdit, onDelete }: {
   item: OutlineBase,
@@ -89,15 +88,15 @@ function OutlineItemButton({ item, onAdd, onEdit, onDelete }: {
   onDelete: (item: OutlineBase) => void,
 }) {
   const [isEditing, setIsEditing] = useState(false);
-  const {setCurrentOutline} = useOutline()
+  const {setCurrentOutline, currentOutline} = useOutline()
   const Icon = outlineTypeIcons[item.type as keyof typeof outlineTypeIcons] || File;
-
 
   return (
     <div
       className={cn(
         'group flex items-center gap-2 px-2 py-1 rounded-md hover:bg-[rgba(0,0,0,0.04)] cursor-pointer relative',
-        'text-[rgb(55,53,47)] text-sm min-h-[28px]'
+        'text-[rgb(55,53,47)] text-sm min-h-[28px]',
+        currentOutline?.outlineID === item.outlineID && 'bg-[rgba(0,0,0,0.04)] '
       )}
       style={{
         paddingLeft: `${(item.level + 1) * 12}px`
