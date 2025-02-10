@@ -1,72 +1,63 @@
-"use server"
-
-import { OutlineBase } from "./generateOutlineBase"
-import { ChatOpenAI } from "@langchain/openai";
+import { StructuredOutputParser } from "@langchain/core/output_parsers";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { RunnableSequence } from "@langchain/core/runnables";
+import { ChatOpenAI } from "@langchain/openai";
+import { z } from "zod";
 
-// 方案1: 都返回 Promise<AsyncIterable>
-const textGenerators = {
-    'title': async function* (title: string) {
-        yield `<h2>${title}</h2>`;
-    },
-    'ai-text': async function* (title: string, shouldStop = { value: false }) {
-        const chat = new ChatOpenAI({
-            model: process.env.BASE_MODEL_NAME,
-            temperature: 0,
-            streaming: true
-        });
-        const prompt = ChatPromptTemplate.fromTemplate(
-            "请写一段关于{title}的内容，大约50个汉字左右。内容要简洁明了，语言要专业"
-        );
-        const chain = RunnableSequence.from([prompt, chat]);
-        const stream = await chain.stream({ title });
 
-        for await (const chunk of stream) {
-            if (shouldStop.value) break;
 
-            if (typeof chunk === 'object' && 'content' in chunk) {
-                yield chunk.content;
-            } else if (typeof chunk === 'string') {
-                yield chunk;
-            }
-        }
-    },
-    'line-chart': async function* (title: string) {
-        // Create chart configuration
-        const configuration = {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: title,
-                    data: [12, 19, 3, 5, 2, 3],
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1
-                }]
-            }
-        };
 
-        // Use QuickChart API to generate chart
-        const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(configuration))}`;
 
-        // Return chart URL in TipTap compatible format
-        const imageHtml = `<img src="${chartUrl}" alt="Chart" /> <p></p>`;
-        yield imageHtml;
-    },
-
-};
-
-export const generateText = async function* (outline: OutlineBase) {
-    const generator = textGenerators[outline?.type as keyof typeof textGenerators]
-    if (!generator) {
-        yield outline.outlineTitle;
-        return;
-    }
-
-    const stream = await generator(outline.outlineTitle);
-
-    for await (const chunk of stream) {
-        yield chunk
-    }
+interface GenerateTextProps {
+    report_title: string;
+    outline_title: string;
+    example: string[];
+    data: string;
 }
+
+export async function generateText(props: GenerateTextProps) {
+    const model = new ChatOpenAI({
+        model: process.env.BASE_MODEL_NAME,
+        temperature: 0
+    });
+
+    const prompt = ChatPromptTemplate.fromTemplate(`
+        为标题为"${props.report_title}"的报告，使用模板"${props.outline_title}"，生成内容。
+
+        历史样例:
+        ${props.example.map(ex => `- ${ex}`).join('\n')}
+        
+        数据:
+        ${props.data}
+
+        请生成合适的内容，并返回以下格式:
+        - content: 生成的内容
+        - type: 内容类型
+        - metadata: 元数据
+
+        {format_instructions}
+    `);
+
+    const zodSchema = z.object({
+        content: z.string(),
+        type: z.string(),
+        metadata: z.record(z.any())
+    });
+
+    const parser = StructuredOutputParser.fromZodSchema(zodSchema);
+   
+    const chain = RunnableSequence.from([
+        prompt,
+        model,
+        parser
+    ]);
+
+    const response = await chain.invoke({
+        format_instructions: parser.getFormatInstructions()
+    });
+
+    return response;
+}
+
+
+

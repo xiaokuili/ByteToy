@@ -19,8 +19,6 @@ export interface GenerateConfig {
     generationType: string
      // 生成历史样例
      example: string[]
-     // 描述
-     description: string
 }
   
 export interface DataConfig {

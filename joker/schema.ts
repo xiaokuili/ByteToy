@@ -6,7 +6,7 @@ export const outlineItems = pgTable('outline_items', {
     reportId: text('report_id').notNull(), // Foreign key to reports table
     title: text('title').notNull(),
     type: text('type').notNull(), // 'title' | 'ai-text' | 'line-chart' etc
-    variables: json('variables').notNull(), // Template variables
+    params: json('params').notNull(), // Template parameters
     dataConfig: json('data_config').notNull(), // Data source configuration
     generateConfig: json('generate_config').notNull(), // Generation parameters
     createdAt: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
