@@ -4,3 +4,5 @@ components/*
 hooks/*
 types/*
 node_modules/*
+chromadb/*
+*.pyc
