@@ -45,7 +45,7 @@ export async function generateText(props: GenerateTextProps) {
     });
 
     const parser = StructuredOutputParser.fromZodSchema(zodSchema);
-   
+
     const chain = RunnableSequence.from([
         prompt,
         model,

@@ -11,8 +11,8 @@ import { Input } from "@/components/ui/input";
 import { OutlineItem } from "@/hook/useOutline";
 
 export default function ReportOutline() {
-  const {items, updateItem, addItem, deleteItem} = useOutline()
-  const { title , report_id} = useInput();
+  const { items, updateItem, addItem, deleteItem } = useOutline()
+  const { title, report_id } = useInput();
 
   const { generate, initGenerateMessage: generateMessage, isInitGenerating: isGenerating, error } = useOutline();
 
@@ -24,10 +24,10 @@ export default function ReportOutline() {
         const outlines = await generate({ report_title: title });
         outlines.forEach((outline: OutlineItem) => {
           updateItem(outline.outlineID, {
-            reportID: report_id ,
+            reportID: report_id,
           })
         })
-        
+
       } catch (error) {
         console.error(error);
       }
@@ -61,7 +61,7 @@ export default function ReportOutline() {
     ) : error ? (
       <div className="text-red-500">{error}</div>
     ) : (
-      items.map((item) => (
+      items?.map((item) => (
         <OutlineItemButton key={item.outlineID} item={item} onAdd={onAdd} onEdit={onEdit} onDelete={onDelete} />
       ))
     )}
@@ -88,7 +88,7 @@ function OutlineItemButton({ item, onAdd, onEdit, onDelete }: {
   onDelete: (item: OutlineBase) => void,
 }) {
   const [isEditing, setIsEditing] = useState(false);
-  const {setCurrentOutline, currentOutline} = useOutline()
+  const { setCurrentOutline, currentOutline } = useOutline()
   const Icon = outlineTypeIcons[item.type as keyof typeof outlineTypeIcons] || File;
 
   return (

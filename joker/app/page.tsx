@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Send,  Upload } from "lucide-react";
+import { Send, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useInput } from "@/hook/useInput";
@@ -23,7 +23,7 @@ export default function Home() {
         <p className="text-muted-foreground">输入报告主题，AI将为您生成专业的商业报告</p>
       </div>
 
-      <InputCard  />
+      <InputCard />
 
     </div>
   );
@@ -83,17 +83,17 @@ function InputCard() {
                     setTemplate(result.data);
                   }
                 }}>
-                    <Input
-                      id="template" 
-                      type="file"
-                      name="file"
-                      accept=".txt,.doc,.docx"
-                      className="cursor-pointer w-full h-12 file:mr-4 file:py-2 file:px-4
+                  <Input
+                    id="template"
+                    type="file"
+                    name="file"
+                    accept=".txt,.doc,.docx"
+                    className="cursor-pointer w-full h-12 file:mr-4 file:py-2 file:px-4
                         file:rounded-md file:border-0
                         file:text-sm file:font-semibold
                         file:bg-primary file:text-primary-foreground
                         hover:file:bg-primary/90"
-                    />
+                  />
                   <DialogFooter className="mt-4 flex justify-end gap-4">
                     <Button type="submit" className="w-32">确认上传</Button>
                   </DialogFooter>
