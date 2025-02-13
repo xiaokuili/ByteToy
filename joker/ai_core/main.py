@@ -22,6 +22,7 @@ class OutlineRequest(BaseModel):
     history: Optional[str] = None 
     focus_modules: Optional[List[str]] = None
 
+
 @app.post("/generate-outline")
 async def generate_outline(request: OutlineRequest):
     chain = create_outline_chain(
@@ -29,35 +30,12 @@ async def generate_outline(request: OutlineRequest):
         history=request.history,
         focus_modules=request.focus_modules
     )
-    
-    async def generate():
-        # 发送开始标记
-        yield json.dumps({
-            "type": "start",
-            "data": None
-        }) + "\n"
-        
-        async for chunk in chain.astream({
-            "title": request.title,
-            "history_context": f"Historical reference:\n{request.history}" if request.history else "",
-            "focus_context": "Focus on these modules:\n" + "\n".join(request.focus_modules) if request.focus_modules else ""
-        }):
-            # 发送数据
-            yield json.dumps({
-                "type": "data",
-                "data": chunk
-            }) + "\n"
-        
-        # 发送结束标记
-        yield json.dumps({
-            "type": "end",
-            "data": None
-        }) + "\n"
-    
-    return StreamingResponse(
-        generate(),
-        media_type="application/x-ndjson"
-    )
+    outline = await chain.ainvoke({
+        "title": request.title,
+        "history_context": f"Historical reference:\n{request.history}" if request.history else "",
+        "focus_context": "Focus on these modules:\n" + "\n".join(request.focus_modules) if request.focus_modules else ""
+    })
+    return outline
 
 if __name__ == "__main__":
     import uvicorn
