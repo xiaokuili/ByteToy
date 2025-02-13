@@ -48,8 +48,7 @@ interface OutlineState {
     setCurrentOutline: (outline: OutlineItem) => void
 
     generate: ({ report_title, history }: { report_title: string, history?: string }) => Promise<OutlineItem[]>
-    generateDataConfig: ({ report_title, report_id, outline_id, outline_title }:
-        { report_title: string, report_id: string, outline_id: string, outline_title: string }) => Promise<DataConfig[]>
+    generateDataConfig: ({ report_title, outline_title }: { report_title: string,  outline_title: string }) => Promise<DataConfig[]>
 
     updateItem: (id: string, updates: Partial<OutlineItem>) => void
     deleteItem: (id: string) => void
@@ -89,23 +88,16 @@ export const useOutline = create<OutlineState>((set, get) => ({
             return [];
         }
     },
-    generateDataConfig: async ({ report_title, report_id, outline_id, outline_title }:
-        { report_title: string, report_id: string, outline_id: string, outline_title: string }): Promise<DataConfig[]> => {
+    generateDataConfig: async ({ report_title, outline_title }: { report_title: string, outline_title: string }): Promise<DataConfig[]> => {
         if (get().currentOutline == null) {
             return [];
         }
         set({ isDataConfigGenerating: true, DataConfigMessage: '' });
         try {
-
-            const dataConfig = await dbgenerateDataConfig(report_id, outline_id);
-            if (dataConfig) {
-                set({ isDataConfigGenerating: false });
-                return dataConfig;
-            } else {
-                const result = await aigenerateDataConfig({ report_title, outline_title });
-                set({ isDataConfigGenerating: false });
-                return result;
-            }
+            console.log(report_title)
+            const dataConfig = await fetchDataSource(outline_title);
+            set({ isDataConfigGenerating: false, DataConfigMessage: '数据源生成完成' });
+            return dataConfig;
         } catch (error) {
             set({
                 isDataConfigGenerating: false,
@@ -219,15 +211,42 @@ const fetchOutlineWithDebounce = (title: string, history?: string): Promise<Outl
 
 
 
+const fetchDataSource = async (keyword: string): Promise<DataConfig[]> => {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_AI_CORE_URL}/search`, {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                keyword: keyword,
+                collection_name: "test_collection"
+            }),
+        });
 
-const dbgenerateDataConfig = async (report_id: string, outline_id: string): Promise<DataConfig[]> => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-    console.log(report_id, outline_id)
-    return []
-}
+        const data = await response.json();
 
-const aigenerateDataConfig = async ({ report_title, outline_title }: { report_title: string, outline_title: string }): Promise<DataConfig[]> => {
-    console.log(report_title, outline_title)
-    return []
+        if (!data.results || !Array.isArray(data.results)) {
+            throw new Error('Invalid response format');
+        }
+
+        return data.results.map((item: {
+            content: string;
+            metadata: { url?: string, name?: string };
+            id: string;
+        }) => ({
+            id: item.id,
+            url: item.metadata?.url || '',
+            name: item.metadata.name || ''
+        }));
+    } catch (error) {
+        console.error('Error fetching data source:', error);
+        throw error;
+    }
 }
 
