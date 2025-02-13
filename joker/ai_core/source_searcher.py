@@ -27,7 +27,8 @@ class RAGDataSource:
         
         # 使用 SentenceTransformer 嵌入模型
         self.embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
-            model_name="BAAI/bge-small-en-v1.5"
+            model_name="BAAI/bge-small-zh-v1.5", 
+            cache_folder='./model_cache'
         )
         
         # 获取或创建集合

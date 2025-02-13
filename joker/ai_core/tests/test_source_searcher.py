@@ -1,7 +1,7 @@
 import pytest
 from ..source_searcher import Document, RAGDataSource, create_datasource_factory
-@pytest.mark.asyncio
 
+@pytest.mark.asyncio
 async def test_rag_datasource():
     # Initialize RAG data source
     ds = RAGDataSource(collection_name="test_collection")

@@ -1,10 +1,13 @@
 from fastapi import FastAPI
 from typing import List, Optional
 from pydantic import BaseModel
-from outline_generator import create_outline_chain
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-import json
+from fastapi import HTTPException
+
+from outline_generator import create_outline_chain
+from source_searcher import create_datasource_factory, Document
+
 
 app = FastAPI()
 
@@ -36,6 +39,34 @@ async def generate_outline(request: OutlineRequest):
         "focus_context": "Focus on these modules:\n" + "\n".join(request.focus_modules) if request.focus_modules else ""
     })
     return outline
+
+
+
+class SearchRequest(BaseModel):
+    keyword: str
+    collection_name: str
+
+@app.post("/search")
+async def search_documents(request: SearchRequest):
+    try:
+        # Create a data source using the factory
+        data_source = create_datasource_factory("rag", collection_name=request.collection_name)
+    
+        # Perform the search
+        results = await data_source.search(request.keyword)
+        
+        # Convert the results to a list of dictionaries
+        formatted_results = [
+            {
+                "content": doc.content,
+                "metadata": doc.metadata,
+                "id": doc.id
+            } for doc in results
+        ]
+        
+        return {"results": formatted_results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
