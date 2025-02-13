@@ -13,7 +13,6 @@ load_dotenv()
 class OutlineItem(BaseModel):
     outline_id: str = Field(description="unique string ID for the outline item")
     outline_title: str = Field(description="section title of the outline item")
-    type: str = Field(description="section type (heading/subheading/point)")
     level: int = Field(description="hierarchy level as integer")
     next_id: Optional[str] = Field(default=None, description="ID of next section")
 
