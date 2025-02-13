@@ -1,10 +1,10 @@
 from fastapi import FastAPI
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
-
+import uuid
 from outline_generator import create_outline_chain
 from source_searcher import create_datasource_factory, Document
 
@@ -65,6 +65,29 @@ async def search_documents(request: SearchRequest):
         ]
         
         return {"results": formatted_results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+class AddDocumentRequest(BaseModel):
+    collection_name: str
+    documents: List[Document]
+
+@app.post("/add-documents")
+async def add_documents(request: AddDocumentRequest):
+    for doc in request.documents:
+        if "name" not in doc.metadata:
+            doc.metadata["name"] = "custom"
+        if "url" not in doc.metadata:
+            doc.metadata["url"] = "custom"
+    try:
+        # Create a data source using the factory
+        data_source = create_datasource_factory("rag", collection_name=request.collection_name)
+
+        # Add the documents to the data source
+        await data_source.add(request.documents)
+        return {"message": f"Successfully added {len(request.documents)} documents to {request.collection_name}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
