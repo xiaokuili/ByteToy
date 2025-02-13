@@ -8,6 +8,7 @@ export interface OutlineBase {
     level: number
     nextId: string | null
 }
+
 // 控制生成文本的数据源
 // 数据源可以产生优质内容，而不是数据
 export interface DataConfig  {
