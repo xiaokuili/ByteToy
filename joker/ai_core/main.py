@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from typing import List, Optional
 from pydantic import BaseModel
-from joker.ai_core.outline_generator import create_outline_chain
+from outline_generator import create_outline_chain
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 import json
