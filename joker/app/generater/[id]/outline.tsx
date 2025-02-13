@@ -1,8 +1,7 @@
 "use client";
-import { useOutline } from "@/hook/useOutline";
+import { OutlineBase, useOutline } from "@/hook/useOutline";
 import { useInput } from "@/hook/useInput";
 import { useEffect, useState } from "react";
-import { OutlineBase } from "@/server/generateOutlineBase";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { FileText, Table, BarChart, List, LucideIcon, FileIcon as File, ImageIcon as Image, PlusIcon, MoreHorizontal, Pencil, Trash } from 'lucide-react';
@@ -35,13 +34,13 @@ export default function ReportOutline() {
     generateOutlines();
   }, [generate, report_id, title, updateItem]);
 
-  const onAdd = (item: OutlineBase) => {
+  const onAdd = (item: OutlineItem) => {
     addItem({
       outlineID: Math.random().toString(),
       outlineTitle: "新章节",
-      type: "text",
       level: item.level,
-      reportID: title
+      reportID: report_id,
+      nextId: null
     });
   }
   const onEdit = (item: OutlineBase) => {
@@ -89,7 +88,7 @@ function OutlineItemButton({ item, onAdd, onEdit, onDelete }: {
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const { setCurrentOutline, currentOutline } = useOutline()
-  const Icon = outlineTypeIcons[item.type as keyof typeof outlineTypeIcons] || File;
+  const Icon = File;
 
   return (
     <div
