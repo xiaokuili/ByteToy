@@ -7,7 +7,7 @@ export const reportConfig = pgTable('report_config', {
     title: text('title').notNull(),
     type: text('type').notNull(), // 'title' | 'ai-text' | 'line-chart' etc
     params: json('params').notNull(), // Template parameters
-    dataConfig: text('data_config_ids').array().notNull(), // List of data source configuration IDs
+    dataConfig: json('data_config').array().notNull().default(sql`'{}'::jsonb[]`), // Array of {id: string, name: string, url: string}
     generateConfig: json('generate_config').notNull(), // Generation parameters
     createdAt: timestamp('created_at').default(sql`CURRENT_TIMESTAMP`).notNull(),
     updatedAt: timestamp('updated_at').default(sql`CURRENT_TIMESTAMP`).notNull(),

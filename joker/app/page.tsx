@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Send, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useInput } from "@/hook/useInput";
+import { useOutlineCreator } from "@/hook/useOutlineCreator";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { parseTemplate } from "@/actions";
 import { nanoid } from 'nanoid'
@@ -31,7 +31,7 @@ export default function Home() {
 
 
 function InputCard() {
-  const { title, setTitle, setHistory: setTemplate, setReportId } = useInput()
+  const { title, setTitle, setHistory: setTemplate, setReportId } = useOutlineCreator()
   const router = useRouter();
   const [id, setId] = useState<string>('')
 
