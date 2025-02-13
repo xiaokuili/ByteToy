@@ -1,3 +1,4 @@
+import debounce from 'lodash-es/debounce'
 import { create } from 'zustand'
 
 // 第一步从大模型生成的大纲
@@ -76,7 +77,7 @@ export const useOutline = create<OutlineState>((set, get) => ({
 
         set({ isInitGenerating: true, error: null });
         try {
-            const items = await fetchOutline(report_title, history);
+            const items = await fetchOutlineWithDebounce(report_title, history);
             set({ items, isInitGenerating: false, initGenerateMessage: '大纲生成完成' });
             return items;
         } catch (err) {
@@ -193,6 +194,30 @@ const fetchOutline = async (title: string, history?: string): Promise<OutlineIte
         throw err;
     }
 };
+
+// 基于防抖动，禁止开发过程中两次请求结果不同
+const debouncedFetchOutline = debounce(async (
+    title: string,
+    history: string | undefined,
+    resolve: (value: OutlineItem[]) => void,
+    reject: (error: Error) => void
+) => {
+    console.log('Actually fetching outline for:', title);
+    try {
+        const result = await fetchOutline(title, history);
+        resolve(result);
+    } catch (error) {
+        reject(error instanceof Error ? error : new Error(String(error)));
+    }
+}, 500);
+
+const fetchOutlineWithDebounce = (title: string, history?: string): Promise<OutlineItem[]> => {
+    return new Promise<OutlineItem[]>((resolve, reject) => {
+        debouncedFetchOutline(title, history, resolve, reject);
+    });
+};
+
+
 
 
 const dbgenerateDataConfig = async (report_id: string, outline_id: string): Promise<DataConfig[]> => {
