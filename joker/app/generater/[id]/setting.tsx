@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { getDataSourcesByName } from "@/server/datasource";
-import { DataConfig, GenerateConfig } from "@/server/generateOutlineSetting";
 import { useOutline} from '@/hook/useOutline'
 import {  ExternalLink } from "lucide-react";
 import {useInput} from '@/hook/useInput' 
@@ -13,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { DataConfig, GenerateConfig } from "@/hook/useOutline";
+import { useDatasource, Document } from "@/hook/useDatasource";
 
 export default function ReportSetting() {
 
@@ -40,8 +40,9 @@ function DataSetting() {
 }
 function DataSettingSearch() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<DataConfig[]>([]);
+  const [searchResults, setSearchResults] = useState<Document[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const {searchDatasource} = useDatasource()
 
   useEffect(() => {
     if (!searchTerm.trim()) {
@@ -53,8 +54,8 @@ function DataSettingSearch() {
       setIsSearching(true);
       try {
         // TODO: Replace with actual search API call
-        const results  = await getDataSourcesByName(searchTerm)
-        setSearchResults(results as DataConfig[]);
+        const results = await searchDatasource(searchTerm)
+        setSearchResults(results);
       } catch (error) {
         console.error('Search failed:', error);
       } finally {
@@ -64,7 +65,7 @@ function DataSettingSearch() {
 
     const debouncer = setTimeout(search, 500);
     return () => clearTimeout(debouncer);
-  }, [searchTerm]);
+  }, [searchTerm, searchDatasource]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -83,7 +84,7 @@ function DataSettingSearch() {
               key={result.id}
               className="flex items-center justify-between p-2 hover:bg-gray-100 rounded"
             >
-              <span>{result.name}</span>
+              <span>{result.metadata?.name}</span>
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -110,8 +111,6 @@ function DataConfigItem() {
     const generate = async () => {
       const dataConfig = await generateDataConfig({
         report_title: title, 
-        report_id: report_id || "", 
-        outline_id: currentOutline?.outlineID || "", 
         outline_title: currentOutline?.outlineTitle || "", 
       })
       setDataConfig(dataConfig)
@@ -170,7 +169,7 @@ function DataConfigDialog({config}: {config: DataConfig}) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">{config.name}</span>
-            <Badge variant="outline">{config.category}</Badge>
+            <Badge variant="outline">{config.name}</Badge>
           </div>
           <Button variant="ghost" size="icon">
             <ExternalLink className="h-4 w-4" />
@@ -182,7 +181,7 @@ function DataConfigDialog({config}: {config: DataConfig}) {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{config.name}</DialogTitle>
-            <DialogDescription>{config.description}</DialogDescription>
+            <DialogDescription>{config.name}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4">
@@ -190,14 +189,14 @@ function DataConfigDialog({config}: {config: DataConfig}) {
             <div className="space-y-2">
               <Label>Input Schema</Label>
               <ScrollArea className="h-[100px] rounded border p-2">
-                <pre className="text-sm">{JSON.stringify(config.input, null, 2)}</pre>
+                <pre className="text-sm">{JSON.stringify(config.url, null, 2)}</pre>
               </ScrollArea>
             </div>
 
             <div className="space-y-2">
               <Label>Output Schema</Label>
               <ScrollArea className="h-[100px] rounded border p-2">
-                <pre className="text-sm">{JSON.stringify(config.output, null, 2)}</pre>
+                <pre className="text-sm">{JSON.stringify(config.url, null, 2)}</pre>
               </ScrollArea>
             </div>
 
@@ -219,6 +218,7 @@ function DataConfigDialog({config}: {config: DataConfig}) {
 function DataSettingUpload() {
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const {addDatasource} = useDatasource()
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -253,15 +253,25 @@ function DataSettingUpload() {
     });
 
     try {
-      // TODO: Replace with actual upload API endpoint
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      });
-      
-      if (response.ok) {
-        setFiles([]);
+      for (const file of files) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const content = e.target?.result as string;
+          const document: Document = {
+            id: file.name,
+            content: content,
+            metadata: {
+              name: file.name,
+              url: URL.createObjectURL(file)
+            }
+          };
+          await addDatasource(document);
+        };
+        reader.readAsText(file);
       }
+      // TODO: Replace with actual upload API endpoint
+      
+    
     } catch (error) {
       console.error('Upload failed:', error);
     }
@@ -323,8 +333,9 @@ function DataSettingUpload() {
 
 function GenerateSetting() {
   const [config, setConfig] = useState<GenerateConfig>({
-    generationType: '',
-    example: [],
+    id: '',
+    llm_name: '',
+    example_sentence: '',
   });
 
   const generateTypes = [
@@ -347,8 +358,8 @@ function GenerateSetting() {
         </Label>
         <select
           id="generationType"
-          value={config.generationType}
-          onChange={(e) => setConfig({...config, generationType: e.target.value})}
+          value={config.llm_name}
+          onChange={(e) => setConfig({...config, llm_name: e.target.value})}
           className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm hover:border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors"
         >
           <option value="" className="text-gray-500">请选择生成类型</option>
@@ -364,7 +375,7 @@ function GenerateSetting() {
         </select>
       </div>
 
-      {config.generationType === 'text' && (
+      {config.llm_name === 'text' && (
         <div className="space-y-2">
           <Label 
             htmlFor="example" 
@@ -374,8 +385,8 @@ function GenerateSetting() {
           </Label>
           <Textarea
             id="example"
-            value={config.example.join('\n')}
-            onChange={(e) => setConfig({...config, example: e.target.value.split('\n')})}
+            value={config.example_sentence}
+            onChange={(e) => setConfig({...config, example_sentence: e.target.value})}
             placeholder="每行输入一个历史样例"
             rows={4}
             className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm hover:border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-colors resize-none"
