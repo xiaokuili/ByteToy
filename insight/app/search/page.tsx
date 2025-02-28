@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { QueryBuilder } from "@/components/QueryBuilder"
+import { QueryBuilder } from "@/components/query-builder"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"

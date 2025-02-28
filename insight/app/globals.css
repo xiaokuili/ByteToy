@@ -38,6 +38,27 @@
 
 @layer base {
   :root {
+    /* 主题色系 */
+    --primary: 231 66% 56%;
+    /* 主蓝色 #4F6EF7 */
+    --primary-hover: 231 66% 46%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 252 95% 85%;
+    /* 浅紫色背景 */
+    --secondary-foreground: 252 95% 25%;
+
+    /* 中性色 */
+    --slate-50: 210 40% 98%;
+    --slate-100: 210 40% 96%;
+    --slate-200: 214 32% 91%;
+    --slate-600: 215 25% 27%;
+    --slate-700: 215 25% 27%;
+
+    /* 特效 */
+    --shine-degree: 120deg;
+    --shine-color: rgba(156, 146, 255, 0.1);
+    --shine-width: 50%;
 
     --background: 0 0% 100%;
 
@@ -50,14 +71,6 @@
     --popover: 0 0% 100%;
 
     --popover-foreground: 0 0% 3.9%;
-
-    --primary: 0 0% 9%;
-
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 0 0% 96.1%;
-
-    --secondary-foreground: 0 0% 9%;
 
     --muted: 0 0% 96.1%;
 
@@ -151,5 +164,79 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* 添加发光边框效果 */
+.shine-border {
+  position: relative;
+  overflow: hidden;
+  --border-width: 1px;
+  --border-radius: 8px;
+  border-radius: var(--border-radius);
+}
+
+.shine-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--border-radius);
+  padding: var(--border-width);
+  background: linear-gradient(var(--shine-degree), transparent, var(--shine-color), transparent);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 关键词标签样式 */
+.keyword-tag {
+  @apply px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200;
+  @apply bg-slate-100 text-slate-700 hover:bg-slate-200;
+  @apply flex items-center gap-2 cursor-pointer;
+}
+
+/* 移除 group 相关的样式，改用独立的类名 */
+.keyword-tag-remove {
+  @apply w-4 h-4 text-slate-400 opacity-0 transition-all duration-200;
+}
+
+.keyword-tag:hover .keyword-tag-remove {
+  @apply opacity-100;
+}
+
+/* 数据源和展示样式选择器 */
+.option-grid {
+  @apply grid gap-2;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.option-item {
+  @apply flex items-center justify-center p-3 rounded-lg transition-all duration-200;
+  @apply border border-slate-200 bg-white hover:border-primary/50;
+  @apply cursor-pointer text-sm text-slate-600;
+}
+
+.option-item.active {
+  @apply border-primary/50 bg-primary/5 text-primary;
+}
+
+/* 在现有样式后添加 */
+@keyframes ripple {
+  to {
+    transform: scale(2);
+    opacity: 0;
   }
 }
