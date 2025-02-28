@@ -1,100 +1,99 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Message } from "ai";
-
-import { generate } from "@/actions";
-import { readStreamableValue } from "ai/rsc";
-import { useChat } from '@ai-sdk/react';
-
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-// Allow streaming responses up to 30 seconds
-export const maxDuration = 30;
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { useState } from "react"
+import { SourceToggle } from "@/components/ui/source-toggle"
+import { useRouter } from "next/navigation"
 
 export default function Home() {
-  const { messages, input, handleInputChange, handleSubmit, data } = useChat();
-  const results = [...messages];
-  if (data) {
-    // Iterate through data array in reverse order
-    for (let i = data.length - 1; i >= 0; i--) {
-      const item = data[i] as {};
+  const [isOnline, setIsOnline] = useState(true);
+  const [query, setQuery] = useState("");
+  const router = useRouter();
 
-      if ('index' in item && typeof item.index === 'number') {
-        // Replace content at the specified index
-        if (results[item.index]) {
-          results[item.index] = {
-            ...results[item.index],
-            content: 'begin table'
-          };
-        }
-      }
-    }
-  }
-  console.log(data);
+  const handleSearch = () => {
+    if (!query.trim()) return;
 
-  console.log(results);
+    // 使用 URLSearchParams 构建查询参数
+    const params = new URLSearchParams({
+      q: query,
+      source: isOnline ? 'online' : 'local'
+    });
+
+    // 添加页面切换动画类
+    document.body.classList.add('page-transition');
+
+    // 延迟导航以显示动画
+    setTimeout(() => {
+      router.push(`/search?${params.toString()}`);
+    }, 200);
+  };
+
   return (
-    <div>
-      <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-        {results.map(m => (
-          <div key={m.id} className="whitespace-pre-wrap">
-            {m.role === 'user' ? 'User: ' : 'AI: '}
-            {m.content === 'begin table' ? <TableExample /> : <div>{m.content}</div>}
+    <main className="min-h-screen w-full relative overflow-hidden bg-gradient-to-b from-[#E6F0FD] to-[#F9F9F9]">
+      {/* 背景装饰 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute w-[500px] h-[500px] blur-[100px] rounded-full bg-blue-100/50 -top-20 -left-20" />
+        <div className="absolute w-[500px] h-[500px] blur-[100px] rounded-full bg-purple-100/50 -bottom-20 -right-20" />
+      </div>
 
+      {/* 主要内容 */}
+      <div className="container max-w-4xl mx-auto px-4 h-screen flex flex-col items-center justify-center space-y-8">
+        {/* Logo */}
+        <div className="flex items-center space-x-2 text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            className="w-10 h-10 text-indigo-600"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <span>WriteFinder</span>
+        </div>
+
+        {/* 标语 */}
+        <p className="text-lg text-gray-600 text-center">发现灵感，创造精彩</p>
+
+        {/* 搜索框容器 */}
+        <div className="w-full max-w-2xl backdrop-blur-sm bg-white/70 rounded-2xl shadow-lg p-6 space-y-6 transition-all duration-300 hover:shadow-xl">
+          <div className="flex items-center space-x-4">
+            <Input
+              type="text"
+              placeholder="输入关键词开始搜索..."
+              className="flex-1 h-12 text-lg border-0 bg-transparent focus:ring-0"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            />
+            <Button
+              size="lg"
+              className="bg-indigo-600 hover:bg-indigo-700"
+              onClick={handleSearch}
+            >
+              搜索
+            </Button>
           </div>
-        ))}
-        <form onSubmit={handleSubmit}>
-          <input
-            className="fixed dark:bg-zinc-900 bottom-0 w-full max-w-md p-2 mb-8 border border-zinc-300 dark:border-zinc-800 rounded shadow-xl"
-            value={input}
-            placeholder="Say something..."
-            onChange={handleInputChange}
+
+          {/* 本地/网络切换 */}
+          <SourceToggle
+            isOnline={isOnline}
+            onToggle={setIsOnline}
+            className="justify-center"
           />
-        </form>
+        </div>
+
+        {/* 底部提示 */}
+        <p className="text-sm text-gray-500">
+          按下回车键开始搜索，或使用高级搜索选项
+        </p>
       </div>
-    </div>
-  );
-}
-
-
-
-function TableExample() {
-
-  return (
-    <div className="w-full">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Invoice</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Method</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell className="font-medium">INV001</TableCell>
-              <TableCell>Paid</TableCell>
-              <TableCell>Credit Card</TableCell>
-              <TableCell className="text-right">$250.00</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">INV002</TableCell>
-              <TableCell>Pending</TableCell>
-              <TableCell>PayPal</TableCell>
-              <TableCell className="text-right">$150.00</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">INV003</TableCell>
-              <TableCell>Unpaid</TableCell>
-              <TableCell>Bank Transfer</TableCell>
-              <TableCell className="text-right">$350.00</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+    </main>
   )
 }
