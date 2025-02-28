@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { SourceToggle } from "@/components/ui/source-toggle"
 import { useRouter } from "next/navigation"
+import { FileUploadToggle } from "@/components/ui/file-upload-toggle"
 
 export default function Home() {
   const [isOnline, setIsOnline] = useState(true);
-  const [query, setQuery] = useState("");
+  const [isUpload, setIsUpload] = useState(false);
   const router = useRouter();
 
-  const handleSearch = () => {
+  const handleSearch = (query: string) => {
     if (!query.trim()) return;
 
     // 使用 URLSearchParams 构建查询参数
@@ -27,6 +28,11 @@ export default function Home() {
     setTimeout(() => {
       router.push(`/search?${params.toString()}`);
     }, 200);
+  };
+
+  const handleFileSelect = (file: File) => {
+    console.log('Selected file:', file);
+    // TODO: 处理文件上传逻辑
   };
 
   return (
@@ -63,23 +69,12 @@ export default function Home() {
 
         {/* 搜索框容器 */}
         <div className="w-full max-w-2xl backdrop-blur-sm bg-white/70 rounded-2xl shadow-lg p-6 space-y-6 transition-all duration-300 hover:shadow-xl">
-          <div className="flex items-center space-x-4">
-            <Input
-              type="text"
-              placeholder="输入关键词开始搜索..."
-              className="flex-1 h-12 text-lg border-0 bg-transparent focus:ring-0"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            <Button
-              size="lg"
-              className="bg-indigo-600 hover:bg-indigo-700"
-              onClick={handleSearch}
-            >
-              搜索
-            </Button>
-          </div>
+          <FileUploadToggle
+            isUpload={isUpload}
+            onToggle={setIsUpload}
+            onFileSelect={handleFileSelect}
+            onSearch={handleSearch}
+          />
 
           {/* 本地/网络切换 */}
           <SourceToggle
@@ -89,10 +84,6 @@ export default function Home() {
           />
         </div>
 
-        {/* 底部提示 */}
-        <p className="text-sm text-gray-500">
-          按下回车键开始搜索，或使用高级搜索选项
-        </p>
       </div>
     </main>
   )

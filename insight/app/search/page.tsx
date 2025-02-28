@@ -10,10 +10,24 @@ import { Search, Globe, HardDrive, ExternalLink } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { SourceToggle } from "@/components/ui/source-toggle"
+import { FileUploadToggle } from "@/components/ui/file-upload-toggle"
 
 export default function SearchPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isOnline, setIsOnline] = useState(true);
+    const [isUpload, setIsUpload] = useState(false);
+
+    const handleSearch = (query: string) => {
+        if (!query.trim()) return;
+        setIsLoading(true);
+        // TODO: 实现搜索逻辑
+        setTimeout(() => setIsLoading(false), 2000);
+    };
+
+    const handleFileSelect = (file: File) => {
+        console.log('Selected file:', file);
+        // TODO: 处理文件上传逻辑
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -24,22 +38,14 @@ export default function SearchPage() {
                         WriteFinder
                     </div>
                     <div className="flex-1 max-w-2xl">
-                        <Input
-                            type="text"
-                            placeholder="搜索..."
-                            className="w-full bg-white/50"
+                        <FileUploadToggle
+                            isUpload={isUpload}
+                            onToggle={setIsUpload}
+                            onFileSelect={handleFileSelect}
+                            onSearch={handleSearch}
                         />
                     </div>
-                    <div className="flex items-center gap-6">
-                        <SourceToggle
-                            isOnline={isOnline}
-                            onToggle={setIsOnline}
-                        />
-                        <Button className="bg-indigo-600 hover:bg-indigo-700">
-                            <Search className="w-4 h-4 mr-2" />
-                            搜索
-                        </Button>
-                    </div>
+
                 </div>
             </header>
 
