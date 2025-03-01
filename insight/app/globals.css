@@ -39,20 +39,32 @@
 @layer base {
   :root {
     /* 主题色系 */
-    --primary: 231 66% 56%;
-    /* 主蓝色 #4F6EF7 */
-    --primary-hover: 231 66% 46%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 79 70 229;
+    /* indigo-600 */
+    --primary-hover: 67 56 202;
+    /* indigo-700 */
+    --primary-light: 224 231 255;
+    /* indigo-50 */
+    --primary-border: 199 210 254;
+    /* indigo-200 */
 
-    --secondary: 252 95% 85%;
-    /* 浅紫色背景 */
-    --secondary-foreground: 252 95% 25%;
+    /* 渐变色 */
+    --gradient-start: 79 70 229;
+    /* indigo-600 */
+    --gradient-end: 147 51 234;
+    /* purple-600 */
+
+    /* 背景色 */
+    --bg-gradient-start: 230 240 253;
+    /* #E6F0FD */
+    --bg-gradient-end: 249 249 249;
+    /* #F9F9F9 */
 
     /* 中性色 */
-    --slate-50: 210 40% 98%;
-    --slate-100: 210 40% 96%;
-    --slate-200: 214 32% 91%;
-    --slate-600: 215 25% 27%;
+    --slate-50: 248 250 252;
+    --slate-100: 241 245 249;
+    --slate-200: 226 232 240;
+    --slate-600: 71 85 105;
     --slate-700: 215 25% 27%;
 
     /* 特效 */

@@ -6,83 +6,89 @@ import { DataSourceFilter } from "@/components/filters/DataSourceFilter"
 import { DisplayFormatFilter } from "@/components/filters/DisplayFormatFilter"
 import { SearchResults } from "@/components/search/SearchResults"
 import { useSearchParams } from "next/navigation"
+import { DataSource, DisplayFormat, AIModel } from "@/config/filters";
+import { SearchInput } from "@/components/search/SearchInput";
 
 export default function SearchPage() {
     const searchParams = useSearchParams();
-    const [isLoading, setIsLoading] = useState(false);
-    const [isUpload, setIsUpload] = useState(false);
-    const [selectedSources, setSelectedSources] = useState<string[]>([]);
-    const [displayFormat, setDisplayFormat] = useState("列表");
+    const query = searchParams.get("q") || "";
+    const model = (searchParams.get("model") as AIModel) || "GPT-4";
+    const format = (searchParams.get("format") as DisplayFormat) || "列表";
+    const sourcesParam = searchParams.get("sources") || "";
+    const sources = sourcesParam ? sourcesParam.split(",") as DataSource[] : [];
 
-    // 从 URL 参数初始化状态
+    const [searchQuery, setSearchQuery] = useState(query);
+    const [isLoading, setIsLoading] = useState(true);
+    const [results, setResults] = useState<any[]>([]);
+
     useEffect(() => {
-        const sources = searchParams.get('sources')?.split(',') || [];
-        const format = searchParams.get('format') || "列表";
-        setSelectedSources(sources);
-        setDisplayFormat(format);
+        // 模拟搜索结果加载
+        const timer = setTimeout(() => {
+            setResults([
+                { id: 1, title: "搜索结果 1", content: "这是搜索结果的内容..." },
+                { id: 2, title: "搜索结果 2", content: "这是搜索结果的内容..." },
+                { id: 3, title: "搜索结果 3", content: "这是搜索结果的内容..." },
+            ]);
+            setIsLoading(false);
+        }, 1500);
 
-        // 如果有搜索词，自动执行搜索
-        const query = searchParams.get('q');
-        if (query) {
-            handleSearch(query);
-        }
-    }, [searchParams]);
+        return () => clearTimeout(timer);
+    }, [query, model, format, sourcesParam]);
 
-    const handleSearch = (query: string) => {
-        if (!query.trim()) return;
-        setIsLoading(true);
-        // TODO: 实现搜索逻辑
-        setTimeout(() => setIsLoading(false), 2000);
+    const handleSearch = () => {
+        // 实现搜索逻辑
+        console.log("Searching for:", searchQuery);
     };
 
-    const handleFileSelect = (file: File) => {
-        console.log('Selected file:', file);
-        // TODO: 处理文件上传逻辑
+    const handleFileUpload = (file: File) => {
+        console.log("File uploaded:", file);
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white page-enter">
-            {/* Logo部分 */}
-            <div className="container mx-auto px-6 py-4">
-                <div className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 
-                              bg-clip-text text-transparent hover:opacity-80 transition-opacity cursor-pointer">
-                    WriteFinder
-                </div>
-            </div>
-
-            {/* 搜索和筛选区域 */}
-            <div className="container mx-auto px-6 py-8 space-y-8">
-                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6
-                              backdrop-blur-sm bg-white/70">
-                    <FileUploadToggle
-                        isUpload={isUpload}
-                        onToggle={setIsUpload}
-                        onFileSelect={handleFileSelect}
+        <main className="min-h-screen w-full bg-gradient-to-b from-slate-50 to-slate-100">
+            <div className="container mx-auto px-4 py-6">
+                {/* 搜索栏 */}
+                <div className="mb-8">
+                    <SearchInput
+                        value={searchQuery}
+                        onChange={setSearchQuery}
+                        selectedModel={model}
+                        onModelClick={() => { }}
+                        onDataSourceClick={() => { }}
+                        onDisplayFormatClick={() => { }}
+                        onFileUpload={handleFileUpload}
                         onSearch={handleSearch}
+                        hasDataSourceSettings={sources.length > 0}
+                        hasDisplayFormatSettings={format !== "列表"}
+                        dataSourceName={sources[0] || "百度"}
+                        displayFormatName={format}
                     />
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-medium text-slate-600">数据源</h3>
-                            <DataSourceFilter
-                                selectedSources={selectedSources}
-                                onChange={setSelectedSources}
-                            />
-                        </div>
-
-                        <div className="space-y-4">
-                            <h3 className="text-sm font-medium text-slate-600">展示格式</h3>
-                            <DisplayFormatFilter
-                                selectedFormat={displayFormat}
-                                onChange={setDisplayFormat}
-                            />
-                        </div>
-                    </div>
                 </div>
 
-                {/* 搜索结果区域 */}
-                <SearchResults isLoading={isLoading} />
+                {/* 搜索结果 */}
+                <div className="space-y-6">
+                    {isLoading ? (
+                        <div className="flex justify-center py-12">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                        </div>
+                    ) : (
+                        <>
+                            <h2 className="text-xl font-medium text-slate-800">搜索结果</h2>
+                            <div className="space-y-4">
+                                {results.map((result) => (
+                                    <div
+                                        key={result.id}
+                                        className="p-6 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+                                    >
+                                        <h3 className="text-lg font-medium text-slate-800 mb-2">{result.title}</h3>
+                                        <p className="text-slate-600">{result.content}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
-        </div>
+        </main>
     );
 } 

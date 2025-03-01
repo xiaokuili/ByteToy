@@ -1,9 +1,8 @@
-import { dataSources } from "@/app/api/query-builder/schema";
-import { sourceIcons } from "@/app/query-builder/utils/icons";
+import { dataSources, sourceIcons, DataSource } from "@/config/filters";
 
 interface DataSourceFilterProps {
-    selectedSources: string[];
-    onChange: (sources: string[]) => void;
+    selectedSources: DataSource[];
+    onChange: (sources: DataSource[]) => void;
     className?: string;
 }
 
@@ -23,8 +22,8 @@ export function DataSourceFilter({ selectedSources, onChange, className = "" }: 
                     }}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all
                         ${selectedSources.includes(source)
-                            ? 'bg-indigo-50 text-indigo-600 border border-indigo-200'
-                            : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-100'}`}
+                            ? 'bg-[rgb(var(--primary-light))] text-[rgb(var(--primary))] border border-[rgb(var(--primary-border))]'
+                            : 'bg-white border border-[rgb(var(--slate-200))] text-[rgb(var(--slate-600))] hover:border-[rgb(var(--primary-border))]'}`}
                 >
                     {sourceIcons[source]}
                     <span>{source}</span>

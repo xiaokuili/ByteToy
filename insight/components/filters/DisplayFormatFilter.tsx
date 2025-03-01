@@ -1,9 +1,8 @@
-import { displayFormats } from "@/app/api/query-builder/schema";
-import { formatIcons } from "@/app/query-builder/utils/icons";
+import { displayFormats, formatIcons, DisplayFormat } from "@/config/filters";
 
 interface DisplayFormatFilterProps {
-    selectedFormat: string;
-    onChange: (format: string) => void;
+    selectedFormat: DisplayFormat;
+    onChange: (format: DisplayFormat) => void;
     className?: string;
 }
 
@@ -16,8 +15,8 @@ export function DisplayFormatFilter({ selectedFormat, onChange, className = "" }
                     onClick={() => onChange(format)}
                     className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all
                         ${selectedFormat === format
-                            ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
-                            : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-100'}`}
+                            ? 'bg-gradient-to-r from-[rgb(var(--gradient-start))] to-[rgb(var(--gradient-end))] text-white'
+                            : 'bg-white border border-[rgb(var(--slate-200))] text-[rgb(var(--slate-600))] hover:border-[rgb(var(--primary-border))]'}`}
                 >
                     {formatIcons[format]}
                     <span className="text-sm">{format}</span>
