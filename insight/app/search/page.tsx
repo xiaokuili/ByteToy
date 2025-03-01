@@ -45,7 +45,7 @@ export default function SearchPage() {
     };
 
     return (
-        <main className="min-h-screen w-full bg-gradient-to-b from-slate-50 to-slate-100">
+        <main className="min-h-screen w-full">
             <div className="container mx-auto px-4 py-6">
                 {/* 搜索栏 */}
                 <div className="mb-8">
@@ -69,7 +69,7 @@ export default function SearchPage() {
                 <div className="space-y-6">
                     {isLoading ? (
                         <div className="flex justify-center py-12">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                            <div className="loading-spinner"></div>
                         </div>
                     ) : (
                         <>
@@ -78,7 +78,7 @@ export default function SearchPage() {
                                 {results.map((result) => (
                                     <div
                                         key={result.id}
-                                        className="p-6 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+                                        className="card"
                                     >
                                         <h3 className="text-lg font-medium text-slate-800 mb-2">{result.title}</h3>
                                         <p className="text-slate-600">{result.content}</p>

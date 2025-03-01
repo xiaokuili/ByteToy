@@ -38,15 +38,47 @@
 
 @layer base {
   :root {
-    /* 主题色系 */
-    --primary: 79 70 229;
+    /* 主色调 */
+    --color-primary: 79 70 229;
     /* indigo-600 */
-    --primary-hover: 67 56 202;
+    --color-primary-light: 224 231 255;
+    /* indigo-100 */
+    --color-primary-dark: 67 56 202;
     /* indigo-700 */
-    --primary-light: 224 231 255;
-    /* indigo-50 */
-    --primary-border: 199 210 254;
-    /* indigo-200 */
+
+    /* 强调色 */
+    --color-accent: 168 85 247;
+    /* purple-500 */
+
+    /* 中性色 */
+    --color-background: 248 250 252;
+    /* slate-50 */
+    --color-background-secondary: 241 245 249;
+    /* slate-100 */
+    --color-surface: 255 255 255;
+    /* white */
+    --color-border: 226 232 240;
+    /* slate-200 */
+    --color-border-hover: 203 213 225;
+    /* slate-300 */
+
+    /* 文本色 */
+    --color-text-primary: 30 41 59;
+    /* slate-800 */
+    --color-text-secondary: 71 85 105;
+    /* slate-600 */
+    --color-text-tertiary: 148 163 184;
+    /* slate-400 */
+
+    /* 状态色 */
+    --color-success: 34 197 94;
+    /* green-500 */
+    --color-error: 239 68 68;
+    /* red-500 */
+    --color-warning: 245 158 11;
+    /* amber-500 */
+    --color-info: 6 182 212;
+    /* cyan-500 */
 
     /* 渐变色 */
     --gradient-start: 79 70 229;
@@ -59,13 +91,6 @@
     /* #E6F0FD */
     --bg-gradient-end: 249 249 249;
     /* #F9F9F9 */
-
-    /* 中性色 */
-    --slate-50: 248 250 252;
-    --slate-100: 241 245 249;
-    --slate-200: 226 232 240;
-    --slate-600: 71 85 105;
-    --slate-700: 215 25% 27%;
 
     /* 特效 */
     --shine-degree: 120deg;
@@ -167,15 +192,25 @@
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gradient-to-b from-slate-50 to-slate-100 text-slate-800;
+  }
+
+  h1 {
+    @apply text-3xl font-bold text-slate-800;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold text-slate-800;
+  }
+
+  h3 {
+    @apply text-xl font-medium text-slate-800;
   }
 }
 
@@ -286,5 +321,63 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@layer components {
+  .logo-text {
+    @apply font-bold bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent;
+  }
+
+  .card {
+    @apply bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow p-6;
+  }
+
+  .panel {
+    @apply bg-white rounded-2xl border border-slate-200 p-6 shadow-sm animate-in fade-in slide-in-from-top-2;
+  }
+
+  .btn-primary {
+    @apply bg-indigo-500 hover:bg-indigo-600 text-white rounded-full transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-colors;
+  }
+
+  .btn-icon {
+    @apply p-2 text-slate-600 hover:text-slate-800 rounded-full hover:bg-slate-100 transition-colors;
+  }
+
+  .input-container {
+    @apply w-full flex flex-col bg-white rounded-3xl border border-slate-200 hover:border-slate-300 focus-within:border-indigo-300 focus-within:ring-2 focus-within:ring-indigo-100 shadow-sm transition-all duration-300;
+  }
+
+  .tab-container {
+    @apply flex w-full bg-white rounded-full border border-slate-200 p-1 shadow-sm;
+  }
+
+  .tab {
+    @apply flex items-center justify-center gap-2 flex-1 py-2 rounded-full transition-colors text-sm font-medium;
+  }
+
+  .tab-active {
+    @apply bg-indigo-500 text-white;
+  }
+
+  .tab-inactive {
+    @apply text-slate-700 hover:text-slate-900 hover:bg-slate-100;
+  }
+
+  .model-badge {
+    @apply flex items-center gap-2 px-3 py-1.5 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors;
+  }
+
+  .model-icon {
+    @apply bg-indigo-100 p-1 rounded-md;
+  }
+
+  .loading-spinner {
+    @apply animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500;
   }
 }

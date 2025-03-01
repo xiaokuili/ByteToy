@@ -54,12 +54,10 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-gradient-to-b from-slate-50 to-slate-100 flex flex-col items-center">
+    <main className="min-h-screen w-full flex flex-col items-center">
       {/* Logo */}
       <div className="mt-20 mb-4">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">
-          WriteFinder
-        </h1>
+        <h1 className="text-4xl logo-text">WriteFinder</h1>
       </div>
       <h2 className="text-2xl text-slate-700 mb-12 font-medium">The next-Gen search engine for developers</h2>
 
@@ -83,7 +81,7 @@ export default function Home() {
 
         {/* 模型选择面板 */}
         {showModelSelector && (
-          <div className="mt-4 w-full max-w-4xl bg-white rounded-2xl border border-slate-200 p-6 animate-in fade-in slide-in-from-top-2 shadow-sm">
+          <div className="panel mt-4 w-full max-w-4xl">
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-slate-700">AI Model</h3>
               <ModelSelector
@@ -99,7 +97,7 @@ export default function Home() {
 
         {/* 数据源面板 */}
         {showDataSources && (
-          <div className="mt-4 w-full max-w-4xl bg-white rounded-2xl border border-slate-200 p-6 animate-in fade-in slide-in-from-top-2 shadow-sm">
+          <div className="panel mt-4 w-full max-w-4xl">
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-slate-700">Data Sources</h3>
               <DataSourceFilter
@@ -119,7 +117,7 @@ export default function Home() {
 
         {/* 展示格式面板 */}
         {showDisplayFormat && (
-          <div className="mt-4 w-full max-w-4xl bg-white rounded-2xl border border-slate-200 p-6 animate-in fade-in slide-in-from-top-2 shadow-sm">
+          <div className="panel mt-4 w-full max-w-4xl">
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-slate-700">Display Format</h3>
               <DisplayFormatFilter
