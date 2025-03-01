@@ -11,37 +11,15 @@ export class CSVSourceHandler implements SourceHandler {
     }
 
     async query(source: Source, query: string): Promise<QueryResult> {
-        try {
-            // 确保路径是相对于项目根目录的
-            const absolutePath = path.resolve(process.cwd(), source.path);
-            const content = await fs.readFile(absolutePath, 'utf-8');
-
-            const records = await new Promise((resolve, reject) => {
-                csv.parse(content, {
-                    columns: true,
-                    skip_empty_lines: true,
-                    cast: true // 自动转换数据类型
-                }, (err, data) => {
-                    if (err) reject(err);
-                    resolve(data);
-                });
-            });
-
-            // 根据查询内容处理数据
-            const processedData = await this.processQuery(records, query);
-
-            return {
-                data: processedData,
-                type: this.determineResultType(query),
-                metadata: {
-                    source: source.id,
-                    query,
-                    timestamp: new Date().toISOString()
-                }
-            };
-        } catch (error) {
-            throw new Error(`Failed to process CSV source: ${error.message}`);
-        }
+        return {
+            data: [],
+            type: 'text',
+            metadata: {
+                source: source.id,
+                query,
+                timestamp: new Date().toISOString()
+            }
+        };
     }
 
     private async processQuery(data: any[], query: string): Promise<any> {

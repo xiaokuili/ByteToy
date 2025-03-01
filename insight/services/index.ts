@@ -25,7 +25,7 @@ export class InsightService {
                 id: 'sales-data',
                 type: SourceType.CSV,
                 name: '销售数据',
-                path: 'insight/case/new_energy_vehicles/sales_data.csv',
+                path: 'case/new_energy_vehicles/sales_data.csv',
                 description: '新能源汽车销售数据',
                 metadata: {
                     category: 'market',
@@ -36,14 +36,46 @@ export class InsightService {
                 id: 'price-analysis',
                 type: SourceType.CSV,
                 name: '价格分析',
-                path: 'insight/case/new_energy_vehicles/price_analysis.csv',
+                path: 'case/new_energy_vehicles/price_analysis.csv',
                 description: '价格区间分析数据',
                 metadata: {
                     category: 'market',
                     updateFrequency: 'monthly'
                 }
+            },
+            {
+                id: 'market-share',
+                type: SourceType.CSV,
+                name: '市场份额',
+                path: 'case/new_energy_vehicles/market_share.csv',
+                description: '各品牌市场占有率数据',
+                metadata: {
+                    category: 'market',
+                    updateFrequency: 'monthly'
+                }
+            },
+            {
+                id: 'consumer-survey',
+                type: SourceType.CSV,
+                name: '消费者调研',
+                path: 'case/new_energy_vehicles/consumer_survey.csv',
+                description: '消费者购买意向与满意度调查',
+                metadata: {
+                    category: 'consumer',
+                    updateFrequency: 'quarterly'
+                }
+            },
+            {
+                id: 'charging-stations',
+                type: SourceType.CSV,
+                name: '充电设施',
+                path: 'case/new_energy_vehicles/charging_stations.csv',
+                description: '充电桩分布与使用情况',
+                metadata: {
+                    category: 'infrastructure',
+                    updateFrequency: 'weekly'
+                }
             }
-            // 可以继续添加其他数据源
         ];
 
         sources.forEach(source => this.registry.registerSource(source));

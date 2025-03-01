@@ -2,37 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 添加页面过渡动画 */
+/* 修改页面过渡动画 */
 .page-transition {
-  animation: fadeOut 0.2s ease-in-out;
+  animation: smoothFadeOut 0.4s ease-in-out;
 }
 
-@keyframes fadeOut {
-  from {
+@keyframes smoothFadeOut {
+  0% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 
-  to {
+  100% {
     opacity: 0;
-    transform: scale(0.98);
+    transform: scale(0.98) translateY(-10px);
   }
 }
 
-/* 页面进入动画 */
+/* 搜索页面进入动画 */
 .page-enter {
-  animation: fadeIn 0.3s ease-out;
+  animation: smoothFadeIn 0.5s ease-out;
 }
 
-@keyframes fadeIn {
-  from {
+@keyframes smoothFadeIn {
+  0% {
     opacity: 0;
-    transform: scale(0.98);
+    transform: scale(0.98) translateY(10px);
   }
 
-  to {
+  100% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -238,5 +238,41 @@
   to {
     transform: scale(2);
     opacity: 0;
+  }
+}
+
+/* 更柔和的加载动画 */
+@keyframes pulse-subtle {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 优化进入动画 */
+.slide-in-from-bottom-4 {
+  --tw-enter-translate-y: 0.4rem;
+}
+
+/* 让卡片逐个出现 */
+.card-enter {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: card-enter-animation 0.5s ease forwards;
+}
+
+@keyframes card-enter-animation {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -1,30 +1,27 @@
 "use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { useState } from "react"
-import { SourceToggle } from "@/components/ui/source-toggle"
 import { useRouter } from "next/navigation"
 import { FileUploadToggle } from "@/components/ui/file-upload-toggle"
+import { DataSourceFilter } from "@/components/filters/DataSourceFilter"
+import { DisplayFormatFilter } from "@/components/filters/DisplayFormatFilter"
 
 export default function Home() {
-  const [isOnline, setIsOnline] = useState(true);
   const [isUpload, setIsUpload] = useState(false);
+  const [selectedSources, setSelectedSources] = useState<string[]>([]);
+  const [displayFormat, setDisplayFormat] = useState("列表");
   const router = useRouter();
 
   const handleSearch = (query: string) => {
     if (!query.trim()) return;
 
-    // 使用 URLSearchParams 构建查询参数
     const params = new URLSearchParams({
       q: query,
-      source: isOnline ? 'online' : 'local'
+      format: displayFormat,
+      sources: selectedSources.join(',')
     });
 
-    // 添加页面切换动画类
     document.body.classList.add('page-transition');
-
-    // 延迟导航以显示动画
     setTimeout(() => {
       router.push(`/search?${params.toString()}`);
     }, 200);
@@ -68,7 +65,7 @@ export default function Home() {
         <p className="text-lg text-gray-600 text-center">发现灵感，创造精彩</p>
 
         {/* 搜索框容器 */}
-        <div className="w-full max-w-2xl backdrop-blur-sm bg-white/70 rounded-2xl shadow-lg p-6 space-y-6 transition-all duration-300 hover:shadow-xl">
+        <div className="w-full max-w-2xl backdrop-blur-sm bg-white/70 rounded-2xl shadow-lg p-6 space-y-6">
           <FileUploadToggle
             isUpload={isUpload}
             onToggle={setIsUpload}
@@ -76,12 +73,21 @@ export default function Home() {
             onSearch={handleSearch}
           />
 
-          {/* 本地/网络切换 */}
-          <SourceToggle
-            isOnline={isOnline}
-            onToggle={setIsOnline}
-            className="justify-center"
-          />
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-slate-600">数据源</h3>
+            <DataSourceFilter
+              selectedSources={selectedSources}
+              onChange={setSelectedSources}
+            />
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-slate-600">展示格式</h3>
+            <DisplayFormatFilter
+              selectedFormat={displayFormat}
+              onChange={setDisplayFormat}
+            />
+          </div>
         </div>
 
       </div>

@@ -2,6 +2,8 @@ import { Upload, Search } from "lucide-react"
 import { Button } from "./button"
 import { Input } from "./input"
 import { useState, useRef } from "react"
+import { useSearchParams } from 'next/navigation';
+
 
 interface FileUploadToggleProps {
     isUpload: boolean
@@ -12,7 +14,9 @@ interface FileUploadToggleProps {
 }
 
 export function FileUploadToggle({ isUpload, onToggle, onFileSelect, onSearch, className = "" }: FileUploadToggleProps) {
-    const [searchText, setSearchText] = useState("");
+    const searchParams = useSearchParams();
+    
+    const [searchText, setSearchText] = useState(searchParams.get("q") || "");
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
