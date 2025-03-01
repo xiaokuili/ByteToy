@@ -55,7 +55,7 @@ export function SearchInput({
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
                         placeholder={placeholder}
-                        className="flex-1 bg-transparent border-0 text-slate-800 placeholder:text-slate-400 focus-visible:ring-0 h-12 text-lg"
+                        className="flex-1 bg-transparent text-slate-800 placeholder:text-slate-400 focus-visible:ring-0 focus:outline-none !border-none !shadow-none !outline-none h-12 text-lg "
                         onKeyDown={(e) => e.key === 'Enter' && onSearch()}
                     />
                 </div>
