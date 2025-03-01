@@ -1,4 +1,4 @@
-import { displayFormats, formatIcons, DisplayFormat } from "@/config/filters";
+import { DisplayFormat, displayFormats, formatIcons } from "@/config/filters";
 
 interface DisplayFormatFilterProps {
     selectedFormat: DisplayFormat;
@@ -8,20 +8,24 @@ interface DisplayFormatFilterProps {
 
 export function DisplayFormatFilter({ selectedFormat, onChange, className = "" }: DisplayFormatFilterProps) {
     return (
-        <div className={`flex flex-wrap gap-2 ${className}`}>
-            {displayFormats.map(format => (
-                <button
-                    key={format}
-                    onClick={() => onChange(format)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all
-                        ${selectedFormat === format
-                            ? 'bg-gradient-to-r from-[rgb(var(--gradient-start))] to-[rgb(var(--gradient-end))] text-white'
-                            : 'bg-white border border-[rgb(var(--slate-200))] text-[rgb(var(--slate-600))] hover:border-[rgb(var(--primary-border))]'}`}
-                >
-                    {formatIcons[format]}
-                    <span className="text-sm">{format}</span>
-                </button>
-            ))}
+        <div className={`${className}`}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {displayFormats.map(format => (
+                    <button
+                        key={format}
+                        onClick={() => onChange(format)}
+                        className={`flex items-center gap-2 px-4 py-3 rounded-lg transition-all
+                            ${selectedFormat === format
+                                ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white'
+                                : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-200 hover:bg-indigo-50'}`}
+                    >
+                        <div className={`${selectedFormat === format ? 'text-white' : 'text-indigo-500'}`}>
+                            {formatIcons[format]}
+                        </div>
+                        <span className="text-sm font-medium">{format}</span>
+                    </button>
+                ))}
+            </div>
         </div>
     );
 } 

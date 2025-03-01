@@ -123,7 +123,7 @@ export function SearchInput({
                     className={`tab ${activeTab === 'display' ? 'tab-active' : 'tab-inactive'}`}
                 >
                     <LayoutGrid className={`w-4 h-4 ${activeTab === 'display' ? 'text-white' : 'text-slate-600'}`} />
-                    <span>展示图</span>
+                    <span>数据可视化</span>
                 </button>
 
                 <button

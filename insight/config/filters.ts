@@ -1,53 +1,34 @@
-import { FileText, Globe, Book, Newspaper, MessageSquare, LayoutGrid, LayoutList } from "lucide-react";
 import { createElement } from 'react';
+import { Sparkles, Database, Globe, FileText, BarChart3, PieChart, LineChart, Table, List } from "lucide-react";
 import { JSX } from 'react';
 
-// 数据源配置
-export const dataSources = [
-    "本地文档",
-    "网络资源",
-    "学术论文",
-    "新闻报道",
-    "社交媒体"
-] as const;
+// AI 模型
+export type AIModel = "GPT-4" | "GPT-3.5" | "Claude" | "Gemini";
+export const aiModels: AIModel[] = ["GPT-4", "GPT-3.5", "Claude", "Gemini"];
 
-export type DataSource = typeof dataSources[number];
+// 数据源
+export type DataSource = "百度" | "Google" | "本地文件" | "网页" | "数据库";
+export const dataSources: DataSource[] = ["百度", "Google", "本地文件", "网页", "数据库"];
 
-// 展示格式配置
-export const displayFormats = [
-    "列表",
-    "卡片",
-    "详细",
-    "摘要",
-    "图表"
-] as const;
-
-export type DisplayFormat = typeof displayFormats[number];
-
-// AI 模型配置
-export const aiModels = [
-    "GPT-4",
-    "GPT-3.5",
-    "Claude",
-    "Gemini",
-    "LLaMA"
-] as const;
-
-export type AIModel = typeof aiModels[number];
-
-// 图标映射
+// 数据源图标
 export const sourceIcons: Record<DataSource, JSX.Element> = {
-    "本地文档": createElement(FileText, { className: "w-4 h-4" }),
-    "网络资源": createElement(Globe, { className: "w-4 h-4" }),
-    "学术论文": createElement(Book, { className: "w-4 h-4" }),
-    "新闻报道": createElement(Newspaper, { className: "w-4 h-4" }),
-    "社交媒体": createElement(MessageSquare, { className: "w-4 h-4" })
+    "百度": createElement(Globe, { className: "w-4 h-4" }),
+    "Google": createElement(Globe, { className: "w-4 h-4" }),
+    "本地文件": createElement(FileText, { className: "w-4 h-4" }),
+    "网页": createElement(Globe, { className: "w-4 h-4" }),
+    "数据库": createElement(Database, { className: "w-4 h-4" })
 };
 
+// 展示格式
+export type DisplayFormat = "列表" | "表格" | "饼图" | "柱状图" | "折线图" | "文本";
+export const displayFormats: DisplayFormat[] = ["列表", "表格", "饼图", "柱状图", "折线图", "文本"];
+
+// 格式图标
 export const formatIcons: Record<DisplayFormat, JSX.Element> = {
-    "列表": createElement(LayoutList, { className: "w-4 h-4" }),
-    "卡片": createElement(LayoutGrid, { className: "w-4 h-4" }),
-    "详细": createElement(FileText, { className: "w-4 h-4" }),
-    "摘要": createElement(MessageSquare, { className: "w-4 h-4" }),
-    "图表": createElement(LayoutGrid, { className: "w-4 h-4" })
+    "列表": createElement(List, { className: "w-4 h-4" }),
+    "表格": createElement(Table, { className: "w-4 h-4" }),
+    "饼图": createElement(PieChart, { className: "w-4 h-4" }),
+    "柱状图": createElement(BarChart3, { className: "w-4 h-4" }),
+    "折线图": createElement(LineChart, { className: "w-4 h-4" }),
+    "文本": createElement(FileText, { className: "w-4 h-4" })
 }; 

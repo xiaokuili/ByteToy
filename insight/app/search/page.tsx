@@ -14,8 +14,7 @@ export default function SearchPage() {
     const query = searchParams.get("q") || "";
     const model = (searchParams.get("model") as AIModel) || "GPT-4";
     const format = (searchParams.get("format") as DisplayFormat) || "列表";
-    const sourcesParam = searchParams.get("sources") || "";
-    const sources = sourcesParam ? sourcesParam.split(",") as DataSource[] : [];
+    const source = searchParams.get("source") as DataSource || null;
 
     const [searchQuery, setSearchQuery] = useState(query);
     const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +32,7 @@ export default function SearchPage() {
         }, 1500);
 
         return () => clearTimeout(timer);
-    }, [query, model, format, sourcesParam]);
+    }, [query, model, format, source]);
 
     const handleSearch = () => {
         // 实现搜索逻辑
@@ -58,9 +57,9 @@ export default function SearchPage() {
                         onDisplayFormatClick={() => { }}
                         onFileUpload={handleFileUpload}
                         onSearch={handleSearch}
-                        hasDataSourceSettings={sources.length > 0}
+                        hasDataSourceSettings={source !== null}
                         hasDisplayFormatSettings={format !== "列表"}
-                        dataSourceName={sources[0] || "百度"}
+                        dataSourceName={source || "百度"}
                         displayFormatName={format}
                     />
                 </div>

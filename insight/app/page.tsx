@@ -14,10 +14,8 @@ export default function Home() {
   const [showDataSources, setShowDataSources] = useState(false);
   const [showDisplayFormat, setShowDisplayFormat] = useState(false);
   const [selectedModel, setSelectedModel] = useState<AIModel>("GPT-4");
-  const [selectedSources, setSelectedSources] = useState<DataSource[]>([]);
+  const [selectedSource, setSelectedSource] = useState<DataSource | null>(null);
   const [displayFormat, setDisplayFormat] = useState<DisplayFormat>("列表");
-  const [dataSourceName, setDataSourceName] = useState("百度");
-  const [displayFormatName, setDisplayFormatName] = useState("搜索");
   const router = useRouter();
 
   const handleSearch = () => {
@@ -27,7 +25,7 @@ export default function Home() {
       q: searchQuery,
       model: selectedModel,
       format: displayFormat,
-      sources: selectedSources.join(',')
+      source: selectedSource || ""
     });
 
     router.push(`/search?${params.toString()}`);
@@ -72,10 +70,10 @@ export default function Home() {
           onDisplayFormatClick={() => togglePanel('format')}
           onFileUpload={handleFileUpload}
           onSearch={handleSearch}
-          hasDataSourceSettings={selectedSources.length > 0}
+          hasDataSourceSettings={selectedSource !== null}
           hasDisplayFormatSettings={displayFormat !== "列表"}
-          dataSourceName={dataSourceName}
-          displayFormatName={displayFormatName}
+          dataSourceName={selectedSource || "百度"}
+          displayFormatName={displayFormat}
           placeholder="Try using @ to select context..."
         />
 
@@ -101,14 +99,10 @@ export default function Home() {
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-slate-700">Data Sources</h3>
               <DataSourceFilter
-                selectedSources={selectedSources}
-                onChange={(sources) => {
-                  setSelectedSources(sources);
-                  if (sources.length > 0) {
-                    setDataSourceName(sources[0]);
-                  } else {
-                    setDataSourceName("百度");
-                  }
+                selectedSource={selectedSource}
+                onChange={(source) => {
+                  setSelectedSource(source);
+                  setShowDataSources(false);
                 }}
               />
             </div>
@@ -124,7 +118,6 @@ export default function Home() {
                 selectedFormat={displayFormat}
                 onChange={(format) => {
                   setDisplayFormat(format);
-                  setDisplayFormatName(format);
                   setShowDisplayFormat(false);
                 }}
               />
