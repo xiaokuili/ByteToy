@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import SearchResult, { ContentFormat } from '@/components/search/SearchResult';
+import SearchResult from '@/components/search/SearchResult';
 import SearchInput from '@/components/search/SearchInput';
 import { ChartConfig } from '@/components/search/charts/ChartTypes';
-
+import { DisplayFormat, DisplayFormatType, getDisplayFormat, getDisplayFormatType, displayFormatMap } from '@/config/filters';
+import { SearchResultProps } from '@/components/search/SearchResult';
 // 客户端组件不能直接使用 generateMetadata，但可以通过 useEffect 更新文档标题
+
 export default function Page() {
     const searchParams = useSearchParams();
     const query = searchParams.get('q') || '';
@@ -16,13 +18,7 @@ export default function Page() {
     const source = searchParams.get('source') || '';
 
 
-    const [searchResults, setSearchResults] = useState<Array<{
-        id: string;
-        query: string;
-        isLoading: boolean;
-        format: ContentFormat;
-        contentProps: any;
-    }>>([]);
+    const [searchResults, setSearchResults] = useState<SearchResultProps[]>([]);
 
     // 当 URL 参数变化时执行搜索
     useEffect(() => {
@@ -36,11 +32,10 @@ export default function Page() {
 
         // 创建新的搜索结果（初始状态为加载中）
         const newResult = {
-            id: Date.now().toString(),
             query,
             isLoading: true,
-            format: 'chart' as ContentFormat, // 默认格式，将被API响应覆盖
-            contentProps: {}
+            format: '列表' as DisplayFormat, // 默认格式，将被API响应覆盖
+            chartConfig: {} as ChartConfig
         };
 
         setSearchResults(prev => [newResult, ...prev]);
@@ -55,28 +50,27 @@ export default function Page() {
 
             setSearchResults(prev =>
                 prev.map(result => {
-                    if (result.id !== newResult.id) return result;
 
                     return {
                         ...result,
                         isLoading: false,
                         format: mockResponse.format,
-                        contentProps: mockResponse.contentProps
+                        chartConfig: mockResponse.contentProps.chartConfig
                     };
                 })
             );
+            console.log(mockResponse);
         } catch (error) {
             console.error('搜索失败:', error);
 
             // 更新结果状态为错误
             setSearchResults(prev =>
-                prev.map(result => {
-                    if (result.id !== newResult.id) return result;
+                prev.map((result, index) => {
 
                     return {
                         ...result,
                         isLoading: false,
-                        format: 'text',
+                        format: '列表' as DisplayFormat,
                         contentProps: {
                             content: '搜索请求失败，请稍后重试。'
                         }
@@ -86,7 +80,6 @@ export default function Page() {
         }
     };
 
-    console.log(searchResults);
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-950 relative overflow-hidden">
             {/* 背景装饰元素 */}
@@ -156,16 +149,15 @@ export default function Page() {
             {/* 搜索历史和结果区域 */}
             <div className="flex-1 w-full max-w-4xl mx-auto px-4 py-8 pb-24 overflow-y-auto relative z-10">
                 <div className="space-y-8">
-                    {searchResults.map(result => {
+                    {searchResults.map((result, index) => {
                         const props = {
                             query: result.query,
                             isLoading: result.isLoading,
                             format: result.format,
-                            ...result.contentProps
+                            chartConfig: result.chartConfig
                         };
-                        const id = result.id;
 
-                        return <SearchResult key={id} {...props} />;
+                        return <SearchResult key={index} {...props} />;
                     })}
                 </div>
             </div>
@@ -179,7 +171,7 @@ export default function Page() {
 
 // 模拟搜索结果的接口
 interface MockSearchResponse {
-    format: ContentFormat;
+    format: DisplayFormat;
     contentProps: any;
 }
 
@@ -187,7 +179,7 @@ interface MockSearchResponse {
 async function mockSearchAPI(
     query: string,
     model: string = 'DEEPSEEK',
-    format: string = '列表',
+    format: string = '柱状图',
     source: string = ''
 ): Promise<MockSearchResponse> {
     // 模拟API延迟
@@ -206,60 +198,26 @@ async function mockSearchAPI(
     }
 
     // 如果没有精确匹配，则生成随机结果
-    const formats: ContentFormat[] = ['text', 'code', 'table', 'list', 'file', 'chart'];
+    const formats: DisplayFormat[] = ['列表', '表格', '饼图', '柱状图', '折线图'];
+
     // 如果指定了格式，尝试使用指定的格式，否则随机选择
-    let resultFormat: ContentFormat;
-    if (format === '列表') {
-        resultFormat = formats[Math.floor(Math.random() * formats.length)];
-    } else if (format === '图表') {
-        resultFormat = 'chart';
-    } else if (format === '表格') {
-        resultFormat = 'table';
-    } else if (format === '代码') {
-        resultFormat = 'code';
+    let resultFormat: DisplayFormat;
+    if (formats.includes(format as DisplayFormat)) {
+        resultFormat = format as DisplayFormat;
     } else {
-        resultFormat = 'text';
+        resultFormat = formats[Math.floor(Math.random() * formats.length)];
     }
 
     // 根据不同的格式生成不同的内容
     switch (resultFormat) {
-        case 'chart':
-            return generateRandomChartData(query);
+        case '饼图':
+        case '柱状图':
+        case '折线图':
+            return generateChartData(query, getDisplayFormatType(resultFormat));
 
-        case 'text':
+        case '表格':
             return {
-                format: 'text',
-                contentProps: {
-                    content: `这是对 "${query}" 的文本回答。在实际应用中，这里会显示从API获取的真实回答内容。\n\n这是一个模拟的回答，用于演示目的。您可以替换为真实的API调用来获取实际的搜索结果。`
-                }
-            };
-
-        case 'code':
-            return {
-                format: 'code',
-                contentProps: {
-                    language: 'javascript',
-                    code: `// 这是对 "${query}" 的代码示例
-function example() {
-  console.log("这是一个与 '${query}' 相关的代码示例");
-  
-  // 在实际应用中，这里会显示真实的代码片段
-  const data = {
-    query: "${query}",
-    timestamp: new Date().toISOString(),
-    source: "${source || '未指定'}"
-  };
-  
-  return data;
-}
-
-example();`
-                }
-            };
-
-        case 'table':
-            return {
-                format: 'table',
+                format: '表格',
                 contentProps: {
                     headers: ['项目', '描述', '值'],
                     rows: [
@@ -270,9 +228,10 @@ example();`
                 }
             };
 
-        case 'list':
+        case '列表':
+        default:
             return {
-                format: 'list',
+                format: '列表',
                 contentProps: {
                     items: [
                         `关于 "${query}" 的第一点：这是一个示例项目，在实际应用中会替换为真实内容。`,
@@ -282,36 +241,15 @@ example();`
                     ordered: Math.random() > 0.5
                 }
             };
-
-        case 'file':
-            return {
-                format: 'file',
-                contentProps: {
-                    fileName: `${query.substring(0, 10).replace(/\s+/g, '_')}.txt`,
-                    fileType: 'text/plain',
-                    fileContent: `这是关于 "${query}" 的文件内容示例。\n在实际应用中，这里会包含真实的文件内容。\n\n查询: ${query}\n模型: ${model}\n数据源: ${source || '未指定'}\n格式: ${format}`
-                }
-            };
-
-        default:
-            return {
-                format: 'text',
-                contentProps: {
-                    content: `无法为查询 "${query}" 生成指定格式的内容。`
-                }
-            };
     }
 }
 
-// 生成随机图表数据
-function generateRandomChartData(query: string): { format: 'chart', contentProps: { chartConfig: ChartConfig } } {
-    // 随机选择一种图表类型
-    const chartTypes = ['bar', 'line', 'pie'] as const;
-    const randomChartType = chartTypes[Math.floor(Math.random() * chartTypes.length)];
-
+// 生成图表数据
+function generateChartData(query: string, formatType: DisplayFormatType): MockSearchResponse {
     let chartConfig: ChartConfig;
+    let format: DisplayFormat = getDisplayFormat(formatType);
 
-    if (randomChartType === 'bar') {
+    if (formatType === 'bar') {
         chartConfig = {
             chartData: {
                 type: 'bar',
@@ -339,7 +277,7 @@ function generateRandomChartData(query: string): { format: 'chart', contentProps
                 subtitle: '随机生成的示例数据'
             }
         };
-    } else if (randomChartType === 'line') {
+    } else if (formatType === 'line') {
         chartConfig = {
             chartData: {
                 type: 'line',
@@ -401,7 +339,8 @@ function generateRandomChartData(query: string): { format: 'chart', contentProps
     }
 
     return {
-        format: 'chart',
+        format,
+
         contentProps: { chartConfig }
     };
 }
@@ -411,71 +350,42 @@ const EXAMPLE_SEARCH_RESULTS = [
     {
         id: '1',
         query: '什么是向量数据库？',
-        format: 'text' as ContentFormat,
+        format: '列表' as DisplayFormat,
         contentProps: {
-            content: '向量数据库是一种专门设计用于存储、索引和查询高维向量数据的数据库系统。它们在机器学习、人工智能和相似性搜索等应用中非常有用，因为这些领域通常需要处理大量的向量数据。向量数据库使用特殊的索引结构（如HNSW、IVF等）来加速相似性搜索，使得在数十亿向量中快速找到最相似的向量成为可能。'
+            items: [
+                '向量数据库是一种专门设计用于存储、索引和查询高维向量数据的数据库系统。',
+                '它们在机器学习、人工智能和相似性搜索等应用中非常有用，因为这些领域通常需要处理大量的向量数据。',
+                '向量数据库使用特殊的索引结构（如HNSW、IVF等）来加速相似性搜索，使得在数十亿向量中快速找到最相似的向量成为可能。'
+            ],
+            ordered: false
         }
     },
     {
         id: '2',
         query: '如何使用React Hooks实现状态管理？',
-        format: 'text' as ContentFormat,
+        format: '列表' as DisplayFormat,
         contentProps: {
-            content: (
-                <>
-                    <p>React Hooks 是 React 16.8 引入的特性，允许在函数组件中使用状态和其他 React 特性。以下是使用 React Hooks 进行状态管理的基本方法：</p>
-
-                    <h4 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500">1. useState Hook</h4>
-                    <p>useState 是最基本的状态管理 Hook，用于在函数组件中添加本地状态：</p>
-                    <pre className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 shadow-inner"><code>{`
-const [count, setCount] = useState(0);
-const [user, setUser] = useState({ name: '', email: '' });
-                    `}</code></pre>
-
-                    <h4 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500">2. useReducer Hook</h4>
-                    <p>对于更复杂的状态逻辑，可以使用 useReducer：</p>
-                    <pre className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 shadow-inner"><code>{`
-const [state, dispatch] = useReducer(reducer, initialState);
-                    `}</code></pre>
-
-                    <h4 className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500">3. useContext Hook</h4>
-                    <p>结合 Context API 可以实现跨组件的状态共享：</p>
-                    <pre className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 shadow-inner"><code>{`
-const value = useContext(MyContext);
-                    `}</code></pre>
-                </>
-            )
-        }
-    },
-    {
-        id: '3',
-        query: 'JavaScript中的闭包是什么？',
-        format: 'code' as ContentFormat,
-        contentProps: {
-            language: 'javascript',
-            code: `// 闭包示例
-function createCounter() {
-  let count = 0;
-  
-  return function() {
-    count += 1;
-    return count;
-  };
-}
-
-const counter = createCounter();
-console.log(counter()); // 1
-console.log(counter()); // 2
-console.log(counter()); // 3
-
-// 闭包允许内部函数访问外部函数的变量，
-// 即使外部函数已经执行完毕`
+            items: [
+                <div key="1">
+                    <strong className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500">1. useState Hook</strong>
+                    <p>useState 是最基本的状态管理 Hook，用于在函数组件中添加本地状态。</p>
+                </div>,
+                <div key="2">
+                    <strong className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500">2. useReducer Hook</strong>
+                    <p>对于更复杂的状态逻辑，可以使用 useReducer。</p>
+                </div>,
+                <div key="3">
+                    <strong className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500">3. useContext Hook</strong>
+                    <p>结合 Context API 可以实现跨组件的状态共享。</p>
+                </div>
+            ],
+            ordered: true
         }
     },
     {
         id: '4',
         query: '2023年全球前五大科技公司市值',
-        format: 'table' as ContentFormat,
+        format: '表格' as DisplayFormat,
         contentProps: {
             headers: ['排名', '公司', '市值 (十亿美元)', '同比增长'],
             rows: [
@@ -490,7 +400,7 @@ console.log(counter()); // 3
     {
         id: '5',
         query: '常见的设计模式有哪些？',
-        format: 'list' as ContentFormat,
+        format: '列表' as DisplayFormat,
         contentProps: {
             items: [
                 <div key="1">
@@ -509,7 +419,7 @@ console.log(counter()); // 3
     {
         id: '6',
         query: '2023年全球主要科技公司市值走势',
-        format: 'chart' as ContentFormat,
+        format: '折线图' as DisplayFormat,
         contentProps: {
             chartConfig: {
                 chartData: {
@@ -551,7 +461,7 @@ console.log(counter()); // 3
     {
         id: '7',
         query: '2023年全球科技公司市值分布',
-        format: 'chart' as ContentFormat,
+        format: '饼图' as DisplayFormat,
         contentProps: {
             chartConfig: {
                 chartData: {
@@ -585,7 +495,7 @@ console.log(counter()); // 3
     {
         id: '8',
         query: '2023年各季度科技公司营收对比',
-        format: 'chart' as ContentFormat,
+        format: '柱状图' as DisplayFormat,
         contentProps: {
             chartConfig: {
                 chartData: {

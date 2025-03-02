@@ -3,6 +3,7 @@ import BarChart from './BarChart';
 import LineChart from './LineChart';
 import PieChart from './PieChart';
 import { cn } from '@/lib/utils';
+import { DisplayFormatType, displayFormatMap } from '@/config/filters';
 
 interface ChartFactoryProps {
     config: ChartConfig;
@@ -11,9 +12,10 @@ interface ChartFactoryProps {
 
 export default function ChartFactory({ config, className }: ChartFactoryProps) {
     const { chartData, options } = config;
+    const chartType = chartData.type;
 
     // 根据图表类型渲染对应的图表组件
-    switch (chartData.type) {
+    switch (chartType) {
         case 'bar':
             return <BarChart data={chartData.data} options={options} className={className} />;
 

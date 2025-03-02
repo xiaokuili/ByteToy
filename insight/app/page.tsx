@@ -6,7 +6,7 @@ import { SearchInput } from "@/components/home/SearchInput"
 import { ModelSelector } from "@/components/filters/ModelSelector"
 import { DataSourceFilter } from "@/components/filters/DataSourceFilter"
 import { DisplayFormatFilter } from "@/components/filters/DisplayFormatFilter"
-import { DataSource, DisplayFormat, AIModel } from "@/config/filters"
+import { DataSource, DisplayFormat, AIModel, DisplayFormatType, getDisplayFormat } from "@/config/filters"
 import Head from "next/head";
 
 export default function HomePage() {
