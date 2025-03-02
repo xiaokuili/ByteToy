@@ -1,4 +1,4 @@
-import { Sparkles, Upload, Database, LayoutGrid, ArrowRight, Search } from "lucide-react";
+import { Sparkles, Upload, Database, LayoutGrid, ArrowRight, Search, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useRef, useState } from "react";
 import { AIModel } from "@/config/filters";
@@ -101,11 +101,11 @@ export function SearchInput({
                         </button>
 
                         {/* 搜索按钮 */}
+
                         <button
                             onClick={onSearch}
-                            className="btn-primary p-2"
-                        >
-                            <Search className="w-5 h-5" />
+                            className="p-2 bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 text-white rounded-full hover:from-blue-600 hover:to-purple-700 dark:hover:from-blue-500 dark:hover:to-purple-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+                            <Send className="h-4 w-4" />
                         </button>
                     </div>
                 </div>
