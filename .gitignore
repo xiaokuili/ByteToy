@@ -6,3 +6,8 @@ types/*
 node_modules/*
 chromadb/*
 *.pyc
+joker/ai_core/venv/*
+.gitignore
+joker/ai_core/chromadb/*
+joker/ai_core/model_cache/*
+model_cache/*
