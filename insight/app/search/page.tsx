@@ -6,7 +6,7 @@ import Link from 'next/link';
 import SearchResult from '@/components/search/SearchResult';
 import SearchInput from '@/components/search/SearchInput';
 import { ChartConfig } from '@/components/search/charts/ChartTypes';
-import { DisplayFormat, getDisplayFormat } from '@/config/filters';
+import { DisplayFormat } from '@/config/filters';
 import { SearchResultProps } from '@/components/search/SearchResult';
 // 客户端组件不能直接使用 generateMetadata，但可以通过 useEffect 更新文档标题
 
