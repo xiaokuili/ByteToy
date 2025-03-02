@@ -1,11 +1,28 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import SearchResult, { ContentFormat } from '@/components/search/SearchResult';
 import SearchInput from '@/components/search/SearchInput';
 import { ChartConfig } from '@/components/search/charts/ChartTypes';
+import { Metadata } from 'next';
 
+// 客户端组件不能直接使用 generateMetadata，但可以通过 useEffect 更新文档标题
 export default function Page() {
+    const searchParams = useSearchParams();
+    const query = searchParams.get('q') || '';
+    const model = searchParams.get('model') || 'DEEPSEEK';
+    const format = searchParams.get('format') || '列表';
+    const source = searchParams.get('source') || '';
+
+    // 使用 useEffect 更新文档标题
+    useEffect(() => {
+        document.title = query
+            ? `${query} - ByteToy Insight 搜索结果`
+            : '搜索 - ByteToy Insight';
+    }, [query]);
+
     const [searchResults, setSearchResults] = useState<Array<{
         id: string;
         query: string;
@@ -238,6 +255,13 @@ console.log(counter()); // 3
         }
     ]);
 
+    // 当 URL 参数变化时执行搜索
+    useEffect(() => {
+        if (query) {
+            handleSearch(query);
+        }
+    }, [query, model, format, source]);
+
     const handleSearch = (query: string) => {
         if (!query.trim()) return;
 
@@ -370,7 +394,7 @@ console.log(counter()); // 3
                                                     'rgba(75, 192, 192, 0.7)',
                                                     'rgba(153, 102, 255, 0.7)'
                                                 ],
-                                                borderColor: 'white',
+                                                borderColor: ['white', 'white', 'white', 'white', 'white'],
                                                 borderWidth: 1
                                             }],
                                             isDonut: Math.random() > 0.5
@@ -423,11 +447,60 @@ console.log(counter()); // 3
                 <div className="absolute bottom-40 left-40 w-80 h-80 bg-pink-300 dark:bg-pink-700 rounded-full mix-blend-multiply dark:mix-blend-soft-light filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
             </div>
 
+            {/* 头部导航 */}
+            <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center py-4">
+                        <div className="flex items-center">
+                            <Link href="/" className="flex items-center">
+                                <div className="relative w-10 h-10 mr-3">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-80"></div>
+                                    <div className="absolute inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                        <span className="text-white text-sm font-bold">BT</span>
+                                    </div>
+                                </div>
+                                <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+                                    ByteToy Insight
+                                </h1>
+                            </Link>
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-300">
+                            使用模型: {model}
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            {/* 搜索信息 */}
+            <div className="w-full max-w-4xl mx-auto px-4 pt-6">
+                {query ? (
+                    <div className="mb-6">
+                        <h2 className="text-xl font-semibold mb-2">搜索: {query}</h2>
+                        <div className="flex flex-wrap gap-2">
+                            {source && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    数据源: {source}
+                                </span>
+                            )}
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                                展示格式: {format}
+                            </span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="text-center py-12">
+                        <h2 className="text-xl font-semibold mb-4">请输入搜索内容</h2>
+                        <p className="text-gray-600 dark:text-gray-400">
+                            使用上方的搜索框输入您的问题，开始智能搜索
+                        </p>
+                    </div>
+                )}
+            </div>
+
             {/* 浮动输入框 */}
             <SearchInput
-                variant="floating"
                 onSearch={handleSearch}
-                defaultModel="GPT-4"
+                defaultModel={model}
                 placeholder="输入您的问题..."
             />
 

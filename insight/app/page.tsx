@@ -7,6 +7,7 @@ import { ModelSelector } from "@/components/filters/ModelSelector"
 import { DataSourceFilter } from "@/components/filters/DataSourceFilter"
 import { DisplayFormatFilter } from "@/components/filters/DisplayFormatFilter"
 import { DataSource, DisplayFormat, AIModel } from "@/config/filters"
+import Head from "next/head";
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,7 +55,11 @@ export default function HomePage() {
   return (
     <>
 
-
+      <Head>
+        <title>ByteToy Insight - 智能搜索与知识管理平台</title>
+        <meta name="description" content="ByteToy Insight 是一个现代化的智能搜索与知识管理平台，帮助您更高效地获取和组织信息。" />
+        <meta name="keywords" content="智能搜索,知识管理,AI,人工智能,ByteToy" />
+      </Head>
       <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-950">
         {/* 背景装饰元素 */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">

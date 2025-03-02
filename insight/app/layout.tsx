@@ -11,9 +11,9 @@ export const metadata: Metadata = {
   },
   description: 'ByteToy Insight 是一个现代化的智能搜索与知识管理平台，帮助您更高效地获取和组织信息。',
   keywords: ['智能搜索', '知识管理', 'AI', '人工智能', 'ByteToy'],
-  authors: [{ name: 'ByteToy Team' }],
-  creator: 'ByteToy',
-  publisher: 'ByteToy',
+  authors: [{ name: '7788' }],
+  creator: '7788',
+  publisher: '7788',
   formatDetection: {
     email: false,
     address: false,
