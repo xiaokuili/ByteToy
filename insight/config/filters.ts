@@ -26,7 +26,7 @@ export type DisplayFormatType = "list" | "table" | "pie" | "bar" | "line";
 // 展示格式结构
 export interface DisplayFormatInfo {
     type: DisplayFormatType;  // 英文类型名
-    name_ch: string;         // 中文显示名
+    label: string;         // 中文显示名
     icon: JSX.Element;       // 图标
     chartType?: string;      // 对应的图表类型 (如果适用)
 }
@@ -35,29 +35,29 @@ export interface DisplayFormatInfo {
 export const displayFormatMap: Record<DisplayFormatType, DisplayFormatInfo> = {
     "list": {
         type: "list",
-        name_ch: "列表",
+        label: "列表",
         icon: createElement(List, { className: "w-4 h-4" })
     },
     "table": {
         type: "table",
-        name_ch: "表格",
+        label: "表格",
         icon: createElement(Table, { className: "w-4 h-4" })
     },
     "pie": {
         type: "pie",
-        name_ch: "饼图",
+        label: "饼图",
         icon: createElement(PieChart, { className: "w-4 h-4" }),
         chartType: "pie"
     },
     "bar": {
         type: "bar",
-        name_ch: "柱状图",
+        label: "柱状图",
         icon: createElement(BarChart3, { className: "w-4 h-4" }),
         chartType: "bar"
     },
     "line": {
         type: "line",
-        name_ch: "折线图",
+        label: "折线图",
         icon: createElement(LineChart, { className: "w-4 h-4" }),
         chartType: "line"
     }
