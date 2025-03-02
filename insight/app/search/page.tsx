@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import SearchResult from '@/components/search/SearchResult';
 import SearchInput from '@/components/search/SearchInput';
 import { ChartConfig } from '@/components/search/charts/ChartTypes';
-import { DisplayFormat, DisplayFormatType, getDisplayFormat, getDisplayFormatType, displayFormatMap } from '@/config/filters';
+import { DisplayFormat, getDisplayFormat } from '@/config/filters';
 import { SearchResultProps } from '@/components/search/SearchResult';
 // 客户端组件不能直接使用 generateMetadata，但可以通过 useEffect 更新文档标题
 
@@ -14,15 +14,22 @@ export default function Page() {
     const searchParams = useSearchParams();
     const query = searchParams.get('q') || '';
     const model = searchParams.get('model') || 'DEEPSEEK';
-    const format = searchParams.get('format') || '列表';
+    const format = searchParams.get('format') || 'pie';
     const source = searchParams.get('source') || '';
+
+    const searchedQueriesRef = useRef<Set<string>>(new Set());
 
 
     const [searchResults, setSearchResults] = useState<SearchResultProps[]>([]);
 
     // 当 URL 参数变化时执行搜索
     useEffect(() => {
-        if (query) {
+        // 创建一个唯一的搜索标识符（组合查询和其他参数）
+        const searchKey = `${query}_${model}_${format}_${source}`;
+
+        // 只有当这个组合没有被搜索过时才执行搜索
+        if (query && !searchedQueriesRef.current.has(searchKey)) {
+            searchedQueriesRef.current.add(searchKey);
             handleSearch(query);
         }
     }, [query, model, format, source]);
@@ -30,11 +37,15 @@ export default function Page() {
     const handleSearch = async (query: string) => {
         if (!query.trim()) return;
 
+        // 生成唯一ID用于标识此次搜索
+        const searchId = Date.now().toString();
+
         // 创建新的搜索结果（初始状态为加载中）
         const newResult = {
+            id: searchId,
             query,
             isLoading: true,
-            format: '列表' as DisplayFormat, // 默认格式，将被API响应覆盖
+            format: 'list' as DisplayFormat, // 默认格式，将被API响应覆盖
             chartConfig: {} as ChartConfig
         };
 
@@ -48,38 +59,42 @@ export default function Page() {
             // 暂时使用mock数据
             const mockResponse = await mockSearchAPI(query, model, format, source);
 
+            // 只更新匹配ID的搜索结果
             setSearchResults(prev =>
                 prev.map(result => {
-
-                    return {
-                        ...result,
-                        isLoading: false,
-                        format: mockResponse.format,
-                        chartConfig: mockResponse.contentProps.chartConfig
-                    };
+                    if (result.id === searchId) {
+                        return {
+                            ...result,
+                            isLoading: false,
+                            format: mockResponse.format,
+                            chartConfig: mockResponse.contentProps.chartConfig
+                        };
+                    }
+                    return result;
                 })
             );
-            console.log(mockResponse);
         } catch (error) {
             console.error('搜索失败:', error);
 
-            // 更新结果状态为错误
+            // 只更新匹配ID的搜索结果
             setSearchResults(prev =>
-                prev.map((result, index) => {
-
-                    return {
-                        ...result,
-                        isLoading: false,
-                        format: '列表' as DisplayFormat,
-                        contentProps: {
-                            content: '搜索请求失败，请稍后重试。'
-                        }
-                    };
+                prev.map(result => {
+                    if (result.id === searchId) {
+                        return {
+                            ...result,
+                            isLoading: false,
+                            format: 'list' as DisplayFormat,
+                            contentProps: {
+                                content: '搜索请求失败，请稍后重试。'
+                            }
+                        };
+                    }
+                    return result;
                 })
             );
         }
     };
-
+    console.log(searchResults);
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-950 relative overflow-hidden">
             {/* 背景装饰元素 */}
@@ -151,13 +166,14 @@ export default function Page() {
                 <div className="space-y-8">
                     {searchResults.map((result, index) => {
                         const props = {
+                            id: result.id,
                             query: result.query,
                             isLoading: result.isLoading,
                             format: result.format,
                             chartConfig: result.chartConfig
                         };
 
-                        return <SearchResult key={index} {...props} />;
+                        return <SearchResult key={result.id || index} {...props} />;
                     })}
                 </div>
             </div>
@@ -179,11 +195,11 @@ interface MockSearchResponse {
 async function mockSearchAPI(
     query: string,
     model: string = 'DEEPSEEK',
-    format: string = '柱状图',
+    format: string = 'pie',
     source: string = ''
 ): Promise<MockSearchResponse> {
     // 模拟API延迟
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
     // 尝试从预设结果中查找匹配的查询
     const exactMatch = EXAMPLE_SEARCH_RESULTS.find(result =>
@@ -198,7 +214,7 @@ async function mockSearchAPI(
     }
 
     // 如果没有精确匹配，则生成随机结果
-    const formats: DisplayFormat[] = ['列表', '表格', '饼图', '柱状图', '折线图'];
+    const formats: DisplayFormat[] = ["pie", "bar", "line"];
 
     // 如果指定了格式，尝试使用指定的格式，否则随机选择
     let resultFormat: DisplayFormat;
@@ -210,14 +226,14 @@ async function mockSearchAPI(
 
     // 根据不同的格式生成不同的内容
     switch (resultFormat) {
-        case '饼图':
-        case '柱状图':
-        case '折线图':
-            return generateChartData(query, getDisplayFormatType(resultFormat));
+        case 'pie':
+        case 'bar':
+        case 'line':
+            return generateChartData(query, resultFormat);
 
-        case '表格':
+        case 'table':
             return {
-                format: '表格',
+                format: 'table',
                 contentProps: {
                     headers: ['项目', '描述', '值'],
                     rows: [
@@ -228,10 +244,10 @@ async function mockSearchAPI(
                 }
             };
 
-        case '列表':
+        case 'list':
         default:
             return {
-                format: '列表',
+                format: 'list',
                 contentProps: {
                     items: [
                         `关于 "${query}" 的第一点：这是一个示例项目，在实际应用中会替换为真实内容。`,
@@ -245,9 +261,8 @@ async function mockSearchAPI(
 }
 
 // 生成图表数据
-function generateChartData(query: string, formatType: DisplayFormatType): MockSearchResponse {
+function generateChartData(query: string, formatType: DisplayFormat): MockSearchResponse {
     let chartConfig: ChartConfig;
-    let format: DisplayFormat = getDisplayFormat(formatType);
 
     if (formatType === 'bar') {
         chartConfig = {
@@ -339,8 +354,7 @@ function generateChartData(query: string, formatType: DisplayFormatType): MockSe
     }
 
     return {
-        format,
-
+        format: formatType,
         contentProps: { chartConfig }
     };
 }
@@ -350,7 +364,7 @@ const EXAMPLE_SEARCH_RESULTS = [
     {
         id: '1',
         query: '什么是向量数据库？',
-        format: '列表' as DisplayFormat,
+        format: 'list' as DisplayFormat,
         contentProps: {
             items: [
                 '向量数据库是一种专门设计用于存储、索引和查询高维向量数据的数据库系统。',
@@ -363,7 +377,7 @@ const EXAMPLE_SEARCH_RESULTS = [
     {
         id: '2',
         query: '如何使用React Hooks实现状态管理？',
-        format: '列表' as DisplayFormat,
+        format: 'list' as DisplayFormat,
         contentProps: {
             items: [
                 <div key="1">
@@ -385,7 +399,7 @@ const EXAMPLE_SEARCH_RESULTS = [
     {
         id: '4',
         query: '2023年全球前五大科技公司市值',
-        format: '表格' as DisplayFormat,
+        format: 'table' as DisplayFormat,
         contentProps: {
             headers: ['排名', '公司', '市值 (十亿美元)', '同比增长'],
             rows: [
@@ -400,7 +414,7 @@ const EXAMPLE_SEARCH_RESULTS = [
     {
         id: '5',
         query: '常见的设计模式有哪些？',
-        format: '列表' as DisplayFormat,
+        format: 'list' as DisplayFormat,
         contentProps: {
             items: [
                 <div key="1">
@@ -419,7 +433,7 @@ const EXAMPLE_SEARCH_RESULTS = [
     {
         id: '6',
         query: '2023年全球主要科技公司市值走势',
-        format: '折线图' as DisplayFormat,
+        format: 'line' as DisplayFormat,
         contentProps: {
             chartConfig: {
                 chartData: {
@@ -461,7 +475,7 @@ const EXAMPLE_SEARCH_RESULTS = [
     {
         id: '7',
         query: '2023年全球科技公司市值分布',
-        format: '饼图' as DisplayFormat,
+        format: 'pie' as DisplayFormat,
         contentProps: {
             chartConfig: {
                 chartData: {
@@ -495,7 +509,7 @@ const EXAMPLE_SEARCH_RESULTS = [
     {
         id: '8',
         query: '2023年各季度科技公司营收对比',
-        format: '柱状图' as DisplayFormat,
+        format: 'bar' as DisplayFormat,
         contentProps: {
             chartConfig: {
                 chartData: {

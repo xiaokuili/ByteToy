@@ -3,7 +3,7 @@ import BarChart from './BarChart';
 import LineChart from './LineChart';
 import PieChart from './PieChart';
 import { cn } from '@/lib/utils';
-import { DisplayFormatType, displayFormatMap } from '@/config/filters';
+import { DisplayFormat } from '@/config/filters';
 
 interface ChartFactoryProps {
     config: ChartConfig;

@@ -39,37 +39,3 @@ export const formatIcons: Record<DisplayFormat, JSX.Element> = {
     "line": createElement(LineChart, { className: "w-4 h-4" }),
 
 };
-
-// 类型转换辅助函数
-export function getDisplayFormatInfo(format: DisplayFormat): DisplayFormatInfo {
-    switch (format) {
-        case "列表": return displayFormatMap.list;
-        case "表格": return displayFormatMap.table;
-        case "饼图": return displayFormatMap.pie;
-        case "柱状图": return displayFormatMap.bar;
-        case "折线图": return displayFormatMap.line;
-        default: return displayFormatMap.list;
-    }
-}
-
-export function getDisplayFormatType(format: DisplayFormat): DisplayFormatType {
-    switch (format) {
-        case "列表": return "list";
-        case "表格": return "table";
-        case "饼图": return "pie";
-        case "柱状图": return "bar";
-        case "折线图": return "line";
-        default: return "list";
-    }
-}
-
-export function getDisplayFormat(type: DisplayFormatType): DisplayFormat {
-    switch (type) {
-        case "list": return "列表";
-        case "table": return "表格";
-        case "pie": return "饼图";
-        case "bar": return "柱状图";
-        case "line": return "折线图";
-        default: return "列表";
-    }
-} 

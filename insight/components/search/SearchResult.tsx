@@ -3,10 +3,11 @@ import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import ChartFactory from './charts/ChartFactory';
 import { ChartConfig } from './charts/ChartTypes';
-import { DisplayFormat, DisplayFormatType, getDisplayFormatInfo, getDisplayFormatType } from '@/config/filters';
+import { DisplayFormat, formatIcons } from '@/config/filters';
 
 // 基础搜索结果属性
 export interface SearchResultProps {
+    id?: string;  // 唯一标识符
     query: string;
     isLoading?: boolean;
     className?: string;
@@ -16,8 +17,6 @@ export interface SearchResultProps {
 
 export default function SearchResult(props: SearchResultProps) {
     const { query, isLoading = false, className, format } = props;
-    const formatInfo = getDisplayFormatInfo(format);
-
     return (
         <div className={cn(
             "rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm bg-white/80 dark:bg-gray-800/80",
@@ -41,7 +40,7 @@ export default function SearchResult(props: SearchResultProps) {
                 {/* 展示格式指示器 */}
                 {!isLoading && (
                     <div className="flex items-center">
-                        <FormatIndicator formatInfo={formatInfo} />
+                        <FormatIndicator formatInfo={format} />
                     </div>
                 )}
             </div>
@@ -58,10 +57,10 @@ export default function SearchResult(props: SearchResultProps) {
 }
 
 // 展示格式指示器组件
-function FormatIndicator({ formatInfo }: { formatInfo: ReturnType<typeof getDisplayFormatInfo> }) {
+function FormatIndicator({ formatInfo }: { formatInfo: DisplayFormat }) {
     return (
         <div className="p-1 rounded-md bg-gray-100 dark:bg-gray-700">
-            {formatInfo.icon}
+            {formatIcons[formatInfo]}
         </div>
     );
 }
