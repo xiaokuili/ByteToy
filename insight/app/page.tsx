@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { SearchInput } from "@/components/search/SearchInput"
+import { SearchInput } from "@/components/home/SearchInput"
 import { ModelSelector } from "@/components/filters/ModelSelector"
 import { DataSourceFilter } from "@/components/filters/DataSourceFilter"
 import { DisplayFormatFilter } from "@/components/filters/DisplayFormatFilter"
