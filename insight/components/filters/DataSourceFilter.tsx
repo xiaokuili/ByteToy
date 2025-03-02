@@ -11,20 +11,23 @@ interface DataSourceFilterProps {
 export function DataSourceFilter({ selectedSource, onChange, className = "" }: DataSourceFilterProps) {
     const [expandedSource, setExpandedSource] = useState<DataSource | null>(null);
 
-    // 模拟的本地文件列表
-    const localFiles = [
-        { id: "file1", name: "research_data.csv", type: "csv" },
-        { id: "file2", name: "project_notes.docx", type: "docx" },
-        { id: "file3", name: "analysis.pdf", type: "pdf" },
-        { id: "file4", name: "presentation.pptx", type: "pptx" }
+    // 新能源汽车案例的本地文件列表
+    const caseFiles = [
+        { id: "price_analysis", name: "price_analysis.csv", type: "csv", description: "价格区间分析数据" },
+        { id: "sales_data", name: "sales_data.csv", type: "csv", description: "销量相关数据" },
+        { id: "charging_facilities", name: "charging_facilities.csv", type: "csv", description: "充电设施分布" },
+        { id: "user_profile", name: "user_profile.csv", type: "csv", description: "用户画像数据" },
+        { id: "model_comparison", name: "model_comparison.csv", type: "csv", description: "车型对比数据" },
+        { id: "user_satisfaction", name: "user_satisfaction.csv", type: "csv", description: "用户满意度调研" }
     ];
 
-    // 模拟的数据库表列表
+    // 数据库表列表
     const databaseTables = [
-        { id: "table1", name: "users", records: 1245 },
-        { id: "table2", name: "products", records: 532 },
-        { id: "table3", name: "orders", records: 8721 },
-        { id: "table4", name: "analytics", records: 12543 }
+        { id: "vehicles", name: "vehicles", records: 1245, description: "车型基本信息" },
+        { id: "manufacturers", name: "manufacturers", records: 87, description: "生产厂商信息" },
+        { id: "monthly_sales", name: "monthly_sales", records: 8721, description: "月度销售数据" },
+        { id: "price_trends", name: "price_trends", records: 3652, description: "价格走势数据" },
+        { id: "user_reviews", name: "user_reviews", records: 12543, description: "用户评价数据" }
     ];
 
     // 处理源选择
@@ -109,15 +112,20 @@ export function DataSourceFilter({ selectedSource, onChange, className = "" }: D
                         <FolderOpen className="w-4 h-4" />
                         <span>选择文件</span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {localFiles.map(file => (
+                    <div className="grid grid-cols-1 gap-2">
+                        {caseFiles.map(file => (
                             <button
                                 key={file.id}
                                 onClick={() => handleFileSelect(file.id, file.name)}
-                                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 transition-all"
+                                className="flex items-center justify-between px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 transition-all"
                             >
-                                {getFileIcon(file.type)}
-                                <span className="text-sm truncate">{file.name}</span>
+                                <div className="flex items-center gap-2">
+                                    {getFileIcon(file.type)}
+                                    <span className="text-sm font-medium">{file.name}</span>
+                                </div>
+                                <div className="text-xs text-slate-500 max-w-[60%] text-right truncate">
+                                    {file.description}
+                                </div>
                             </button>
                         ))}
                     </div>

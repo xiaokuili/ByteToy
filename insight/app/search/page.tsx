@@ -48,7 +48,7 @@ export default function SearchPage() {
             <div className="container mx-auto px-4 py-6">
                 {/* 搜索栏 */}
                 <div className="mb-8">
-                    <SearchInput
+                    {/* <SearchInput
                         value={searchQuery}
                         onChange={setSearchQuery}
                         selectedModel={model}
@@ -58,10 +58,10 @@ export default function SearchPage() {
                         onFileUpload={handleFileUpload}
                         onSearch={handleSearch}
                         hasDataSourceSettings={source !== null}
-                        hasDisplayFormatSettings={format !== "列表"}
+                        onSearchResultClick={() => closeAllPanels()}
                         dataSourceName={source || "百度"}
                         displayFormatName={format}
-                    />
+                    /> */}
                 </div>
 
                 {/* 搜索结果 */}

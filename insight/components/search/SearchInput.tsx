@@ -11,11 +11,10 @@ interface SearchInputProps {
     onDataSourceClick: () => void;
     onDisplayFormatClick: () => void;
     onFileUpload: (file: File) => void;
+    onSearchResultClick: () => void;
     onSearch: () => void;
     hasDataSourceSettings: boolean;
-    hasDisplayFormatSettings: boolean;
     dataSourceName: string;
-    displayFormatName: string;
     placeholder?: string;
 }
 
@@ -27,11 +26,10 @@ export function SearchInput({
     onDataSourceClick,
     onDisplayFormatClick,
     onFileUpload,
+    onSearchResultClick,
     onSearch,
     hasDataSourceSettings,
-    hasDisplayFormatSettings,
     dataSourceName,
-    displayFormatName,
     placeholder = "Try using @ to select context..."
 }: SearchInputProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -129,7 +127,7 @@ export function SearchInput({
                 <button
                     onClick={() => {
                         setActiveTab('search');
-                        onSearch();
+                        onSearchResultClick();
                     }}
                     className={`tab ${activeTab === 'search' ? 'tab-active' : 'tab-inactive'}`}
                 >

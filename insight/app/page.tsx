@@ -13,7 +13,7 @@ export default function Home() {
   const [showModelSelector, setShowModelSelector] = useState(false);
   const [showDataSources, setShowDataSources] = useState(false);
   const [showDisplayFormat, setShowDisplayFormat] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<AIModel>("GPT-4");
+  const [selectedModel, setSelectedModel] = useState<AIModel>("DEEPSEEK");
   const [selectedSource, setSelectedSource] = useState<DataSource | null>(null);
   const [displayFormat, setDisplayFormat] = useState<DisplayFormat>("列表");
   const router = useRouter();
@@ -71,10 +71,9 @@ export default function Home() {
           onFileUpload={handleFileUpload}
           onSearch={handleSearch}
           hasDataSourceSettings={selectedSource !== null}
-          hasDisplayFormatSettings={displayFormat !== "列表"}
           dataSourceName={selectedSource || "百度"}
-          displayFormatName={displayFormat}
           placeholder="Try using @ to select context..."
+          onSearchResultClick={() => closeAllPanels()}
         />
 
         {/* 模型选择面板 */}
