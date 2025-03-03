@@ -1,6 +1,5 @@
 import { ScatterChartData, ChartOptions } from './ChartTypes';
 import { cn } from '@/lib/utils';
-import { registerChart } from './ChartFactory';
 
 interface ScatterChartProps {
     data: ScatterChartData;
@@ -120,7 +119,4 @@ function getDefaultColor(index: number): string {
         '#fee440', '#00bbf9', '#00f5d4', '#9b5de5'
     ];
     return colors[index % colors.length];
-}
-
-// 注册散点图组件
-registerChart('scatter', ScatterChart); 
+} 

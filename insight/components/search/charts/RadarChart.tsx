@@ -1,6 +1,5 @@
 import { RadarChartData, ChartOptions } from './ChartTypes';
 import { cn } from '@/lib/utils';
-import { registerChart } from './ChartFactory';
 
 interface RadarChartProps {
     data: RadarChartData;
@@ -205,7 +204,4 @@ function getDefaultColor(index: number): string {
         '#fee440', '#00bbf9', '#00f5d4', '#9b5de5'
     ];
     return colors[index % colors.length];
-}
-
-// 注册雷达图组件
-registerChart('radar', RadarChart); 
+} 
