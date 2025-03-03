@@ -40,6 +40,9 @@ export interface PieChartData {
     isDonut?: boolean; // 是否为环形图
 }
 
+
+
+
 // 散点图数据类型
 export interface ScatterChartData {
     datasets: Array<{
@@ -50,11 +53,16 @@ export interface ScatterChartData {
     }>;
 }
 
+
+
 // 雷达图数据类型
 export interface RadarChartData {
     labels: string[];
     datasets: DataSet[];
 }
+
+
+
 
 // 所有图表数据类型的联合类型
 export type ChartData =
