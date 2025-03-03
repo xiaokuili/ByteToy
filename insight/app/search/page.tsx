@@ -121,38 +121,12 @@ export default function Page() {
                                 </h1>
                             </Link>
                         </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-300">
-                            使用模型: {model}
-                        </div>
+
                     </div>
                 </div>
             </header>
 
-            {/* 搜索信息 */}
-            <div className="w-full max-w-4xl mx-auto px-4 pt-6">
-                {query ? (
-                    <div className="mb-6">
-                        <h2 className="text-xl font-semibold mb-2">搜索: {query}</h2>
-                        <div className="flex flex-wrap gap-2">
-                            {source && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                    数据源: {source}
-                                </span>
-                            )}
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                                展示格式: {format}
-                            </span>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="text-center py-12">
-                        <h2 className="text-xl font-semibold mb-4">请输入搜索内容</h2>
-                        <p className="text-gray-600 dark:text-gray-400">
-                            使用上方的搜索框输入您的问题，开始智能搜索
-                        </p>
-                    </div>
-                )}
-            </div>
+
 
             {/* 浮动输入框 */}
             <SearchInput
