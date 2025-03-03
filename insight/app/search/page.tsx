@@ -94,7 +94,6 @@ export default function Page() {
             );
         }
     };
-    console.log(searchResults);
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-950 relative overflow-hidden">
             {/* 背景装饰元素 */}

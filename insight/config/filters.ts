@@ -21,6 +21,7 @@ export const sourceIcons: Record<DataSource, JSX.Element> = {
 };
 
 // 展示格式类型定义
+// DisplayFormat 定义目前支持的类型
 export type DisplayFormat = "list" | "table" | "pie" | "bar" | "line";
 export const displayFormats: { label: string, type: DisplayFormat }[] = [
     { label: "列表", type: "list" },
