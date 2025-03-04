@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import ChartFactory from './charts/ChartFactory';
 import { ChartConfig } from '@/lib/types';
 import { DisplayFormat, formatIcons } from '@/config/filters';
+import { DBResult } from '@/lib/types';
 
 // 搜索结果类型
 export enum SearchResultType {
@@ -20,8 +21,7 @@ export interface SearchResultProps {
     className?: string;
     format: DisplayFormat;
     chartConfig?: ChartConfig;
-    ragConfig?: string;
-    searchEngineConfig?: string;
+    rowResult?: DBResult;
     resultType: SearchResultType;
 }
 
