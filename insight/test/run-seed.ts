@@ -1,4 +1,4 @@
-import { seedActualTableData } from '@/test/actual-table-data';
+import { seedActualTableData } from '@/test/create-test-table';
 import 'dotenv/config';
 async function main() {
     try {

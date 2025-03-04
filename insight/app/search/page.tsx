@@ -9,6 +9,7 @@ import { generateQuery, runGenerateSQLQuery, generateChartConfig } from "@/app/a
 import { useSearchParams } from "next/navigation";
 import { DataSource } from "@/lib/types";
 import SearchInput from "@/components/search/SearchInput";
+import { testTableData } from "@/test/test-table-data";
 
 interface SearchResultProps {
     id: string;
@@ -64,9 +65,9 @@ export default function Page() {
 
         try {
             // Step 1: Generate SQL query from natural language
-            const sqlQuery = await generateQuery(question, {
-                name: source,
-            } as DataSource);
+            // TODO: 后续处理datasource逻辑
+            const datasource = testTableData[0];
+            const sqlQuery = await generateQuery(question, datasource);
 
             if (sqlQuery === undefined) {
                 toast.error("An error occurred. Please try again.");
