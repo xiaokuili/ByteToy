@@ -77,6 +77,7 @@ export const runGenerateSQLQuery = async (query: string) => {
     let data: any;
     try {
         data = await db.execute(query);
+        console.log("data", data);
     } catch (e: any) {
         if (e.message.includes('relation "unicorns" does not exist')) {
             console.log(
@@ -89,7 +90,7 @@ export const runGenerateSQLQuery = async (query: string) => {
         }
     }
 
-    return data as DBResult[];
+    return data.rows as DBResult[];
 };
 
 export const generateChartConfig = async (

@@ -66,9 +66,9 @@ export default function Page() {
         try {
             // Step 1: Generate SQL query from natural language
             // TODO: 后续处理datasource逻辑
-            const datasource = testTableData[0];
+            const datasource = testTableData;
             const sqlQuery = await generateQuery(question, datasource);
-
+            console.log("sqlQuery", sqlQuery);
             if (sqlQuery === undefined) {
                 toast.error("An error occurred. Please try again.");
                 return;
@@ -77,7 +77,7 @@ export default function Page() {
             // Step 2: Execute the SQL query
             const data = await runGenerateSQLQuery(sqlQuery);
             const columns = data.length > 0 ? Object.keys(data[0]) : [];
-
+            console.log("data", data);
             // Step 3: Generate chart configuration
             const generation = await generateChartConfig(data, question);
             const chartConfig = {
@@ -101,6 +101,7 @@ export default function Page() {
             );
 
         } catch (e) {
+            console.error(e);
             toast.error("An error occurred. Please try again.");
             setSearchResults(prev =>
                 prev.map(result => {
