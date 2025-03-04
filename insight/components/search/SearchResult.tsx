@@ -2,7 +2,7 @@ import { Search, Sparkles } from 'lucide-react';
 import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import ChartFactory from './charts/ChartFactory';
-import { ChartConfig } from './charts/ChartTypes';
+import { ChartConfig } from '@/lib/types';
 import { DisplayFormat, formatIcons } from '@/config/filters';
 
 // 基础搜索结果属性
