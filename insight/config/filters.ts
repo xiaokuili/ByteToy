@@ -8,14 +8,13 @@ export type AIModel = "DEEPSEEK" | "OPENAI" | "CLAUDE" | "GEMINI";
 export const aiModels: AIModel[] = ["DEEPSEEK", "OPENAI", "CLAUDE", "GEMINI"];
 
 // 数据源
-export type DataSource = "百度" | "Google" | "Perplexity" | "本地文件" | "数据库";
-export const dataSources: DataSource[] = ["百度", "Google", "Perplexity", "本地文件", "数据库"];
+export type DataSource = "搜索引擎" | "AI搜索" | "本地文件" | "数据库";
+export const dataSources: DataSource[] = ["搜索引擎", "AI搜索", "本地文件", "数据库"];
 
 // 数据源图标
 export const sourceIcons: Record<DataSource, JSX.Element> = {
-    "百度": createElement(Globe, { className: "w-4 h-4" }),
-    "Google": createElement(Globe, { className: "w-4 h-4" }),
-    "Perplexity": createElement(Globe, { className: "w-4 h-4" }),
+    "搜索引擎": createElement(Globe, { className: "w-4 h-4" }),
+    "AI搜索": createElement(Globe, { className: "w-4 h-4" }),
     "本地文件": createElement(FileText, { className: "w-4 h-4" }),
     "数据库": createElement(Database, { className: "w-4 h-4" })
 };

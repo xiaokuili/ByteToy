@@ -10,6 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { DataSource } from "@/lib/types";
 import SearchInput from "@/components/search/SearchInput";
 import { testTableData } from "@/test/test-table-data";
+import { SearchResultType } from "@/components/search/SearchResult";
 
 interface SearchResultProps {
     id: string;
@@ -36,6 +37,7 @@ export default function Page() {
 
     const searchedQueriesRef = useRef<Set<string>>(new Set());
     const [searchResults, setSearchResults] = useState<SearchResultProps[]>([]);
+    const [resultType, setResultType] = useState<SearchResultType>(SearchResultType.CHART);
 
     // URL参数变化时执行搜索
     useEffect(() => {
@@ -48,6 +50,9 @@ export default function Page() {
 
     const handleSearch = async (question: string) => {
         if (!question.trim()) return;
+
+        // TODO: 后续基于参数判断resultType
+        setResultType(SearchResultType.CHART);
 
         // 生成搜索ID
         const searchId = Date.now().toString();
@@ -165,7 +170,8 @@ export default function Page() {
                             query: result.query,
                             isLoading: result.isLoading,
                             format: result.format,
-                            chartConfig: result.chartConfig
+                            chartConfig: result.chartConfig,
+                            resultType: resultType
                         };
                         return <SearchResult key={result.id || index} {...props} />;
                     })}

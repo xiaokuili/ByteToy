@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { DataSource, dataSources, sourceIcons } from "@/config/filters";
-import { ChevronRight, File, Database, Table, FolderOpen } from "lucide-react";
+import { ChevronRight, File, Database, Table, FolderOpen, Search } from "lucide-react";
 
 interface DataSourceFilterProps {
     selectedSource: DataSource | null;
@@ -29,6 +29,22 @@ export function DataSourceFilter({ selectedSource, onChange, className = "" }: D
         { id: "price_trends", name: "price_trends", records: 3652, description: "价格走势数据" },
         { id: "user_reviews", name: "user_reviews", records: 12543, description: "用户评价数据" }
     ];
+
+    // 搜索引擎列表
+    const searchEngines = [
+        { id: "baidu", name: "百度", description: "百度搜索引擎" },
+        { id: "google", name: "Google", description: "Google搜索引擎" },
+        { id: "perplexity", name: "Perplexity", description: "Perplexity搜索引擎" }
+    ];
+
+    const aiSearchEngines = [
+        { id: "deepseek", name: "DeepSeek", description: "DeepSeek搜索引擎" },
+        { id: "openai", name: "OpenAI", description: "OpenAI搜索引擎" },
+        { id: "claude", name: "Claude", description: "Claude搜索引擎" },
+        { id: "gemini", name: "Gemini", description: "Gemini搜索引擎" }
+    ];
+
+
 
     // 处理源选择
     const handleSourceClick = (source: DataSource) => {
@@ -62,6 +78,22 @@ export function DataSourceFilter({ selectedSource, onChange, className = "" }: D
         console.log(`Selected table: ${tableName} (${tableId})`);
         // 选择表后，关闭面板并通知父组件
         onChange("数据库"); // 或者传递更具体的信息
+        setExpandedSource(null);
+    };
+
+    // 处理搜索引擎选择
+    const handleSearchEngineSelect = (engineId: string, engineName: string) => {
+        console.log(`Selected search engine: ${engineName} (${engineId})`);
+        // 选择搜索引擎后，关闭面板并通知父组件
+        onChange(engineName === "搜索引擎" ? "搜索引擎" : "AI搜索");
+        setExpandedSource(null);
+    };
+
+    // 处理AI搜索引擎选择
+    const handleAISearchEngineSelect = (engineId: string, engineName: string) => {
+        console.log(`Selected AI search engine: ${engineName} (${engineId})`);
+        // 选择AI搜索引擎后，关闭面板并通知父组件
+        onChange("AI搜索");
         setExpandedSource(null);
     };
 
@@ -162,6 +194,56 @@ export function DataSourceFilter({ selectedSource, onChange, className = "" }: D
                         <span>连接新数据表</span>
                         <Table className="w-3 h-3" />
                     </button>
+                </div>
+            )}
+
+            {/* 搜索引擎二级选择 */}
+            {expandedSource === "搜索引擎" && (
+                <div className="ml-4 mt-2 space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <div className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
+                        <Search className="w-4 h-4" />
+                        <span>选择搜索引擎</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2">
+                        {searchEngines.map(engine => (
+                            <button
+                                key={engine.id}
+                                onClick={() => handleSearchEngineSelect(engine.id, engine.name)}
+                                className="flex items-center justify-between px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 transition-all"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Search className="w-4 h-4 text-indigo-500" />
+                                    <span className="text-sm">{engine.name}</span>
+                                </div>
+                                <span className="text-xs text-slate-500">{engine.description}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* AI搜索二级选择 */}
+            {expandedSource === "AI搜索" && (
+                <div className="ml-4 mt-2 space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <div className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
+                        <Search className="w-4 h-4" />
+                        <span>选择AI搜索引擎</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2">
+                        {aiSearchEngines.map(engine => (
+                            <button
+                                key={engine.id}
+                                onClick={() => handleAISearchEngineSelect(engine.id, engine.name)}
+                                className="flex items-center justify-between px-3 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:border-indigo-200 hover:bg-indigo-50 transition-all"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Search className="w-4 h-4 text-indigo-500" />
+                                    <span className="text-sm">{engine.name}</span>
+                                </div>
+                                <span className="text-xs text-slate-500">{engine.description}</span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
             )}
         </div>

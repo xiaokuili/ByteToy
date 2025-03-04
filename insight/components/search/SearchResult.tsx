@@ -5,6 +5,13 @@ import ChartFactory from './charts/ChartFactory';
 import { ChartConfig } from '@/lib/types';
 import { DisplayFormat, formatIcons } from '@/config/filters';
 
+// 搜索结果类型
+export enum SearchResultType {
+    RAG = 'rag',
+    SEARCH_ENGINE = 'search_engine',
+    CHART = 'chart'
+}
+
 // 基础搜索结果属性
 export interface SearchResultProps {
     id?: string;  // 唯一标识符
@@ -12,7 +19,10 @@ export interface SearchResultProps {
     isLoading?: boolean;
     className?: string;
     format: DisplayFormat;
-    chartConfig: ChartConfig;
+    chartConfig?: ChartConfig;
+    ragConfig?: string;
+    searchEngineConfig?: string;
+    resultType: SearchResultType;
 }
 
 export default function SearchResult(props: SearchResultProps) {
@@ -49,7 +59,17 @@ export default function SearchResult(props: SearchResultProps) {
                 {isLoading ? (
                     <SkeletonContent />
                 ) : (
-                    <ChartContent chartConfig={props.chartConfig} />
+                    <>
+                        {props.resultType === SearchResultType.CHART && (
+                            <ChartContent chartConfig={props.chartConfig as ChartConfig} />
+                        )}
+                        {props.resultType === SearchResultType.RAG && (
+                            <RagContent />
+                        )}
+                        {(props.resultType === SearchResultType.SEARCH_ENGINE || props.resultType === SearchResultType.AI_SEARCH_ENGINE) && (
+                            <SearchEngineContent />
+                        )}
+                    </>
                 )}
             </div>
         </div>
@@ -81,4 +101,22 @@ function SkeletonContent() {
             <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
         </div>
     );
-} 
+}
+
+// rag搜索结果展示组件
+function RagContent() {
+    return (
+        <div>
+            <h1>Search Results</h1>
+        </div>
+    );
+}
+
+// 搜索引擎和AI搜索结果展示组件
+function SearchEngineContent() {
+    return (
+        <div>
+            <h1>Search Results</h1>
+        </div>
+    );
+}
