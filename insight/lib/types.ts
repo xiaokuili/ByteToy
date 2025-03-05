@@ -82,6 +82,9 @@ export interface RenderConfig {
     // error 
     isError?: boolean;
     errorMessage?: string;
+
+    // 元数据 
+    metadata?: Record<string, any>;
 }
 
 /** 表格配置 */

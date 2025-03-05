@@ -11,6 +11,7 @@ import { FetchData } from "@/actions/fetch";
 import { testTableData } from "@/test/test-table-data";
 import { RenderSearchResult } from "@/components/search/index";
 import { DisplayFormat } from "@/lib/types";
+import { useDataFlow } from "@/hook/useDataFlow";
 
 // Simple toast replacement
 const toast = {
@@ -30,6 +31,55 @@ export default function Page() {
     const searchedQueriesRef = useRef<Set<string>>(new Set());
     const [searchResults, setSearchResults] = useState<RenderConfig[]>([]);
 
+    // 使用 useDataFlow hook
+    const {
+
+        executeQuery,
+        sqlQueries
+    } = useDataFlow({
+        dataSource: testTableData,
+        format: 'chart' as DisplayFormat,
+        collectSQLQuery: true,
+        onStart: (initialConfig) => {
+            // 添加初始加载状态到搜索结果
+            setSearchResults(prev => [initialConfig, ...prev]);
+        },
+        onSuccess: (config) => {
+            // 成功获取数据后，将结果添加到搜索结果列表
+            setSearchResults(prev => {
+                // 检查是否已存在相同ID的结果，如果有则替换，否则添加到开头
+                const exists = prev.some(item => item.id === config.id);
+                if (exists) {
+                    return prev.map(item => item.id === config.id ? config : item);
+                } else {
+                    return [config, ...prev];
+                }
+            });
+        },
+        onError: (error) => {
+            setSearchResults(prev => {
+                // 创建错误配置
+                const errorConfig: RenderConfig = {
+                    id: crypto.randomUUID(),
+                    query: "",
+                    format: "chart",
+                    data: [],
+                    isLoading: false,
+                    isError: true,
+                    errorMessage: error.message
+                };
+
+                // 检查是否已存在相同ID的结果
+                const exists = prev.some(item => item.id === errorConfig.id);
+                if (exists) {
+                    return prev.map(item => item.id === errorConfig.id ? errorConfig : item);
+                } else {
+                    return [errorConfig, ...prev];
+                }
+            });
+        }
+    });
+
     useEffect(() => {
         const searchKey = `${query}_${model}_${format}_${source}`;
         if (query && !searchedQueriesRef.current.has(searchKey)) {
@@ -38,76 +88,35 @@ export default function Page() {
         }
     }, [query, model, format, source]);
 
+    // 使用 useDataFlow 实现搜索处理
     const handleSearch = async (question: string) => {
         if (!question.trim()) return;
 
-
-        const searchId = Date.now().toString();
-        const newResult: RenderConfig = {
-            id: searchId,
-            query: question,
-            format: 'chart' as DisplayFormat,
-            chartConfig: {} as ChartConfig,
-            data: [],
-            isLoading: true
-        };
-
-        setSearchResults(prev => [newResult, ...prev]);
-
         try {
-            const config: FetchConfig = {
-                fetchType: "sql",
-                query: question,
-                dataSource: testTableData
-            };
-
-            const result = await FetchData(config);
-
-            if (!result.data || result.error) {
-                throw new Error(result.error?.message || "No data returned");
-            }
-
-            const generation = await generateChartConfig(result.data, question);
-            const chartConfig = {
-                options: generation.config
-            };
-            if (!result.data) {
-                throw new Error("No data returned");
-            }
-
-
-            setSearchResults(prev =>
-                prev.map(item =>
-                    item.id === searchId
-                        ? {
-                            ...item,
-                            chartConfig,
-                            data: result.data || [],
-                            isLoading: false
-                        }
-                        : item
-                )
-            );
-
+            // 使用 executeQuery 方法执行查询
+            await executeQuery(question);
         } catch (e) {
             console.error(e);
             toast.error("An error occurred. Please try again.");
-            setSearchResults(prev =>
-                prev.map(item =>
-                    item.id === searchId
-                        ? {
-                            ...item,
-                            isLoading: false,
-                            format: format as DisplayFormat,
-                            chartConfig: {} as ChartConfig,
-                            data: [],
-                            isError: true,
-                            errorMessage: (e as Error).message
-                        }
-                        : item
-                )
-            );
         }
+    };
+
+    // SQL查询历史组件（可选，用于调试）
+    const SQLHistoryDebug = () => {
+        if (!sqlQueries.length) return null;
+
+        return (
+            <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h3 className="text-lg font-medium mb-2">SQL查询历史</h3>
+                <div className="space-y-2">
+                    {sqlQueries.map((sql, index) => (
+                        <div key={index} className="p-2 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
+                            <pre className="text-xs overflow-x-auto">{sql}</pre>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -146,6 +155,10 @@ export default function Page() {
                         />
                     ))}
                 </div>
+
+                {/* 可选：显示SQL查询历史（开发环境调试用） */}
+                {/* TODO: 后续删除 */}
+                {process.env.NODE_ENV === 'development' && <SQLHistoryDebug />}
             </div>
         </div>
     );
