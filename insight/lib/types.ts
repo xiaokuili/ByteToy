@@ -27,7 +27,12 @@ export type Fetch = (config: FetchConfig) => Promise<FetchResult>;
 export type ConfigGenerator = (data: DataRecord[], query: string) => RenderConfig;
 
 /** 数据渲染函数 - 接收配置并返回React组件 */
-export type Render = ({ config }: { config: RenderConfig }) => React.ReactNode;
+export interface Render {
+    content: (config: RenderConfig) => React.ReactNode;
+    error: (config: RenderConfig) => React.ReactNode;
+    loading: (config: RenderConfig) => React.ReactNode;
+}
+
 
 
 /** 数据记录类型 - 所有获取到的数据的基本格式 */
@@ -63,14 +68,20 @@ export interface FetchConfig {
 /** 渲染配置 */
 export interface RenderConfig {
     id: string;
+    query: string // 查询内容
+
     data: DataRecord[];     // 要渲染的数据
     format: DisplayFormat;  // 展示格式
     chartConfig?: ChartConfig; // 图表配置（如果format为chart）
     tableConfig?: TableConfig; // 表格配置（如果format为table）
     searchConfig?: SearchConfig; // 搜索结果配置（如果format为search）
-    query: string // 查询内容
-    isLoading: boolean;
-    error?: string;
+
+    // loading 
+    isLoading?: boolean;
+    loadingMessage?: string;
+    // error 
+    isError?: boolean;
+    errorMessage?: string;
 }
 
 /** 表格配置 */

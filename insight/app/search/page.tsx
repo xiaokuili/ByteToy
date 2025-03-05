@@ -9,9 +9,8 @@ import SearchInput from "@/components/search/SearchInput";
 import { FetchConfig } from "@/lib/types";
 import { FetchData } from "@/actions/fetch";
 import { testTableData } from "@/test/test-table-data";
-import { SearchResultType, RenderSearchResult } from "@/components/search/index";
+import { RenderSearchResult } from "@/components/search/index";
 import { DisplayFormat } from "@/lib/types";
-import { FetchResult } from "@/lib/types";
 
 // Simple toast replacement
 const toast = {
@@ -30,7 +29,6 @@ export default function Page() {
 
     const searchedQueriesRef = useRef<Set<string>>(new Set());
     const [searchResults, setSearchResults] = useState<RenderConfig[]>([]);
-    const [resultType, setResultType] = useState<SearchResultType>(SearchResultType.CHART);
 
     useEffect(() => {
         const searchKey = `${query}_${model}_${format}_${source}`;
@@ -43,7 +41,6 @@ export default function Page() {
     const handleSearch = async (question: string) => {
         if (!question.trim()) return;
 
-        setResultType(SearchResultType.CHART);
 
         const searchId = Date.now().toString();
         const newResult: RenderConfig = {
@@ -103,7 +100,9 @@ export default function Page() {
                             isLoading: false,
                             format: format as DisplayFormat,
                             chartConfig: {} as ChartConfig,
-                            data: []
+                            data: [],
+                            isError: true,
+                            errorMessage: (e as Error).message
                         }
                         : item
                 )

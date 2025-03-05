@@ -190,18 +190,23 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
     );
 }
 
-
-export const ChartResultComponent: Render = ({ config }: { config: RenderConfig }): React.ReactNode => {
-    if (!config.chartConfig) {
-        return null;
+export const ChartResultComponent: Render = {
+    content: (config: RenderConfig): React.ReactNode => {
+        if (!config.chartConfig) {
+            return null;
+        }
+        return (
+            <ChartFactory
+                config={config.chartConfig}
+                className="w-full"
+                chartData={config.data}
+            />
+        );
+    },
+    error: (config: RenderConfig): React.ReactNode => {
+        return <div>Error: {config.errorMessage}</div>;
+    },
+    loading: (config: RenderConfig): React.ReactNode => {
+        return <div>Loading...</div>;
     }
-
-    return (
-        <ChartFactory
-            config={config.chartConfig}
-            className="w-full"
-            chartData={config.data}
-        />
-    );
 };
-
