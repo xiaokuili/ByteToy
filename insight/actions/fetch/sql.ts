@@ -52,7 +52,6 @@ export interface DBConfig {
  */
 export const generateQuery: generateSQLQuery = async (input: string, datasource: DataSource) => {
     "use server";
-
     try {
         const result = await generateObject({
             model: openai("gpt-4o"),
@@ -91,7 +90,7 @@ export const generateQuery: generateSQLQuery = async (input: string, datasource:
         });
         return result.object.query;
     } catch (e) {
-        console.error(e);
+
         throw new Error("Failed to generate query");
     }
 };

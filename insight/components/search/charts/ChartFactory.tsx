@@ -22,7 +22,7 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Config, ChartConfig } from "@/lib/types";
+import { Config, ChartConfig, RenderConfig, Render, DisplayFormat, DataRecord } from "@/lib/types";
 import { transformDataForMultiLineChart } from "@/lib/rechart-format";
 import { cn } from "@/lib/utils";
 
@@ -47,10 +47,11 @@ const colors = [
 interface ChartFactoryProps {
     config: ChartConfig;
     className?: string;
+    chartData: DataRecord[];
 }
 
-export default function ChartFactory({ config, className }: ChartFactoryProps) {
-    const { chartData, options } = config;
+export default function ChartFactory({ config, className, chartData }: ChartFactoryProps) {
+    const { options } = config;
 
     if (!chartData || !options) {
         return <div>No chart data</div>;
@@ -188,3 +189,19 @@ export default function ChartFactory({ config, className }: ChartFactoryProps) {
         </div>
     );
 }
+
+
+export const ChartResultComponent: Render = ({ config }: { config: RenderConfig }): React.ReactNode => {
+    if (!config.chartConfig) {
+        return null;
+    }
+
+    return (
+        <ChartFactory
+            config={config.chartConfig}
+            className="w-full"
+            chartData={config.data}
+        />
+    );
+};
+
