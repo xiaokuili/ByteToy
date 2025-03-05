@@ -266,16 +266,16 @@ class ChocolateDecorator(CoffeeDecorator):
         return self.coffee.get_description() + "，加巧克力"
 
 # 客户端代码
-coffee = SimpleCoffee()
-print(f"{coffee.get_description()} - ¥{coffee.get_cost()}")
+better_coffee = SimpleCoffee()
+print(f"{better_coffee.get_description()} - ¥{better_coffee.get_cost()}")
 
 # 用牛奶装饰
-coffee = MilkDecorator(coffee)
-print(f"{coffee.get_description()} - ¥{coffee.get_cost()}")
+better_coffee = MilkDecorator(better_coffee)
+print(f"{better_coffee.get_description()} - ¥{better_coffee.get_cost()}")
 
 # 再用糖装饰
-coffee = SugarDecorator(coffee)
-print(f"{coffee.get_description()} - ¥{coffee.get_cost()}")
+better_coffee = SugarDecorator(better_coffee)
+print(f"{better_coffee.get_description()} - ¥{better_coffee.get_cost()}")
 
 # 创建一个加奶、加巧克力的咖啡
 special_coffee = SimpleCoffee()
@@ -297,18 +297,33 @@ print(f"{special_coffee.get_description()} - ¥{special_coffee.get_cost()}")
 
 ## 文件修改成本分析
 
+### 设计原则分析
+
+装饰器模式遵循以下设计原则：
+
+1. **开闭原则 (Open/Closed Principle)**：
+   - 问题代码：添加新配料组合需要创建新的子类，修改现有代码结构
+   - 装饰器模式：可以通过创建新的装饰器类或组合现有装饰器来添加新功能，不需要修改现有代码
+
+2. **单一职责原则 (Single Responsibility Principle)**：
+   - 问题代码：每个子类负责特定的配料组合，职责不够单一
+   - 装饰器模式：每个装饰器类只负责添加一种特定的功能，职责单一
+
+3. **组合优于继承原则 (Composition Over Inheritance)**：
+   - 问题代码：使用继承来扩展功能，导致类爆炸
+   - 装饰器模式：使用组合来扩展功能，更加灵活
+
+4. **依赖倒置原则 (Dependency Inversion Principle)**：
+   - 装饰器模式：装饰器和被装饰对象都依赖于抽象接口，而不是具体实现
+
 ### 添加新配料的修改成本对比
 
-假设我们需要添加一个新的配料 "肉桂"：
+假设需要添加一个新的配料"肉桂"：
 
-#### 不使用装饰器模式时：
-
-需要修改的文件和代码：
-1. 创建新的子类 `CoffeeWithCinnamon`
-2. 为每种可能的组合创建新的子类，如 `CoffeeWithMilkAndCinnamon`、`CoffeeWithSugarAndCinnamon`、`CoffeeWithMilkAndSugarAndCinnamon` 等
+#### 问题代码的修改：
 
 ```javascript
-// 新增子类
+// 需要创建多个新类
 class CoffeeWithCinnamon extends Coffee {
   getCost() {
     return super.getCost() + 1.5;
@@ -319,7 +334,7 @@ class CoffeeWithCinnamon extends Coffee {
   }
 }
 
-// 新增组合子类
+// 还需要为每种可能的组合创建新类
 class CoffeeWithMilkAndCinnamon extends Coffee {
   getCost() {
     return super.getCost() + 3.5;  // 2 (牛奶) + 1.5 (肉桂)
@@ -330,7 +345,16 @@ class CoffeeWithMilkAndCinnamon extends Coffee {
   }
 }
 
-// 更多组合...
+class CoffeeWithSugarAndCinnamon extends Coffee {
+  getCost() {
+    return super.getCost() + 2.5;  // 1 (糖) + 1.5 (肉桂)
+  }
+  
+  getDescription() {
+    return super.getDescription() + "，加糖和肉桂";
+  }
+}
+
 class CoffeeWithMilkAndSugarAndCinnamon extends Coffee {
   getCost() {
     return super.getCost() + 4.5;  // 2 (牛奶) + 1 (糖) + 1.5 (肉桂)
@@ -340,21 +364,20 @@ class CoffeeWithMilkAndSugarAndCinnamon extends Coffee {
     return super.getDescription() + "，加奶、糖和肉桂";
   }
 }
+
+// 如果有更多配料，组合数量会呈指数级增长
 ```
 
-这种修改方式存在以下问题：
-- 需要创建大量新的子类，类的数量会随着配料种类的增加呈指数级增长
-- 每个组合都需要单独维护，代码重复
+修改成本：
+- 需要创建多个新类，每个类代表一种配料组合
+- 类的数量随配料种类的增加呈指数级增长
+- 代码重复，难以维护
 - 如果基础咖啡类的行为发生变化，所有子类都需要相应修改
-- 难以支持在运行时动态添加或删除配料
 
-#### 使用装饰器模式时：
-
-需要修改的文件和代码：
-1. 只需创建一个新的装饰器类 `CinnamonDecorator`
+#### 装饰器模式的修改：
 
 ```javascript
-// 只需添加一个新的装饰器类
+// 只需创建一个新的装饰器类
 class CinnamonDecorator extends CoffeeDecorator {
   getCost() {
     return this.coffee.getCost() + 1.5;
@@ -365,12 +388,12 @@ class CinnamonDecorator extends CoffeeDecorator {
   }
 }
 
-// 客户端代码可以自由组合
+// 客户端可以自由组合
 let coffeeWithCinnamon = new SimpleCoffee();
 coffeeWithCinnamon = new CinnamonDecorator(coffeeWithCinnamon);
 console.log(`${coffeeWithCinnamon.getDescription()} - ¥${coffeeWithCinnamon.getCost()}`);
 
-// 加奶、糖和肉桂的组合
+// 任意组合
 let complexCoffee = new SimpleCoffee();
 complexCoffee = new MilkDecorator(complexCoffee);
 complexCoffee = new SugarDecorator(complexCoffee);
@@ -378,27 +401,20 @@ complexCoffee = new CinnamonDecorator(complexCoffee);
 console.log(`${complexCoffee.getDescription()} - ¥${complexCoffee.getCost()}`);
 ```
 
-装饰器模式的优势：
-- 只需创建一个新的装饰器类，而不是多个组合子类
-- 可以在运行时动态组合不同的装饰器
-- 装饰器可以嵌套使用，支持任意组合
-- 符合开闭原则，不需要修改现有代码
+修改成本：
+- 只需创建一个新的装饰器类
+- 不需要修改现有代码
+- 可以与现有装饰器自由组合
+- 代码简洁，易于维护
 
 ### 修改配料价格的修改成本对比
 
-假设我们需要将牛奶的价格从 2 元调整为 2.5 元：
+假设需要将牛奶的价格从 2 元调整为 2.5 元：
 
-#### 不使用装饰器模式时：
-
-需要修改所有包含牛奶的子类：
-1. `CoffeeWithMilk`
-2. `CoffeeWithMilkAndSugar`
-3. `CoffeeWithMilkAndCinnamon`
-4. `CoffeeWithMilkAndSugarAndCinnamon`
-5. 其他可能的组合...
+#### 问题代码的修改：
 
 ```javascript
-// 需要修改多个类
+// 需要修改所有包含牛奶的子类
 class CoffeeWithMilk extends Coffee {
   getCost() {
     return super.getCost() + 2.5;  // 从 2 改为 2.5
@@ -413,39 +429,109 @@ class CoffeeWithMilkAndSugar extends Coffee {
   // ...
 }
 
-// 更多需要修改的类...
+class CoffeeWithMilkAndCinnamon extends Coffee {
+  getCost() {
+    return super.getCost() + 4;  // 从 3.5 改为 4
+  }
+  // ...
+}
+
+class CoffeeWithMilkAndSugarAndCinnamon extends Coffee {
+  getCost() {
+    return super.getCost() + 5;  // 从 4.5 改为 5
+  }
+  // ...
+}
+
+// 更多包含牛奶的组合...
 ```
 
-#### 使用装饰器模式时：
+修改成本：
+- 需要修改所有包含牛奶的子类
+- 容易遗漏某些类，导致价格不一致
+- 修改范围大，风险高
+- 如果有多个地方使用了硬编码的价格，需要全部修改
 
-只需修改 `MilkDecorator` 类：
+#### 装饰器模式的修改：
 
 ```javascript
-// 只需修改一个类
+// 只需修改一个装饰器类
 class MilkDecorator extends CoffeeDecorator {
   getCost() {
     return this.coffee.getCost() + 2.5;  // 从 2 改为 2.5
   }
-  // ...
+  
+  getDescription() {
+    return this.coffee.getDescription() + "，加奶";
+  }
 }
 ```
 
-### 工作量减轻
+修改成本：
+- 只需修改一个装饰器类
+- 所有使用该装饰器的组合都会自动更新价格
+- 修改范围小，风险低
+- 价格逻辑集中在一处，易于维护
 
-使用装饰器模式后，添加或修改功能的工作量显著减轻：
-1. 不需要创建和维护大量的组合子类
-2. 添加新功能只需创建一个新的装饰器类
-3. 修改现有功能只需修改对应的装饰器类
-4. 可以独立开发和测试每个装饰器
-5. 客户端代码可以灵活组合不同的装饰器，而不需要依赖预定义的组合类
+### 工作量减轻分析
 
-### 实际应用中的文件修改成本
+装饰器模式通过以下方式减轻工作量：
 
-在实际项目中，如果咖啡店菜单经常变化（添加新配料、调整价格等），使用装饰器模式可以显著降低维护成本：
+1. **避免类爆炸**：
+   - 使用组合而不是继承来扩展功能
+   - n个配料只需要n个装饰器类，而不是2^n个子类
 
-1. **添加新配料**：只需添加一个新文件，而不是多个组合类文件
-2. **修改价格**：只需修改一个文件，而不是多个包含该配料的组合类文件
-3. **添加新的基础咖啡**：只需添加一个新的具体组件类，所有现有装饰器都可以直接应用
-4. **修改基础咖啡**：只需修改基础咖啡类，所有装饰器都会自动继承这些变化
+2. **动态组合**：
+   - 可以在运行时动态组合不同的装饰器
+   - 不需要预先定义所有可能的组合
 
-总结：装饰器模式通过将功能封装在独立的装饰器类中，使得添加或修改功能时只需要添加或修改相应的装饰器类，而不需要创建和维护大量的组合子类，从而显著降低了文件修改成本和工作量。 
+3. **职责分离**：
+   - 每个装饰器只负责添加一种特定的功能
+   - 装饰器之间相互独立，可以单独开发和测试
+
+4. **易于维护**：
+   - 修改一个装饰器不会影响其他装饰器
+   - 添加新功能只需创建新的装饰器类
+
+### 实际应用案例
+
+装饰器模式在实际项目中的典型应用：
+
+1. **UI组件**：动态添加边框、滚动条、阴影等视觉效果
+2. **输入输出流**：Java的I/O流库使用装饰器模式添加缓冲、加密等功能
+3. **中间件**：Web框架中的请求处理中间件
+4. **权限控制**：动态添加权限检查、日志记录等功能
+
+### 进一步优化
+
+装饰器模式还可以进一步优化：
+
+1. **装饰器工厂**：使用工厂模式创建常用的装饰器组合
+2. **装饰器注册表**：使用映射表根据名称或类型获取装饰器
+3. **自动装饰**：根据配置自动应用装饰器
+4. **装饰器顺序管理**：控制装饰器应用的顺序
+
+```javascript
+// 装饰器工厂示例
+class CoffeeFactory {
+  static createCoffeeWithMilkAndSugar() {
+    let coffee = new SimpleCoffee();
+    coffee = new MilkDecorator(coffee);
+    coffee = new SugarDecorator(coffee);
+    return coffee;
+  }
+  
+  static createMochaCoffee() {
+    let coffee = new SimpleCoffee();
+    coffee = new MilkDecorator(coffee);
+    coffee = new ChocolateDecorator(coffee);
+    return coffee;
+  }
+}
+
+// 客户端使用工厂
+const mocha = CoffeeFactory.createMochaCoffee();
+console.log(`${mocha.getDescription()} - ¥${mocha.getCost()}`);
+```
+
+总结：装饰器模式通过将功能封装在独立的装饰器类中，使得添加或修改功能时只需要添加或修改相应的装饰器类，而不需要创建和维护大量的组合子类，从而显著降低了修改成本和工作量。它特别适合于需要动态添加功能，且功能组合多样的场景。 
