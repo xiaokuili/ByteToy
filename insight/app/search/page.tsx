@@ -7,8 +7,9 @@ import SearchResult from "@/components/search/SearchResult";
 import { DisplayFormat } from "@/config/filters";
 import { generateQuery, runGenerateSQLQuery, generateChartConfig } from "@/app/actions";
 import { useSearchParams } from "next/navigation";
-import { DataSource } from "@/lib/types";
 import SearchInput from "@/components/search/SearchInput";
+import { FetchConfig } from "@/lib/types";
+import { FetchData } from "@/actions/fetch";
 import { testTableData } from "@/test/test-table-data";
 import { SearchResultType } from "@/components/search/SearchResult";
 
@@ -69,28 +70,32 @@ export default function Page() {
         setSearchResults(prev => [newResult, ...prev]);
 
         try {
-            // Step 1: Generate SQL query from natural language
-            // TODO: 后续处理datasource逻辑
-            const datasource = testTableData;
-            const sqlQuery = await generateQuery(question, datasource);
-            console.log("sqlQuery", sqlQuery);
-            if (sqlQuery === undefined) {
-                toast.error("An error occurred. Please try again.");
-                return;
+            // 构建FetchConfig
+            const config: FetchConfig = {
+                fetchType: "sql", // 目前默认使用SQL
+                query: question,
+                dataSource: testTableData // 使用测试数据源
+            };
+
+            // 使用统一的FetchData函数获取数据
+            const result = await FetchData(config);
+
+            if (result.error) {
+                throw new Error(result.error.message);
             }
 
-            // Step 2: Execute the SQL query
-            const data = await runGenerateSQLQuery(sqlQuery);
-            const columns = data.length > 0 ? Object.keys(data[0]) : [];
-            console.log("data", data);
-            // Step 3: Generate chart configuration
-            const generation = await generateChartConfig(data, question);
+            if (!result.data) {
+                throw new Error("No data returned");
+            }
+
+            // 生成图表配置
+            const generation = await generateChartConfig(result.data, question);
             const chartConfig = {
-                chartData: data,
+                chartData: result.data,
                 options: generation.config
             };
 
-            // Update search results
+            // 更新搜索结果
             setSearchResults(prev =>
                 prev.map(result => {
                     if (result.id === searchId) {
