@@ -24,7 +24,7 @@ export type Fetch = (config: FetchConfig) => Promise<FetchResult>;
 
 
 /** 配置生成器 - 为选定的展示格式生成配置 */
-export type ConfigGenerator = (data: DataRecord[], query: string) => RenderConfig;
+export type ConfigGenerator = (data: DataRecord[], query: string) => Promise<RenderConfig>;
 
 /** 数据渲染函数 - 接收配置并返回React组件 */
 export interface Render {
@@ -67,8 +67,8 @@ export interface FetchConfig {
 
 /** 渲染配置 */
 export interface RenderConfig {
-    id: string;
-    query: string // 查询内容
+    id?: string; // 第一次创建是生成，后续不生成 
+    query?: string // 查询内容
 
     data: DataRecord[];     // 要渲染的数据
     format: DisplayFormat;  // 展示格式
