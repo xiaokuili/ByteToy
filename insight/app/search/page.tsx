@@ -2,12 +2,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, MessageSquare, Send } from "lucide-react";
 import Link from "next/link";
-import { ChartConfig, RenderConfig } from "@/lib/types";
-import { generateQuery, runGenerateSQLQuery, generateChartConfig } from "@/app/actions";
+import { RenderConfig } from "@/lib/types";
 import { useSearchParams } from "next/navigation";
 import SearchInput from "@/components/search/SearchInput";
-import { FetchConfig } from "@/lib/types";
-import { FetchData } from "@/actions/fetch";
 import { testTableData } from "@/test/test-table-data";
 import { RenderSearchResult } from "@/components/search/index";
 import { DisplayFormat } from "@/lib/types";
