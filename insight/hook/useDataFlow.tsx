@@ -133,6 +133,7 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
 
                 // 将SQL查询添加到最终配置的元数据中
                 const enhancedConfig: RenderConfig = {
+                    id: flowId,
                     ...finalConfig,
                     isLoading: false,
                     metadata: {

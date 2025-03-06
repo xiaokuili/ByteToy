@@ -62,7 +62,6 @@ export const SQLConfigGenerator: ConfigGenerator = async (data: DataRecord[], qu
     const { config } = await generateChartConfig(data, query);
 
     return {
-        id: crypto.randomUUID(),
         query,
         data,
         format: "chart" as DisplayFormat,
