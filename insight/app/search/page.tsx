@@ -9,14 +9,10 @@ import { testTableData } from "@/test/test-table-data";
 import { RenderSearchResult } from "@/components/search/index";
 import { DisplayFormat } from "@/lib/types";
 import { useDataFlow } from "@/hook/useDataFlow";
+import { toast } from "sonner";
+import { useDataflowStorage } from "@/hook/useDataflowStorage";
+import { DataflowConfigInput } from "@/actions/dataflowConfig";
 
-// Simple toast replacement
-const toast = {
-    error: (message: string) => {
-        console.error(message);
-        alert(message);
-    }
-};
 
 export default function Page() {
     const searchParams = useSearchParams();
@@ -25,8 +21,11 @@ export default function Page() {
     const format = searchParams.get('format') || 'pie';
     const source = searchParams.get('source') || '';
 
+    const dataSource = testTableData;
+
     const searchedQueriesRef = useRef<Set<string>>(new Set());
     const [searchResults, setSearchResults] = useState<RenderConfig[]>([]);
+    const { saveDraft, removeDraft } = useDataflowStorage();
 
     // 使用 useDataFlow hook
     const {
@@ -34,7 +33,7 @@ export default function Page() {
         executeQuery,
         sqlQueries
     } = useDataFlow({
-        dataSource: testTableData,
+        dataSource: dataSource,
         format: 'chart' as DisplayFormat,
         collectSQLQuery: true,
         onStart: (initialConfig) => {
@@ -46,12 +45,26 @@ export default function Page() {
             setSearchResults(prev => {
                 // 检查是否已存在相同ID的结果，如果有则替换，否则添加到开头
                 const exists = prev.some(item => item.id === config.id);
-                if (exists) {
-                    return prev.map(item => item.id === config.id ? config : item);
-                } else {
-                    return [config, ...prev];
+                const newResults = exists
+                    ? prev.map(item => item.id === config.id ? config : item)
+                    : [config, ...prev];
+
+                // 保存草稿
+                if (config.id) {
+                    saveDraft(config.id, {
+                        id: config.id,
+                        name: config.query,
+                        datasourceId: dataSource.id as string,
+                        sql: config.metadata?.sqlQuery,
+                        chartType: config.format,
+                        chartConfig: config.chartConfig?.options,
+                        chartFramework: "recharts"
+                    });
                 }
+
+                return newResults;
             });
+
         },
         onError: (error) => {
             setSearchResults(prev => {

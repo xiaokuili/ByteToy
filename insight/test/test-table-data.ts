@@ -1,5 +1,6 @@
 
 export const testTableData = {
+    id: "products",
     name: "products",
     description: "存储电商平台商品信息的数据表",
     schema: `
