@@ -11,7 +11,7 @@ import { DisplayFormat } from "@/lib/types";
 import { useDataFlow } from "@/hook/useDataFlow";
 import { toast } from "sonner";
 import { useDataflowStorage } from "@/hook/useDataflowStorage";
-
+import { Header } from "@/components/layout/Header";
 
 export default function Page() {
     const searchParams = useSearchParams();
@@ -28,7 +28,6 @@ export default function Page() {
 
     // 使用 useDataFlow hook
     const {
-
         executeQuery,
         sqlQueries
     } = useDataFlow({
@@ -172,23 +171,7 @@ export default function Page() {
 
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-950">
-            <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm">
-                <div className="max-w-7xl mx-auto px-4">
-                    <div className="flex justify-between items-center py-4">
-                        <Link href="/" className="flex items-center">
-                            <div className="relative w-10 h-10 mr-3">
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-80"></div>
-                                <div className="absolute inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                    <span className="text-white text-sm font-bold">BT</span>
-                                </div>
-                            </div>
-                            <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                                ByteToy Insight
-                            </h1>
-                        </Link>
-                    </div>
-                </div>
-            </header>
+            <Header variant="full" />
 
             <SearchInput
                 onSearch={handleSearch}
