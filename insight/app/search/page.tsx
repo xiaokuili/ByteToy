@@ -11,7 +11,6 @@ import { DisplayFormat } from "@/lib/types";
 import { useDataFlow } from "@/hook/useDataFlow";
 import { toast } from "sonner";
 import { useDataflowStorage } from "@/hook/useDataflowStorage";
-import { DataflowConfigInput } from "@/actions/dataflowConfig";
 
 
 export default function Page() {
@@ -25,7 +24,7 @@ export default function Page() {
 
     const searchedQueriesRef = useRef<Set<string>>(new Set());
     const [searchResults, setSearchResults] = useState<RenderConfig[]>([]);
-    const { saveDraft, removeDraft } = useDataflowStorage();
+    const { saveDraft, removeDraft, createDataflow, drafts } = useDataflowStorage();
 
     // 使用 useDataFlow hook
     const {
@@ -58,7 +57,9 @@ export default function Page() {
                         sql: config.metadata?.sqlQuery,
                         chartType: config.format,
                         chartConfig: config.chartConfig?.options,
-                        chartFramework: "recharts"
+                        chartFramework: "recharts",
+                        createdBy: "user",
+                        updatedBy: "user",
                     });
                 }
 
@@ -89,6 +90,46 @@ export default function Page() {
             });
         }
     });
+
+    const onExport = async (configId: string) => {
+        // 基于useDataflowStorage 进行实现 存储到数据库中
+        try {
+            // 从drafts中获取对应的草稿数据
+            const draft = drafts[configId];
+
+            if (!draft) {
+                toast.error("未找到草稿数据，请重试");
+                return;
+            }
+
+            // 显示加载状态
+            toast.loading("正在导出到数据库...", { id: "export-loading" });
+
+            // 调用createDataflow将草稿保存到数据库
+            const result = await createDataflow(draft);
+
+            if (result) {
+                toast.dismiss("export-loading");
+                toast.success("导出成功", {
+                    description: "图表已成功保存到数据库"
+                });
+
+                // 可选：导出成功后移除本地草稿
+                // removeDraft(configId);
+            } else {
+                toast.dismiss("export-loading");
+                toast.error("导出失败", {
+                    description: "请稍后重试"
+                });
+            }
+        } catch (error) {
+            console.error("导出到数据库失败:", error);
+            toast.dismiss("export-loading");
+            toast.error("导出失败", {
+                description: error instanceof Error ? error.message : "未知错误"
+            });
+        }
+    }
 
     useEffect(() => {
         const searchKey = `${query}_${model}_${format}_${source}`;
@@ -162,6 +203,7 @@ export default function Page() {
                             key={result.id || index}
                             format={result.format}
                             config={result}
+                            onExport={() => result.id ? onExport(result.id) : toast.error("无法导出：缺少ID")}
                         />
                     ))}
                 </div>

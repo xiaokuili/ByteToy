@@ -1,15 +1,15 @@
-import { Search, Sparkles } from 'lucide-react';
+import { Search, Sparkles, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ChartFactory from './charts/ChartFactory';
 import { DisplayFormat, RenderConfig } from '@/lib/types';
-import { formatIcons } from '@/config/filters';
+import { toast } from 'sonner';
 
 /**
  * 渲染搜索结果组件
  * @param format - 展示格式(chart/search/table)
  * @param config - 渲染配置
  */
-export const RenderSearchResult = ({ format, config }: { format: DisplayFormat, config: RenderConfig }): React.ReactNode => {
+export const RenderSearchResult = ({ format, config, onExport }: { format: DisplayFormat, config: RenderConfig, onExport: () => void }): React.ReactNode => {
     const { isLoading, isError, errorMessage, query = '' } = config;
 
     /**
@@ -45,17 +45,24 @@ export const RenderSearchResult = ({ format, config }: { format: DisplayFormat, 
                 <div className="flex-1">
                     <h3 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                         {query}
-                        {isLoading && (
-                            <span className="inline-block animate-pulse">
-                                <Sparkles className="h-4 w-4 text-amber-400" />
-                            </span>
-                        )}
+                        <span className={cn("inline-block", isLoading ? "animate-pulse" : "opacity-50")}>
+                            <Sparkles className="h-4 w-4 text-amber-400" />
+                        </span>
                     </h3>
                 </div>
 
                 {!isLoading && (
-                    <div className="flex items-center">
-                        <FormatIndicator formatInfo={format} />
+                    <div className="flex items-center gap-2">
+                        <button
+                            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            title="Export"
+                            onClick={() => {
+                                // TODO: Implement export functionality
+                                onExport();
+                            }}
+                        >
+                            <Share2 className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                        </button>
                     </div>
                 )}
             </div>
