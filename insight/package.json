@@ -25,6 +25,7 @@
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.40.0",
     "framer-motion": "^12.4.7",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.476.0",
     "next": "15.1.7",
     "openai": "^4.85.4",

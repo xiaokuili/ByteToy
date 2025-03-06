@@ -177,7 +177,7 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                         },
                         {} as Record<string, { label: string; color: string }>,
                     )}
-                    className="h-[320px] w-full"
+                    className="h-[320px] w-full chart-container"
                 >
                     {renderChart()}
                 </ChartContainer>

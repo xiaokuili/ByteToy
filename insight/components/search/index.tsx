@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import ChartFactory from './charts/ChartFactory';
 import { DisplayFormat, RenderConfig } from '@/lib/types';
 import { toast } from 'sonner';
+import html2canvas from 'html2canvas';
 
 /**
  * 渲染搜索结果组件
@@ -10,7 +11,49 @@ import { toast } from 'sonner';
  * @param config - 渲染配置
  */
 export const RenderSearchResult = ({ format, config, onExport }: { format: DisplayFormat, config: RenderConfig, onExport: () => void }): React.ReactNode => {
-    const { isLoading, isError, errorMessage, query = '' } = config;
+    const { isLoading, isError, errorMessage, query } = config;
+
+    /**
+     * 导出图表为PNG图片
+     */
+    const exportToPng = async () => {
+        try {
+            // 获取图表容器元素
+            const chartElement = document.querySelector('.chart-container');
+
+            if (!chartElement) {
+                toast.error('No chart found to export');
+                return;
+            }
+
+            // 使用html2canvas将图表转换为canvas
+            const canvas = await html2canvas(chartElement as HTMLElement, {
+                backgroundColor: window.getComputedStyle(chartElement as HTMLElement).backgroundColor || '#ffffff',
+                scale: 2, // 提高导出图片质量
+                useCORS: true, // 允许跨域图片
+                logging: false,
+                allowTaint: true,
+            });
+
+            // 转换canvas为PNG图片URL
+            const imageUrl = canvas.toDataURL('image/png');
+
+            // 创建下载链接
+            const downloadLink = document.createElement('a');
+            downloadLink.href = imageUrl;
+            downloadLink.download = `${(query || 'chart').replace(/[^a-z0-9]/gi, '_').toLowerCase()}_chart.png`;
+
+            // 触发下载
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            toast.success('Chart exported as PNG');
+        } catch (error) {
+            console.error('Failed to export chart:', error);
+            toast.error('Failed to export chart');
+        }
+    };
 
     /**
      * 根据不同格式渲染对应内容
@@ -18,7 +61,7 @@ export const RenderSearchResult = ({ format, config, onExport }: { format: Displ
     const renderContent = () => {
         if (format === "chart" && config.chartConfig) {
             return (
-                <div className="w-full">
+                <div className="w-full chart-container bg-white dark:bg-gray-800">
                     <ChartFactory config={config.chartConfig} chartData={config.data} />
                 </div>
             );
@@ -55,9 +98,11 @@ export const RenderSearchResult = ({ format, config, onExport }: { format: Displ
                     <div className="flex items-center gap-2">
                         <button
                             className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                            title="Export"
+                            title="Export as PNG"
                             onClick={() => {
-                                // TODO: Implement export functionality
+                                if (format === "chart") {
+                                    exportToPng();
+                                }
                                 onExport();
                             }}
                         >
