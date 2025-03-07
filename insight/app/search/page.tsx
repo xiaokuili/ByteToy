@@ -12,6 +12,7 @@ import { useDataFlow } from "@/hook/useDataFlow";
 import { toast } from "sonner";
 import { useDataflowStorage } from "@/hook/useDataflowStorage";
 import { Header } from "@/components/layout/Header";
+import { useSession } from "next-auth/react";
 
 export default function Page() {
     const searchParams = useSearchParams();
@@ -21,6 +22,8 @@ export default function Page() {
     const source = searchParams.get('source') || '';
 
     const dataSource = testTableData;
+
+    const { data: session } = useSession();
 
     const searchedQueriesRef = useRef<Set<string>>(new Set());
     const [searchResults, setSearchResults] = useState<RenderConfig[]>([]);
@@ -57,8 +60,8 @@ export default function Page() {
                         chartType: config.format,
                         chartConfig: config.chartConfig?.options,
                         chartFramework: "recharts",
-                        createdBy: "user",
-                        updatedBy: "user",
+                        createdBy: session?.user?.email || "user",
+                        updatedBy: session?.user?.email || "user",
                     });
                 }
 
