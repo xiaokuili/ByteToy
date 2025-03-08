@@ -1,16 +1,13 @@
 import { useState, useCallback, useRef } from 'react';
 import {
-    DataRecord,
     RenderConfig,
-    FetchConfig,
     DisplayFormat,
     DataSource,
     FetchResult
 } from '@/lib/types';
-import { FetchData } from '@/actions/fetch';
-import { ConfigGeneratorFactory } from '@/actions/configGenerator';
-import { select } from '@/actions/select';
-import { testTableData } from '@/test/test-table-data';
+import { FetchData } from '@/actions/dataflow/fetch';
+import { ConfigGeneratorFactory } from '@/actions/dataflow/configGenerator';
+import { select } from '@/actions/dataflow/select';
 
 interface UseDataFlowOptions {
     query?: string;
