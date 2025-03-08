@@ -1,12 +1,11 @@
 
-import { DisplayFormat, ConfigGenerator } from "@/lib/types";
+import { DisplayFormat, ConfigGenerator, DataRecord } from "@/lib/types";
 import { SQLConfigGenerator } from "./sql";
+import { Message } from "ai";
 
 
 
-export const ConfigGeneratorFactory = (format: DisplayFormat): ConfigGenerator => {
-    if (format == "chart") {
-        return SQLConfigGenerator;
-    }
-    throw new Error(`Unsupported format: ${format}`);
+
+export const Generator: ConfigGenerator = async (data: DataRecord[], query: string, messages?: Message[]) => {
+    return SQLConfigGenerator(data, query, messages);
 }

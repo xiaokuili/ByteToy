@@ -32,7 +32,10 @@ export default function Page() {
     // 使用 useDataFlow hook
     const {
         executeQuery,
-        sqlQueries
+        sqlQueries,
+        intentMessages,
+        sqlMessages,
+        chartMessages
     } = useDataFlow({
         dataSource: dataSource,
         format: 'chart' as DisplayFormat,
@@ -144,10 +147,9 @@ export default function Page() {
     // 使用 useDataFlow 实现搜索处理
     const handleSearch = async (question: string) => {
         if (!question.trim()) return;
-
         try {
             // 使用 executeQuery 方法执行查询
-            await executeQuery(question);
+            await executeQuery(question, intentMessages, sqlMessages, chartMessages);
         } catch (e) {
             console.error(e);
             toast.error("An error occurred. Please try again.");

@@ -2,6 +2,8 @@ import { Fetch, FetchConfig, FetchType, FetchResult } from "@/lib/types";
 import { fetchFromSQL } from "./sql";
 import { fetchFromRAG } from "./rag";
 import { fetchFromWeb } from "./web";
+import { Message } from "ai";
+
 
 // 策略映射表
 const fetchStrategies: Record<FetchType, Fetch> = {
@@ -11,7 +13,7 @@ const fetchStrategies: Record<FetchType, Fetch> = {
 };
 
 // 统一的数据获取函数，根据配置选择合适的策略
-export async function FetchData(config: FetchConfig): Promise<FetchResult> {
+export const FetchData: Fetch = async (config: FetchConfig): Promise<{ result: FetchResult; messages?: Message[] }> => {
     const fetchType = config.fetchType;
 
     if (!fetchType) {

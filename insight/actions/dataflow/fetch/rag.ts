@@ -1,6 +1,7 @@
-import { FetchConfig, FetchResult } from "@/lib/types";
+import { Fetch, FetchConfig, FetchResult } from "@/lib/types";
+import { Message } from "ai";
 
-export const fetchFromRAG = async (config: FetchConfig) => {
+export const fetchFromRAG: Fetch = async (config: FetchConfig): Promise<{ result: FetchResult; messages?: Message[] }> => {
 
     // Mock data for testing
     const mockData = [
@@ -10,10 +11,13 @@ export const fetchFromRAG = async (config: FetchConfig) => {
     ];
 
     return {
-        data: mockData,
-        metadata: {
-            total: mockData.length,
-            query: config.query
-        }
+        result: {
+            data: mockData,
+            metadata: {
+                total: mockData.length,
+                query: config.query
+            }
+        },
+        messages: []
     };
 }   

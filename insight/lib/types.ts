@@ -1,3 +1,4 @@
+import { Message } from "ai";
 import { z } from "zod";
 
 //=============================================================================
@@ -20,11 +21,14 @@ import { z } from "zod";
 export type FetchSelector = (dataSource: DataSource, query: string) => FetchConfig;
 
 /** 数据获取函数 - 从特定数据源获取数据 */
-export type Fetch = (config: FetchConfig) => Promise<FetchResult>;
+export type Fetch = (config: FetchConfig) => Promise<{
+    result: FetchResult;
+    messages?: Message[];
+}>;
 
 
 /** 配置生成器 - 为选定的展示格式生成配置 */
-export type ConfigGenerator = (data: DataRecord[], query: string) => Promise<RenderConfig>;
+export type ConfigGenerator = (data: DataRecord[], query: string, messages?: Message[]) => Promise<RenderConfig>;
 
 /** 数据渲染函数 - 接收配置并返回React组件 */
 export interface Render {
@@ -57,13 +61,18 @@ export type FetchResult = Result<DataRecord[]>;
 // 配置类型
 //=============================================================================
 
+
 /** 数据获取配置 */
 export interface FetchConfig {
     fetchType: FetchType;   // 获取数据的方式
     query: string;          // 查询内容
     parameters?: Record<string, any>; // 额外参数
     dataSource?: DataSource; // 数据源
+
+    // 多轮对话记录
+    messages?: Message[];
 }
+
 
 /** 渲染配置 */
 export interface RenderConfig {
@@ -85,6 +94,7 @@ export interface RenderConfig {
 
     // 元数据 
     metadata?: Record<string, any>;
+    messages?: Message[]; // 多轮对话记录
 }
 
 /** 表格配置 */
@@ -156,4 +166,10 @@ export const configSchema = z
             .optional(),
         legend: z.boolean().describe("Whether to show legend"),
     })
-    .describe("Chart configuration object"); 
+    .describe("Chart configuration object");
+
+
+export const intentSchema = z.object({
+    intent: z.enum(["sql", "bar", "line", "pie", "area", "radar", "funnel", "heatmap", "no"]),
+})
+export type Intent = z.infer<typeof intentSchema>;

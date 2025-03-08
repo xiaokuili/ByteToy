@@ -1,6 +1,7 @@
 import { FetchConfig, FetchResult } from "@/lib/types";
+import { Fetch } from "@/lib/types"
 
-export const fetchFromWeb = async (config: FetchConfig) => {
+export const fetchFromWeb: Fetch = async (config: FetchConfig): Promise<{ result: FetchResult; messages?: Message[] }> => {
     // Mock data for testing
     const mockData = [
         { id: 1, name: "Test 1", value: 100 },
@@ -9,11 +10,14 @@ export const fetchFromWeb = async (config: FetchConfig) => {
     ];
 
     return {
-        data: mockData,
-        metadata: {
-            total: mockData.length,
-            query: config.query
-        }
+        result: {
+            data: mockData,
+            metadata: {
+                total: mockData.length,
+                query: config.query
+            }
+        },
+        messages: []
     };
 }
 
