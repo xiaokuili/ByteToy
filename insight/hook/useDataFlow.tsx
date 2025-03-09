@@ -8,6 +8,7 @@ import { Message } from 'ai';
 import { processDataFlow, clearDataCache } from '@/actions/dataflow';
 
 interface UseDataFlowOptions {
+    flowId?: string;
     query?: string;
     dataSource?: DataSource;
     format?: DisplayFormat;
@@ -45,7 +46,7 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
     const pendingQueriesRef = useRef<Map<string, Promise<RenderConfig | null>>>(new Map());
 
     // 处理整个数据流程
-    const processData = useCallback(async (query: string, dataSource?: DataSource, format: DisplayFormat = 'chart', intentMessage?: Message[], sqlMessage?: Message[], chartMessage?: Message[]) => {
+    const processData = useCallback(async (flowId: string, query: string, dataSource?: DataSource, format: DisplayFormat = 'chart', intentMessages?: Message[], sqlMessages?: Message[], chartMessages?: Message[]) => {
         if (!query.trim()) return null;
 
         // 创建查询键
@@ -57,7 +58,6 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
         }
 
         // 创建唯一ID
-        const flowId = crypto.randomUUID();
 
         // 初始化渲染配置（加载状态）
         const initialConfig: RenderConfig = {
@@ -95,14 +95,15 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
                 }));
 
                 // 调用服务端处理函数
+                console.log("hook chartMessage", chartMessages);
                 const { result: intentResult, intentType, newSqlMessages, newChartMessages, newIntentMessages } = await processDataFlow(
                     query,
                     dataSource as DataSource,
                     format,
                     flowId,
-                    intentMessage || state.intentMessages,
-                    sqlMessage || state.sqlMessages,
-                    chartMessage || state.chartMessages,
+                    intentMessages,
+                    chartMessages,
+                    sqlMessages,
 
                 );
 
@@ -211,20 +212,22 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
         pendingQueriesRef.current.set(queryKey, processingPromise);
 
         return processingPromise;
+
     }, [options.onStart, options.onSuccess, options.onError, options.collectSQLQuery, state.sqlMessages, state.chartMessages]);
 
     // 执行查询的便捷方法
-    const executeQuery = useCallback((query: string, intentMessages?: Message[], sqlMessages?: Message[], chartMessages?: Message[]) => {
+    const executeQuery = useCallback((flowId: string, query: string, intentMessages?: Message[], sqlMessages?: Message[], chartMessages?: Message[]) => {
         console.log("sqlMessages", sqlMessages);
         console.log("chartMessages", chartMessages);
         console.log("intentMessages", intentMessages);
-        return processData(query, options.dataSource, options.format, sqlMessages, chartMessages);
+        return processData(flowId, query, options.dataSource, options.format, intentMessages, sqlMessages, chartMessages);
     }, [processData, options.dataSource, options.format]);
 
     // 重试当前查询
     const retry = useCallback(() => {
         if (state.renderConfig?.query) {
             return processData(
+                state.renderConfig.id as string,
                 state.renderConfig.query,
                 options.dataSource,
                 state.renderConfig.format

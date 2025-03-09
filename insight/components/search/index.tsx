@@ -12,7 +12,6 @@ import html2canvas from 'html2canvas';
  */
 export const RenderSearchResult = ({ format, config, onExport }: { format: DisplayFormat, config: RenderConfig, onExport: () => void }): React.ReactNode => {
     const { isLoading, isError, errorMessage, query } = config;
-
     /**
      * 导出图表为PNG图片
      */

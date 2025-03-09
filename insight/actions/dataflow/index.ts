@@ -44,26 +44,18 @@ export async function processDataFlow(
     let newChartMessages: Message[] = [];
     try {
         // 1. 意图检测阶段
-        const { intent, messages } = await detectIntent(query, intentMessages);
-        newIntentMessages = [...intentMessages, ...(messages as Message[])];
-        if (intent.intent === "no") {
-            throw new Error("不属于数据可视化范围");
-        }
-
+        const { intent } = await detectIntent(query);
         // 检查缓存中是否有数据，如果意图不是SQL相关，可以复用之前的数据
-        const cacheKey = `${dataSource.name}_${query}`;
+        const cacheKey = `${dataSource.name}_${flowId}`;
         let fetchResult: { result: FetchResult; messages?: Message[] };
-        let intentType = intent;
-
         // 2. 选择和获取阶段
-        if (intent.intent !== "sql" && !dataCache.has(cacheKey)) {
+        if (intent === "生成图表" && !dataCache.has(cacheKey)) {
             // 需要获取新数据
             const fetchConfig = await select(dataSource, query);
 
             // 执行数据获取
             fetchResult = await FetchData(fetchConfig);
             newSqlMessages = [...sqlMessages, ...(fetchResult.messages as Message[])];
-
             // 缓存数据
             if (fetchResult.result.data && fetchResult.result.data.length > 0) {
                 dataCache.set(cacheKey, fetchResult);
@@ -75,7 +67,6 @@ export async function processDataFlow(
             // 没有缓存且意图是图表配置，但没有数据可用
             throw new Error("需要先获取数据才能配置图表");
         }
-
         // 检查数据获取结果
         if (fetchResult.result.error) {
             throw new Error(fetchResult.result.error.message || '获取数据失败');
@@ -86,7 +77,7 @@ export async function processDataFlow(
         }
 
         // 3. 配置阶段 - 生成渲染配置
-        const finalConfig = await Generator(fetchResult.result.data, query, chartMessages);
+        const finalConfig = await Generator(fetchResult.result.data.slice(0, 5), query, chartMessages);
         newChartMessages = [...chartMessages, ...(finalConfig.messages as Message[])];
         // 将SQL查询添加到最终配置的元数据中
         const enhancedConfig: RenderConfig = {
@@ -101,14 +92,12 @@ export async function processDataFlow(
         };
 
 
-
         return {
             result: enhancedConfig,
             newSqlMessages: newSqlMessages,
             newChartMessages: newChartMessages,
             newIntentMessages: newIntentMessages,
             sqlQuery: fetchResult.result.metadata?.query,
-            intentType: intent.intent
         };
     } catch (error) {
         const err = error instanceof Error ? error : new Error('处理数据时发生未知错误');

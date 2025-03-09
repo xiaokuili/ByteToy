@@ -169,7 +169,5 @@ export const configSchema = z
     .describe("Chart configuration object");
 
 
-export const intentSchema = z.object({
-    intent: z.enum(["sql", "bar", "line", "pie", "area", "radar", "funnel", "heatmap", "no"]),
-})
-export type Intent = z.infer<typeof intentSchema>;
+
+export type Intent = "美化图表" | "生成图表"

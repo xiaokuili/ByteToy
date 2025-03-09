@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useDataflowStorage } from "@/hook/useDataflowStorage";
 import { Header } from "@/components/layout/Header";
 import { useSession } from "next-auth/react";
+import { Message } from "ai";
 
 export default function Page() {
     const searchParams = useSearchParams();
@@ -20,6 +21,7 @@ export default function Page() {
     const model = searchParams.get('model') || 'DEEPSEEK';
     const format = searchParams.get('format') || 'pie';
     const source = searchParams.get('source') || '';
+    const flowId = searchParams.get('flowId') || '';
 
     const dataSource = testTableData;
 
@@ -149,7 +151,7 @@ export default function Page() {
         if (!question.trim()) return;
         try {
             // 使用 executeQuery 方法执行查询
-            await executeQuery(question, intentMessages, sqlMessages, chartMessages);
+            await executeQuery(flowId, question, intentMessages, sqlMessages, chartMessages);
         } catch (e) {
             console.error(e);
             toast.error("An error occurred. Please try again.");
@@ -188,7 +190,7 @@ export default function Page() {
                 <div className="space-y-8">
                     {searchResults.map((result, index) => (
                         <RenderSearchResult
-                            key={result.id || index}
+                            key={index}
                             format={result.format}
                             config={result}
                             onExport={() => result.id ? onExport(result.id) : toast.error("无法导出：缺少ID")}

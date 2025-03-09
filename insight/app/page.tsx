@@ -22,12 +22,13 @@ export default function HomePage() {
 
   const handleSearch = () => {
     if (!searchQuery.trim()) return;
-
+    const flowId = crypto.randomUUID();
     const params = new URLSearchParams({
       q: searchQuery,
       model: selectedModel,
       format: displayFormat,
-      source: selectedSource || ""
+      source: selectedSource || "",
+      flowId: flowId
     });
 
     router.push(`/search?${params.toString()}`);
