@@ -1,11 +1,9 @@
 
 # Core interfaces for SQL generation and chart configuration from natural language
-from typing import Dict, List, Any, Optional, Union
-from dataclasses import dataclass
-from enum import Enum
+from typing import Dict, List, Any, Optional
 import uuid
-import re
-import json
+
+from interfaces import DataSource
 
 from langchain.prompts import ChatPromptTemplate
 from langchain.output_parsers import PydanticOutputParser
@@ -16,40 +14,13 @@ from langchain_core.messages import (
     SystemMessage,
     AIMessage,
     BaseMessage,
-    FunctionMessage
 )
-from langchain_core.prompts import PromptTemplate
 
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-
-@dataclass
-class DataSource:
-    """Data source information needed for SQL generation and chart configuration."""
-    name: str
-    description: str
-    schema: Dict[str, Any]  # Table schema information
-    example_data: List[Dict[str, Any]]  # Sample data for context
-    special_fields: Optional[Dict[str, Any]] = None  # Any special fields or constraints
-
-
-# 定义一下 图表配置
-@dataclass
-class ChartConfig:
-    """Chart configuration for data visualization."""
-    chart_type: str  # 图表类型，如 'bar', 'line', 'pie', 'scatter' 等
-    title: str  # 图表标题
-    x_axis: Optional[str] = None  # X轴字段
-    y_axis: Optional[Union[str, List[str]]] = None  # Y轴字段，可以是单个字段或多个字段列表
-    color_by: Optional[str] = None  # 用于颜色分组的字段
-    aggregation: Optional[str] = None  # 聚合方法，如 'sum', 'avg', 'count' 等
-    filters: Optional[Dict[str, Any]] = None  # 数据过滤条件
-    sort_by: Optional[Dict[str, str]] = None  # 排序设置，字段名到排序方向的映射
-    limit: Optional[int] = None  # 数据限制数量
-    additional_settings: Optional[Dict[str, Any]] = None  # 其他图表特定设置
 
 class DataVisualizer:
     """
@@ -75,6 +46,7 @@ class DataVisualizer:
         self.chart_messages: List[BaseMessage] = [SystemMessage(content=self.chart_system_message)]
         self.last_sql_query: Optional[str] = None
         self.last_chart_config: Optional[Dict[str, Any]] = None
+        self.sql_query = ""
 
     def _get_chat_history(self, messages: List[BaseMessage]) -> str:
         """将消息历史记录转换为字符串格式"""
@@ -157,7 +129,7 @@ class DataVisualizer:
             ])
             
             self.last_sql_query = result.query
-
+            self.sql_query = result.query
             return {
                 "query": result.query,
                 "explanation": result.explanation
@@ -282,3 +254,7 @@ class DataVisualizer:
 
     def get_messages(self):
         return self.sql_messages, self.chart_messages
+
+    def get_sql_query(self):
+        return self.sql_query
+

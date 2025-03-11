@@ -1,6 +1,8 @@
 from typing import Dict, Any, Optional, List, Tuple
 from langchain_core.messages import BaseMessage
-from dataVisualizer import DataVisualizer, DataSource
+
+from dataVisualizer import DataVisualizer
+from  interfaces import DataSource
 
 
 class DataVisualizerManager:
@@ -105,6 +107,13 @@ class DataVisualizerManager:
         """
         visualizer = self.get_visualizer(session_id)
         return visualizer.get_messages()
+    
+    def get_sql_query(self, session_id: str) -> str:
+        """
+        Get the SQL query for a specific session.
+        """
+        visualizer = self.get_visualizer(session_id)
+        return visualizer.get_sql_query()
     
 
 # Global manager instance for convenience
