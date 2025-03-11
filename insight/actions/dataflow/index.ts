@@ -2,10 +2,63 @@
 
 import { DataRecord, DataSource, DisplayFormat, FetchResult, RenderConfig } from "@/lib/types";
 import { detectIntent } from "./intent";
-import { DBConfig, RunGenerateSQLQuery } from "./fetch/sql";
+import {  createConnection } from "@/lib/db";
 
 // Cache for storing query results
 const dataCache = new Map<string, { result: FetchResult }>();
+
+
+
+
+
+
+/**
+ * 执行SQL查询
+ * @param query SQL查询语句
+ * @returns 查询结果数据
+ */
+export const RunGenerateSQLQuery = async (query: string) => {
+    "use server";
+    // 安全检查：仅允许SELECT语句
+    const normalizedQuery = query.toLowerCase().trim();
+    console.log(normalizedQuery);
+    
+    if (
+        !normalizedQuery.startsWith("select") ||
+        normalizedQuery.includes("delete") ||
+        normalizedQuery.includes("insert") ||
+        normalizedQuery.includes("update") ||
+        normalizedQuery.includes("alter") ||
+        normalizedQuery.includes("truncate") ||
+        normalizedQuery.includes("grant") ||
+        normalizedQuery.includes("revoke")
+    ) {
+        throw new Error("Only SELECT queries are allowed");
+    }
+
+    let data: {
+        rows: DataRecord[];
+        
+    };
+
+    // TODO:目前仅支持一个源，后续需要支持多个源
+    const db = createConnection();
+    try {
+        data = await db.execute(normalizedQuery);
+    } catch (e: unknown) {
+        if (e instanceof Error && e.message.includes('relation "unicorns" does not exist')) {
+            console.log(
+                "Table does not exist, creating and seeding it with dummy data now...",
+            );
+            // throw error 
+            throw Error("Table does not exist");
+        } else {
+            throw e;
+        }
+    }
+
+    return data.rows as DataRecord[];
+};
 
 /**
  * 从API获取SQL查询结果
@@ -68,7 +121,7 @@ export async function processDataFlow(
         if (intent === "生成图表" && !dataCache.has(cacheKey)) {
             // 获取SQL查询
             const sqlQuery = await fetchSQLQuery(query, dataSource, flowId);
-            const result = await RunGenerateSQLQuery(sqlQuery, {} as DBConfig);
+            const result = await RunGenerateSQLQuery(sqlQuery);
             
             if (result?.length > 0) {
                 fetchResult = { result: { data: result } };

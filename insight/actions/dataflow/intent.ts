@@ -1,13 +1,7 @@
 "use server";
 import { Intent } from "@/lib/types";
-import { generateObject, Message } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
 
-// OpenAI客户端配置
-const openai = createOpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-    baseURL: process.env.OPENAI_BASE_URL,
-});
+
 
 /**
  * 识别用户查询意图
