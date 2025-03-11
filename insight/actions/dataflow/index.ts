@@ -4,27 +4,21 @@ import { DataRecord, DataSource, DisplayFormat, FetchResult, RenderConfig } from
 import { detectIntent } from "./intent";
 import { DBConfig, RunGenerateSQLQuery } from "./fetch/sql";
 
-// 用于缓存数据的Map
+// Cache for storing query results
 const dataCache = new Map<string, { result: FetchResult }>();
 
 /**
  * 从API获取SQL查询结果
  */
-async function fetchSQLQuery(query: string, dataSource: DataSource, flowId: string) {
+async function fetchSQLQuery(query: string, dataSource: DataSource, flowId: string): Promise<string> {
     const response = await fetch('http://127.0.0.1:8000/generate/sql', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            user_input: query,
-            datasource: dataSource,
-            session_id: flowId
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_input: query, datasource: dataSource, session_id: flowId })
     });
 
     if (!response.ok) {
-        throw new Error('SQL生成失败: ' + await response.text());
+        throw new Error(`SQL generation failed: ${await response.text()}`);
     }
 
     const result = await response.json();
@@ -37,22 +31,15 @@ async function fetchSQLQuery(query: string, dataSource: DataSource, flowId: stri
 async function fetchChartConfig(query: string, data: DataRecord[], flowId: string) {
     const response = await fetch('http://127.0.0.1:8000/generate/chart', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            user_input: query,
-            data: data,
-            session_id: flowId
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_input: query, data, session_id: flowId })
     });
 
     if (!response.ok) {
-        throw new Error('图表配置生成失败: ' + await response.text());
+        throw new Error(`Chart config generation failed: ${await response.text()}`);
     }
 
-    const result = await response.json();
-    return result.chart_config;
+    return (await response.json()).chart_config;
 }
 
 /**
@@ -72,8 +59,6 @@ export async function processDataFlow(
         // 1. 意图检测阶段
         const { intent } = await detectIntent(query);
 
-
-        
         // 检查缓存中是否有数据
         const cacheKey = `${dataSource.name}_${flowId}`;
 
@@ -83,15 +68,11 @@ export async function processDataFlow(
         if (intent === "生成图表" && !dataCache.has(cacheKey)) {
             // 获取SQL查询
             const sqlQuery = await fetchSQLQuery(query, dataSource, flowId);
-            try {
-                const result = await RunGenerateSQLQuery(sqlQuery, {} as DBConfig);
-                // 缓存数据
-                if (result && result.length > 0) {
-                    fetchResult = { result: { data: result } };
-                    dataCache.set(cacheKey, fetchResult);
-                }
-            } catch (error) {
-                throw new Error("SQL查询失败: " + error);
+            const result = await RunGenerateSQLQuery(sqlQuery, {} as DBConfig);
+            
+            if (result?.length > 0) {
+                fetchResult = { result: { data: result } };
+                dataCache.set(cacheKey, fetchResult);
             }
         } else if (dataCache.has(cacheKey)) {
             // 使用缓存数据

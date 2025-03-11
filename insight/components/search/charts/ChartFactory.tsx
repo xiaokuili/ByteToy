@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
     Bar,
     BarChart,
@@ -33,7 +32,7 @@ function toTitleCase(str: string): string {
         .join(" ");
 }
 
-const colors = [
+const defaultColors = [
     "hsl(var(--chart-1))",
     "hsl(var(--chart-2))",
     "hsl(var(--chart-3))",
@@ -53,13 +52,12 @@ interface ChartFactoryProps {
 export default function ChartFactory({ config, className, chartData }: ChartFactoryProps) {
     const { options } = config;
 
-
     if (!chartData || !options) {
         return <div>No chart data</div>;
     }
 
     const parsedChartData = chartData.map((item) => {
-        const parsedItem: { [key: string]: any } = {};
+        const parsedItem: { [key: string]: string | number } = {};
         for (const [key, value] of Object.entries(item)) {
             parsedItem[key] = isNaN(Number(value)) ? value : Number(value);
         }
@@ -69,6 +67,10 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
     const processedData = options.type === "bar" || options.type === "pie"
         ? parsedChartData.slice(0, 20)
         : parsedChartData;
+
+    const getColor = (key: string, index: number) => {
+        return options.colors?.[key] || defaultColors[index % defaultColors.length];
+    };
 
     const renderChart = () => {
         switch (options.type) {
@@ -85,7 +87,7 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                         <ChartTooltip content={<ChartTooltipContent />} />
                         {options.legend && <Legend />}
                         {options.yKeys.map((key, index) => (
-                            <Bar key={key} dataKey={key} fill={colors[index % colors.length]} />
+                            <Bar key={key} dataKey={key} fill={getColor(key, index)} />
                         ))}
                     </BarChart>
                 );
@@ -109,10 +111,10 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                         {options.legend && <Legend />}
                         {useTransformedData
                             ? lineFields.map((key, index) => (
-                                <Line key={key} type="monotone" dataKey={key} stroke={colors[index % colors.length]} />
+                                <Line key={key} type="monotone" dataKey={key} stroke={getColor(key, index)} />
                             ))
                             : options.yKeys.map((key, index) => (
-                                <Line key={key} type="monotone" dataKey={key} stroke={colors[index % colors.length]} />
+                                <Line key={key} type="monotone" dataKey={key} stroke={getColor(key, index)} />
                             ))}
                     </LineChart>
                 );
@@ -131,8 +133,8 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                                 key={key}
                                 type="monotone"
                                 dataKey={key}
-                                fill={colors[index % colors.length]}
-                                stroke={colors[index % colors.length]}
+                                fill={getColor(key, index)}
+                                stroke={getColor(key, index)}
                             />
                         ))}
                     </AreaChart>
@@ -150,7 +152,7 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                             outerRadius={120}
                         >
                             {processedData.map((_, index) => (
-                                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                                <Cell key={`cell-${index}`} fill={getColor(options.yKeys[0], index)} />
                             ))}
                         </Pie>
                         <ChartTooltip content={<ChartTooltipContent />} />
@@ -172,7 +174,7 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                         (acc, key, index) => {
                             acc[key] = {
                                 label: key,
-                                color: colors[index % colors.length],
+                                color: getColor(key, index),
                             };
                             return acc;
                         },

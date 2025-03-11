@@ -58,7 +58,6 @@ export const RenderSearchResult = ({ format, config, onExport }: { format: Displ
      * 根据不同格式渲染对应内容
      */
     const renderContent = () => {
-        console.log("renderContent", config);
         if (format === "chart" && config.chartConfig) {
             return (
                 <div className="w-full chart-container bg-white dark:bg-gray-800">
