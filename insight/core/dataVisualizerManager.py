@@ -20,6 +20,7 @@ class DataVisualizerManager:
         Args:
             session_id: Optional ID for the visualizer session
             
+
         Returns:
             DataVisualizer: The requested or newly created visualizer
         """
@@ -51,7 +52,6 @@ class DataVisualizerManager:
         query: str,
         datasource: DataSource,
         session_id: Optional[str] = None,
-        messages: Optional[List[BaseMessage]] = None,
         **kwargs
     ) -> Dict[str, Any]:
         """
@@ -68,14 +68,13 @@ class DataVisualizerManager:
             Dict[str, Any]: Dictionary containing the generated SQL query and updated messages
         """
         visualizer = self.get_visualizer(session_id)
-        return visualizer.generate_sql(query, datasource, messages, **kwargs)
+        return visualizer.generate_sql(query, datasource, **kwargs)
     
     def generate_chart_config(
         self,
         data: List[Dict[str, Any]],
         query: str,
         session_id: Optional[str] = None,
-        messages: Optional[List[BaseMessage]] = None,
         **kwargs
     ) -> Dict[str, Any]:
         """
@@ -92,7 +91,7 @@ class DataVisualizerManager:
             Dict[str, Any]: Chart configuration compatible with visualization libraries
         """
         visualizer = self.get_visualizer(session_id)
-        return visualizer.generate_chart_config(data, query, messages, **kwargs)
+        return visualizer.generate_chart_config(data, query, **kwargs)
 
     def get_messages(self, session_id: str) -> Tuple[List[BaseMessage], List[BaseMessage]]:
         """
@@ -132,14 +131,13 @@ def generate_sql(
     Returns:
         Dict[str, Any]: Dictionary containing the generated SQL query and updated messages
     """
-    return visualizer_manager.generate_sql(query, datasource, session_id, messages, **kwargs)
+    return visualizer_manager.generate_sql(query, datasource, session_id, **kwargs)
 
 
 def generate_chart_config(
     data: List[Dict[str, Any]],
     query: str,
     session_id: Optional[str] = None,
-    messages: Optional[List[BaseMessage]] = None,
     **kwargs
 ) -> Dict[str, Any]:
     """
@@ -155,7 +153,7 @@ def generate_chart_config(
     Returns:
         Dict[str, Any]: Chart configuration compatible with visualization libraries
     """
-    return visualizer_manager.generate_chart_config(data, query, session_id, messages, **kwargs)
+    return visualizer_manager.generate_chart_config(data, query, session_id, **kwargs)
 
 
 def get_messages(session_id: str) -> Tuple[List[BaseMessage], List[BaseMessage]]:
@@ -167,7 +165,7 @@ def get_messages(session_id: str) -> Tuple[List[BaseMessage], List[BaseMessage]]
 
 if __name__ == "__main__":
     # 测试
-    
+    # 创建测试数据源
     datasource = DataSource(
         name="products",
         description="存储电商平台商品信息的数据表",
@@ -206,23 +204,113 @@ stock: 库存数量
 category: 商品类别
 description: 商品描述"""
     )
+
+    # 生成测试数据集
+    data = [
+        {
+            "name": f"商品{i}",
+            "price": 100 + i * 10,
+            "stock": 50 + i * 5,
+            "category": ["电子产品", "服装", "家居", "食品", "玩具"][i % 5],
+            "description": f"商品{i}描述"
+        } for i in range(1, 101)
+    ]
+
+    def print_section(title):
+        print("\n" + "="*80)
+        print(f"{title:^80}")
+        print("="*80)
+
+    def print_json(title, obj):
+        import json
+        print(f"\n{title}:")
+        print("-" * 40)
+        formatted = json.dumps(obj, indent=2, ensure_ascii=False)
+        # 为每行添加缩进
+        formatted = "\n".join(f"    {line}" for line in formatted.split("\n"))
+        print(formatted)
+
     session_id = "test"
-  
-    print(generate_sql(
-        query="商品价格最高的商品", 
+
+    # 测试1: SQL生成
+    print_section("测试SQL查询生成")
+    sql_result = generate_sql(
+        query="查询每个类别中价格最高的商品", 
         datasource=datasource,
         session_id=session_id,
-        messages=[]
-    ))
-    print(get_messages(session_id))
-    # data = [
-    #     {
-    #         "name": f"商品{i}",
-    #         "price": 100 + i * 10,
-    #         "stock": 50 + i * 5,
-    #         "category": ["电子产品", "服装", "家居", "食品", "玩具"][i % 5],
-    #         "description": f"商品{i}描述"
-    #     } for i in range(1, 101)
-    # ]
+       
+    )
+    print_json("生成的SQL查询", sql_result)
 
-    # print(generate_chart_config(data, "商品价格最高的商品", datasource))
+    # 测试2: 基础图表生成
+    print_section("测试基础图表生成")
+    basic_config = generate_chart_config(
+        data=data,
+        query="展示各个类别的商品数量分布",
+        session_id=session_id,
+    )
+    print_json("基础饼图配置", basic_config)
+
+    # 测试3: 颜色定制
+    print_section("测试图表颜色定制")
+    color_tests = [
+        ("使用蓝色主题展示各类别平均价格", "蓝色主题柱状图"),
+        ("用红色和绿色展示不同类别的库存对比", "双色对比图"),
+        ("使用渐变色展示商品价格趋势", "渐变色趋势图")
+    ]
+    
+    for query, desc in color_tests:
+        config = generate_chart_config(
+            data=data,
+            query=query,
+            session_id=session_id,
+        )
+        print_json(desc, config)
+
+    # 测试4: 图表类型切换
+    print_section("测试图表类型切换")
+    chart_types = [
+        ("用折线图展示商品价格变化趋势", "折线图测试"),
+        ("用柱状图展示各类别库存总量", "柱状图测试"),
+        ("用面积图展示各类别价格分布", "面积图测试"),
+        ("用饼图展示商品类别占比", "饼图测试")
+    ]
+    
+    for query, desc in chart_types:
+        config = generate_chart_config(
+            data=data,
+            query=query,
+            session_id=session_id,
+        )
+        print_json(desc, config)
+
+    # 测试5: 复杂可视化
+    print_section("测试复杂可视化需求")
+    complex_tests = [
+        ("展示每个类别的平均价格和库存的关系，用气泡大小表示库存量", "多维度可视化"),
+        ("比较不同类别商品的价格区间分布，用堆叠图表示", "堆叠分布图"),
+        ("分析价格与库存的相关性，使用散点图展示", "相关性分析")
+    ]
+    
+    for query, desc in complex_tests:
+        config = generate_chart_config(
+            data=data,
+            query=query,
+            session_id=session_id,
+        )
+        print_json(desc, config)
+
+    # 测试6: 消息历史记录
+    print_section("测试消息历史记录")
+    final_sql_messages, final_chart_messages = get_messages(session_id)
+    print("\nSQL消息历史:")
+    print(f"- 总消息数: {len(final_sql_messages)}")
+    print(f"- 系统消息数: {sum(1 for m in final_sql_messages if m.type == 'system')}")
+    print(f"- 用户消息数: {sum(1 for m in final_sql_messages if m.type == 'human')}")
+    print(f"- AI响应数: {sum(1 for m in final_sql_messages if m.type == 'ai')}")
+    
+    print("\n图表消息历史:")
+    print(f"- 总消息数: {len(final_chart_messages)}")
+    print(f"- 系统消息数: {sum(1 for m in final_chart_messages if m.type == 'system')}")
+    print(f"- 用户消息数: {sum(1 for m in final_chart_messages if m.type == 'human')}")
+    print(f"- AI响应数: {sum(1 for m in final_chart_messages if m.type == 'ai')}")

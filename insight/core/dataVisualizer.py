@@ -51,7 +51,6 @@ class ChartConfig:
     limit: Optional[int] = None  # 数据限制数量
     additional_settings: Optional[Dict[str, Any]] = None  # 其他图表特定设置
 
-
 class DataVisualizer:
     """
     Class for generating SQL queries and chart configurations from natural language.
@@ -72,140 +71,105 @@ class DataVisualizer:
         Your job is to help the user write a SQL query to retrieve the data they need."""
         self.chart_system_message = """You are a data visualization expert. 
         Your job is to generate chart configurations that best visualize the data and answer the user's query."""
-        self.sql_messages: List[BaseMessage] = []
-        self.chart_messages: List[BaseMessage] = []
+        self.sql_messages: List[BaseMessage] = [SystemMessage(content=self.sql_system_message)]
+        self.chart_messages: List[BaseMessage] = [SystemMessage(content=self.chart_system_message)]
         self.last_sql_query: Optional[str] = None
         self.last_chart_config: Optional[Dict[str, Any]] = None
-        
+
+    def _get_chat_history(self, messages: List[BaseMessage]) -> str:
+        """将消息历史记录转换为字符串格式"""
+        history = []
+        for msg in messages[1:]:  # Skip the system message
+            if isinstance(msg, HumanMessage):
+                history.append(f"Human: {msg.content}")
+            elif isinstance(msg, AIMessage):
+                history.append(f"Assistant: {msg.content}")
+        return "\n".join(history)
+
     def generate_sql(
         self,
         query: str,
         datasource: DataSource,
-        messages: Optional[List[BaseMessage]] = None,
         **kwargs
     ) -> Dict[str, Any]:
         """
-        Generate SQL based on natural language query, datasource information and conversation history.
+        Generate SQL based on natural language query and datasource information.
         
         Args:
             query: Natural language query requesting data
             datasource: Information about the data source
-            messages: Conversation history for context (if None, uses stored sql_messages)
             **kwargs: Additional parameters
             
         Returns:
-            Dict[str, Any]: Dictionary containing the generated SQL query and updated messages
+            Dict[str, Any]: Dictionary containing the generated SQL query
         """
         try:
-            # Use provided messages or initialize a new conversation
-            if messages is not None:
-                all_messages = messages.copy()
-            elif self.sql_messages:
-                all_messages = self.sql_messages.copy()
-            else:
-                # First time initialization with system message
-                system_message_content = f"""{self.sql_system_message}
-
-Table Schema:
-{datasource.schema}
-
-Example Data Format:
-{datasource.example_data}
-
-Fields:
-{datasource.special_fields}
-
-Query Guidelines:
-- Only retrieval (SELECT) queries are allowed
-- For string fields, use case-insensitive search with: LOWER(column) ILIKE LOWER('%term%')
-- For comma-separated list columns, trim whitespace before grouping
-- When querying specific records, include both identifier and value columns
-
-Data Formatting:
-- Numeric values in billions use decimal format (10.0 = $10B)
-- Rates/percentages stored as decimals (0.1 = 10%)
-- Time-based analysis should group by year
-
-Visualization Requirements:
-- Every query must return data suitable for charts (minimum 2 columns)
-- Single column requests should include count/frequency
-- Rate queries should return decimal values
-- Include appropriate grouping columns for visualization context
-"""
-                all_messages = [SystemMessage(content=system_message_content)]
-            
-            # Add the current user query if it's not already the last message
-            if not all_messages or not isinstance(all_messages[-1], HumanMessage) or all_messages[-1].content != query:
-                all_messages.append(HumanMessage(content=query))
-            
-            # Define output parser
+            # 1. Define output schema using Pydantic
             class SQLQueryOutput(BaseModel):
                 query: str = Field(description="The SQL query to execute")
+                explanation: str = Field(description="Explanation of what the SQL query does")
+
+            # 2. Construct the prompt template with chat history
+            chat_history = self._get_chat_history(self.sql_messages)
+            template = """
+            You are a SQL expert. Generate a SQL query based on the following information:
             
-            # Create the output parser
-            parser = PydanticOutputParser(pydantic_object=SQLQueryOutput)
+            Table Schema:
+            {schema}
             
-            # Create prompt template
-            prompt = ChatPromptTemplate.from_messages(all_messages)
+            Example Data:
+            {example_data}
             
-            # Create LLM
-            llm = ChatOpenAI(model=self.model_name, temperature=0)
+            Special Fields:
+            {special_fields}
             
-            # Create and execute chain
-            chain = prompt | llm
-            response = chain.invoke({})
+            Previous conversation:
+            {chat_history}
             
-            # Try to parse the response
-            try:
-                # First try to extract structured output
-                content = response.content if hasattr(response, 'content') else str(response)
-                
-                # Try to extract SQL between SQL code blocks
-                sql_match = re.search(r'```sql\s*(.*?)\s*```', content, re.DOTALL)
-                if sql_match:
-                    sql_query = sql_match.group(1).strip()
-                else:
-                    # Try to parse as JSON
-                    try:
-                        json_data = json.loads(content)
-                        if isinstance(json_data, dict) and 'query' in json_data:
-                            sql_query = json_data['query']
-                        else:
-                            raise ValueError("JSON does not contain 'query' field")
-                    except json.JSONDecodeError:
-                        # If not JSON, try to extract query field from content
-                        query_match = re.search(r'"query"\s*:\s*"(.*?)"', content, re.DOTALL)
-                        if query_match:
-                            sql_query = query_match.group(1).strip()
-                        else:
-                            # If all else fails, use the whole content as the query
-                            sql_query = content.strip()
-            except Exception as parsing_error:
-                raise Exception(f"Could not parse SQL query from response: {content}")
+            User Query: {query}
             
-            # Create a function message with the generated SQL
-            function_message = FunctionMessage(
-                name="generate_sql",
-                content=sql_query
-            )
+            Generate a SQL query to answer this question.
+            """
+
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", template),
+                ("human", "{input}")
+            ])
+
+            # 3. Set up the LLM with structured output
+            model = ChatOpenAI(model=self.model_name, temperature=0)
+            chain = prompt | model.with_structured_output(SQLQueryOutput)
+
+            # 4. Execute the chain
+            result = chain.invoke({
+                "schema": datasource.schema,
+                "example_data": datasource.example_data,
+                "special_fields": datasource.special_fields,
+                "chat_history": chat_history,
+                "query": query,
+                "input": query
+            })
             
-            # Add the function message to the conversation history
-            final_messages = all_messages + [function_message]
+            # 5. Update conversation history
+            self.sql_messages.extend([
+                HumanMessage(content=query),
+                AIMessage(content=str(result))
+            ])
             
-            # Update instance state
-            self.sql_messages = final_messages
-            self.last_sql_query = sql_query
-            
+            self.last_sql_query = result.query
+
             return {
-                "query": sql_query
+                "query": result.query,
+                "explanation": result.explanation
             }
+
         except Exception as e:
             raise Exception(f"Failed to generate query: {str(e)}")
+
     def generate_chart_config(
         self,
         data: List[Dict[str, Any]],
         query: str,
-        messages: Optional[List[BaseMessage]] = None,
         **kwargs
     ) -> Dict[str, Any]:
         """
@@ -214,115 +178,105 @@ Visualization Requirements:
         Args:
             data: The dataset to visualize
             query: Natural language query requesting visualization
-            messages: Conversation history for context (if None, uses stored chart_messages)
             **kwargs: Additional parameters
             
         Returns:
-            Dict[str, Any]: Chart configuration compatible with visualization libraries
+            Dict[str, Any]: Dictionary containing the chart configuration
         """
-        data = data[:5]
         try:
-            # Use provided messages or initialize a new conversation
+            # 1. Define output schema using Pydantic
             class ChartConfigOutput(BaseModel):
-                chart_type: str = Field(description="The type of chart to use (bar, line, pie, scatter, etc.)")
+                description: str = Field(description="Describe what the chart is showing")
+                takeaway: str = Field(description="The main takeaway from the chart")
+                type: str = Field(description="Type of chart (bar, line, area, pie)")
                 title: str = Field(description="The title of the chart")
-                x_axis: str = Field(description="The field to use for the x-axis")
-                y_axis: Union[str, List[str]] = Field(description="The field(s) to use for the y-axis")
-                color_by: Optional[str] = Field(None, description="The field to use for color grouping")
-                aggregation: Optional[str] = Field(None, description="The aggregation method to use (sum, avg, count, etc.)")
-                additional_settings: Optional[Dict[str, Any]] = Field(None, description="Additional chart settings")
-            
-            # Set up a parser
-            parser = PydanticOutputParser(pydantic_object=ChartConfigOutput)
-            
-            if messages is not None:
-                all_messages = messages.copy()
-            elif self.chart_messages:
-                all_messages = self.chart_messages.copy()
-            else:
-                # First time initialization with system message
-                system_message_content = f"""{self.chart_system_message}
+                xKey: str = Field(description="Key for x-axis or category")
+                yKeys: List[str] = Field(description="Key(s) for y-axis values")
+                multipleLines: Optional[bool] = Field(description="For line charts: whether comparing groups of data")
+                measurementColumn: Optional[str] = Field(description="For line charts: key for quantitative y-axis column")
+                lineCategories: Optional[List[str]] = Field(description="For line charts: categories for different lines")
+                colors: Optional[Dict[str, str]] = Field(description="Mapping of data keys to color values")
+                legend: bool = Field(description="Whether to show legend")
+                explanation: str = Field(description="Explanation of the visualization")
 
-Data Visualization Guidelines:
-- Choose the most appropriate chart type for the data and query
-- Ensure the chart title clearly describes what is being shown
-- Select appropriate axes based on data types (categorical vs numerical)
-- Use color grouping only when it adds meaningful information
-- Apply aggregations when dealing with large datasets
+            # 2. Construct the prompt template with chat history
+            chat_history = self._get_chat_history(self.chart_messages)
+            template = """
+            You are a data visualization expert. Generate a chart configuration based on the following:
+            
+            Data Sample:
+            {data}
+            
+            Previous conversation:
+            {chat_history}
+            
+            User Query: {query}
+            
+            Generate an appropriate chart configuration to visualize this data.
+            The configuration must include:
+            - A description of what the chart shows
+            - The main takeaway from the data
+            - Appropriate chart type (bar, line, area, or pie)
+            - Clear title
+            - X and Y axis keys
+            - Legend configuration
+            
+            For colors:
+            - If the user specifies any colors in their query (e.g. "make it blue", "use yellow"), you MUST include those colors in the colors configuration
+            - Colors should be specified as CSS color values (hex, rgb, or color names)
+            - The colors configuration should map data keys to their corresponding colors
+            - Example: if query mentions "yellow bars", set colors: {{"value": "yellow"}}
+            
+            Pay special attention to color requirements in the query and ensure they are reflected in the colors configuration.
+            """
 
-IMPORTANT: Your response must be a valid JSON object with the chart configuration.
-{parser.get_format_instructions()}"""
-                all_messages = [SystemMessage(content=system_message_content)]
-            
-            # Add the current user query with data if it's not already the last message
-            user_content = f"""Generate a visualization for this query: {query}
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", template),
+                ("human", "{input}")
+            ])
 
-Data (sample of {len(data)} records):
-{data[:5] if len(data) > 5 else data}
+            # 3. Set up the LLM with structured output
+            model = ChatOpenAI(model=self.model_name, temperature=0)
+            chain = prompt | model.with_structured_output(ChartConfigOutput)
 
-Total records: {len(data)}"""
+            # 4. Execute the chain
+            result = chain.invoke({
+                "data": str(data[:5]),
+                "chat_history": chat_history,
+                "query": query,
+                "input": query
+            })
 
-            if not all_messages or not isinstance(all_messages[-1], HumanMessage) or all_messages[-1].content != user_content:
-                all_messages.append(HumanMessage(content=user_content))
-                
-            # Create prompt template
-            prompt = ChatPromptTemplate.from_messages(all_messages)
+            # 5. Update conversation history
+            self.chart_messages.extend([
+                HumanMessage(content=query),
+                AIMessage(content=str(result))
+            ])
             
-            # Create LLM
-            llm = ChatOpenAI(model=self.model_name, temperature=0)
-            
-            # Create chain
-            chain = prompt | llm | parser
-            
-            # Execute chain
-            try:
-                result = chain.invoke({})
-                chart_config = ChartConfig(
-                    chart_type=result.chart_type,
-                    title=result.title,
-                    x_axis=result.x_axis,
-                    y_axis=result.y_axis,
-                    color_by=result.color_by,
-                    aggregation=result.aggregation,
-                    additional_settings=result.additional_settings or {"legend": True}
-                )
-            except Exception as parsing_error:
-                # Handle parsing errors by extracting config from the raw response
-                raw_response = llm.invoke(prompt.format_messages({}))
-                content = raw_response.content if hasattr(raw_response, 'content') else str(raw_response)
-                
-                # Try to extract JSON from the response
-               
-                json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
-                if json_match:
-                    config_dict = json.loads(json_match.group(1).strip())
-                    chart_config = ChartConfig(
-                        chart_type=config_dict.get("chart_type", "bar"),
-                        title=config_dict.get("title", "Chart"),
-                        x_axis=config_dict.get("x_axis", ""),
-                        y_axis=config_dict.get("y_axis", ""),
-                        color_by=config_dict.get("color_by"),
-                        aggregation=config_dict.get("aggregation"),
-                        additional_settings=config_dict.get("additional_settings", {"legend": True})
-                    )
-                else:
-                    raise Exception(f"Could not parse chart configuration from response: {content}")
-            
-            # Create an assistant message with the generated chart config
-            assistant_message = AIMessage(
-                content=str(chart_config)
-            )
-            
-            # Add the assistant message to the conversation history
-            final_messages = all_messages + [assistant_message]
-            
-            # Update instance state
-            self.chart_messages = final_messages
-            self.last_chart_config = chart_config
-            
+            self.last_chart_config = result
+            if result.colors is None:
+                # Generate colors for each y-axis key
+                result.colors = {}
+                for i, key in enumerate(result.yKeys):
+                    result.colors[key] = f"hsl(var(--chart-{i + 1}))"
+
             return {
-                "config": chart_config
+                "config": {
+                    "description": result.description,
+                    "takeaway": result.takeaway,
+                    "type": result.type,
+                    "title": result.title,
+                    "xKey": result.xKey,
+                    "yKeys": result.yKeys,
+                    "multipleLines": result.multipleLines,
+                    "measurementColumn": result.measurementColumn,
+                    "lineCategories": result.lineCategories,
+                    "colors": result.colors,
+                    "legend": result.legend,
+                    "explanation": result.explanation
+                }
             }
+
         except Exception as e:
             raise Exception(f"Failed to generate chart configuration: {str(e)}")
 
