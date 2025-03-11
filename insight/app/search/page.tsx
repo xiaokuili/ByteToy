@@ -65,6 +65,7 @@ export default function SearchPage() {
 
     const handleSearchSuccess = (config: RenderConfig) => {
         setSearchResults(prev => {
+            debugger;
             const exists = prev.some(item => item.id === config.id);
             const newResults = exists
                 ? prev.map(item => item.id === config.id ? config : item)
@@ -117,8 +118,9 @@ export default function SearchPage() {
 
     const handleSearch = async (question: string) => {
         if (!question.trim()) return;
+        const chatId = crypto.randomUUID();
         try {
-            await executeQuery(flowId, question);
+            await executeQuery(flowId, question, chatId);
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Search failed. Please try again.");
         }

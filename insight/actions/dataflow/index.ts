@@ -103,6 +103,7 @@ export async function processDataFlow(
     dataSource: DataSource,
     format: DisplayFormat = 'chart',
     flowId: string,
+    chatId: string
 ): Promise<{
     result: RenderConfig;
     sqlQuery?: string;
@@ -121,6 +122,7 @@ export async function processDataFlow(
         if (intent === "生成图表" && !dataCache.has(cacheKey)) {
             // 获取SQL查询
             const sqlQuery = await fetchSQLQuery(query, dataSource, flowId);
+            console.log("sqlQuery", sqlQuery);
             const result = await RunGenerateSQLQuery(sqlQuery);
             
             if (result?.length > 0) {
@@ -142,7 +144,7 @@ export async function processDataFlow(
         const finalConfig = await fetchChartConfig(query, fetchResult.result.data as DataRecord[], flowId);
         // 构建增强配置
         const enhancedConfig: RenderConfig = {
-            id: flowId,
+            id: chatId,
             data: fetchResult.result.data as DataRecord[],
             chartConfig: {
                 options: finalConfig.config
@@ -166,7 +168,7 @@ export async function processDataFlow(
 
         // 创建错误配置
         const errorConfig: RenderConfig = {
-            id: flowId,
+            id: chatId,
             query,
             format,
             data: [],

@@ -4,11 +4,11 @@ import {
     DisplayFormat,
     DataSource,
 } from '@/lib/types';
-import { Message } from 'ai';
 import { processDataFlow, clearDataCache } from '@/actions/dataflow';
 
 interface UseDataFlowOptions {
     flowId?: string;
+    chatId?: string;
     query?: string;
     dataSource?: DataSource;
     format?: DisplayFormat;
@@ -37,6 +37,7 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
 
     const processData = useCallback(async (
         flowId: string, 
+        chatId: string,
         query: string, 
         dataSource?: DataSource, 
         format: DisplayFormat = 'chart'
@@ -49,7 +50,7 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
         }
 
         const initialConfig: RenderConfig = {
-            id: flowId,
+            id: chatId,
             query,
             format,
             data: [],
@@ -62,7 +63,7 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
 
         const processingPromise = (async () => {
             try {
-                const { result } = await processDataFlow(query, dataSource as DataSource, "chart", flowId);
+                const { result } = await processDataFlow(query, dataSource as DataSource, "chart", flowId, chatId);
 
                 if (options.collectSQLQuery && result.metadata?.sqlQuery) {
                     setState(prev => ({
@@ -72,6 +73,7 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
                 }
 
                 setState(prev => ({ ...prev, isLoading: false }));
+                // 设置结果的id
                 options.onSuccess?.(result);
                 return result;
             } catch (e) {
@@ -79,7 +81,7 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
                 console.error(error);
 
                 const errorConfig: RenderConfig = {
-                    id: flowId,
+                    id: chatId,
                     query,
                     format,
                     data: [],
@@ -106,20 +108,11 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
         return processingPromise;
     }, [options]);
 
-    const executeQuery = useCallback((flowId: string, query: string) => {
-        return processData(flowId, query, options.dataSource, options.format);
+    const executeQuery = useCallback((flowId: string, query: string, chatId: string) => {
+        return processData(flowId, chatId, query, options.dataSource, options.format);
     }, [processData, options.dataSource, options.format]);
 
-    const retry = useCallback(() => {
-        if (state.renderConfig?.query) {
-            return processData(
-                state.renderConfig.id as string,
-                state.renderConfig.query,
-                options.dataSource,
-                state.renderConfig.format
-            );
-        }
-    }, [processData, state.renderConfig, options.dataSource]);
+
 
     const clearSQLQueries = useCallback(() => {
         setState(prev => ({ ...prev, sqlQueries: [] }));
@@ -130,9 +123,9 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
         isLoading: state.isLoading,
         error: state.error,
         sqlQueries: state.sqlQueries,
+
         processData,
         executeQuery,
-        retry,
         clearSQLQueries,
         clearCache: clearDataCache
     };
