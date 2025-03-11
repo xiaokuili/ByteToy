@@ -126,30 +126,35 @@ Visualization Requirements:
  * @param query SQL查询语句
  * @returns 查询结果数据
  */
-export const runGenerateSQLQuery: runGenerateSQLQuery = async (query: string, dbconfig?: DBConfig) => {
+export const RunGenerateSQLQuery: runGenerateSQLQuery = async (query: string, dbconfig?: DBConfig) => {
     "use server";
     // 安全检查：仅允许SELECT语句
+    const normalizedQuery = query.toLowerCase().trim();
+    
     if (
-        !query.trim().toLowerCase().startsWith("select") ||
-        query.trim().toLowerCase().includes("delete") ||
-        query.trim().toLowerCase().includes("insert") ||
-        query.trim().toLowerCase().includes("update") ||
-        query.trim().toLowerCase().includes("alter") ||
-        query.trim().toLowerCase().includes("truncate") ||
-        query.trim().toLowerCase().includes("create") ||
-        query.trim().toLowerCase().includes("grant") ||
-        query.trim().toLowerCase().includes("revoke")
+        !normalizedQuery.startsWith("select") ||
+        normalizedQuery.includes("delete") ||
+        normalizedQuery.includes("insert") ||
+        normalizedQuery.includes("update") ||
+        normalizedQuery.includes("alter") ||
+        normalizedQuery.includes("truncate") ||
+        normalizedQuery.includes("grant") ||
+        normalizedQuery.includes("revoke")
     ) {
         throw new Error("Only SELECT queries are allowed");
     }
 
-    let data: any;
+    let data: {
+        rows: DataRecord[];
+        
+    };
+
     // TODO:目前仅支持一个源，后续需要支持多个源
     const db = createConnection(dbconfig as DBConfig);
     try {
-        data = await db.execute(query);
-    } catch (e: any) {
-        if (e.message.includes('relation "unicorns" does not exist')) {
+        data = await db.execute(normalizedQuery);
+    } catch (e: unknown) {
+        if (e instanceof Error && e.message.includes('relation "unicorns" does not exist')) {
             console.log(
                 "Table does not exist, creating and seeding it with dummy data now...",
             );
@@ -170,7 +175,7 @@ function createConnection(config: DBConfig) {
     // 不同的连接参数(主机、端口、凭证等)
 
 
-    return db as any;
+    return db;
 
 }
 /**
@@ -189,13 +194,13 @@ export const fetchFromSQL: Fetch = async (config: FetchConfig): Promise<{ result
         if (genMessages) {
             newMessages = genMessages;
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         return {
             result: {
                 data: [],
                 error: {
                     code: 'SQL_ERROR',
-                    message: error.message,
+                    message: (error as Error).message,
                     details: error
                 },
                 metadata: {
@@ -208,7 +213,7 @@ export const fetchFromSQL: Fetch = async (config: FetchConfig): Promise<{ result
 
     try {
         // 执行查询
-        const data = await runGenerateSQLQuery(sqlQuery);
+        const data = await RunGenerateSQLQuery(sqlQuery);
 
         // 返回结果
         return {

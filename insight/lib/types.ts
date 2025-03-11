@@ -48,9 +48,9 @@ export interface Result<T> {
     error?: {               // 可能的错误信息
         code: string;
         message: string;
-        details?: any;
+        details?: unknown;
     };
-    metadata?: Record<string, any>; // 元数据
+    metadata?: Record<string, unknown>; // 元数据
 }
 
 /** 数据获取结果 */

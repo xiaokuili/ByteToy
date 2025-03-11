@@ -46,7 +46,7 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
     const pendingQueriesRef = useRef<Map<string, Promise<RenderConfig | null>>>(new Map());
 
     // 处理整个数据流程
-    const processData = useCallback(async (flowId: string, query: string, dataSource?: DataSource, format: DisplayFormat = 'chart', intentMessages?: Message[], sqlMessages?: Message[], chartMessages?: Message[]) => {
+    const processData = useCallback(async (flowId: string, query: string, dataSource?: DataSource, format: DisplayFormat = 'chart') => {
         if (!query.trim()) return null;
 
         // 创建查询键
@@ -95,62 +95,29 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
                 }));
 
                 // 调用服务端处理函数
-                console.log("hook chartMessage", chartMessages);
-                const { result: intentResult, intentType, newSqlMessages, newChartMessages, newIntentMessages } = await processDataFlow(
+                const { result } = await processDataFlow(
                     query,
                     dataSource as DataSource,
-                    format,
-                    flowId,
-                    intentMessages,
-                    chartMessages,
-                    sqlMessages,
+                    "chart",
+                    flowId
 
                 );
 
-                // 根据意图类型更新状态
-                if (intentType != "sql") {
-                    // 直接进入配置阶段
-                    setState(prev => ({
-                        ...prev,
-                        isSelecting: false,
-                        isFetching: false,
-                        isConfiguring: true,
-                        renderConfig: {
-                            ...prev.renderConfig!,
-                            loadingMessage: '正在生成可视化配置...'
-                        }
-                    }));
-                } else {
-                    // 正常流程：选择 -> 获取 -> 配置
-                    setState(prev => ({
-                        ...prev,
-                        isSelecting: false,
-                        isFetching: true,
-                        renderConfig: {
-                            ...prev.renderConfig!,
-                            loadingMessage: '正在获取数据...'
-                        }
-                    }));
-
-                    // 模拟获取阶段完成
-                    setTimeout(() => {
-                        setState(prev => ({
-                            ...prev,
-                            isFetching: false,
-                            isConfiguring: true,
-                            renderConfig: {
-                                ...prev.renderConfig!,
-                                loadingMessage: '正在生成可视化配置...'
-                            }
-                        }));
-                    }, 500);
-                }
+                setState(prev => ({
+                    ...prev,
+                    isFetching: false,
+                    isConfiguring: true,
+                    renderConfig: {
+                        ...prev.renderConfig!,
+                        loadingMessage: '正在生成可视化配置...'
+                    }
+                }));
 
                 // 收集SQL查询（如果有）
-                if (options.collectSQLQuery && intentResult.metadata?.sqlQuery) {
+                if (options.collectSQLQuery && result.metadata?.sqlQuery) {
                     setState(prev => ({
                         ...prev,
-                        sqlQueries: [...prev.sqlQueries, intentResult.metadata?.sqlQuery as string]
+                        sqlQueries: [...prev.sqlQueries, result.metadata?.sqlQuery as string]
                     }));
                 }
 
@@ -160,15 +127,13 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
                     isSelecting: false,
                     isFetching: false,
                     isConfiguring: false,
-                    renderConfig: intentResult,
-                    intentMessages: newIntentMessages,
-                    sqlMessages: newSqlMessages,
-                    chartMessages: newChartMessages
+                 
                 }));
+                
                 if (options.onSuccess) {
-                    options.onSuccess(intentResult);
+                    options.onSuccess(result);
                 }
-                return intentResult;
+                return result;
             } catch (e) {
                 const error = e instanceof Error ? e : new Error('处理数据时发生未知错误');
                 console.error(error);
@@ -191,9 +156,7 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
                     isConfiguring: false,
                     renderConfig: errorConfig,
                     error,
-                    intentMessages: state.intentMessages,
-                    sqlMessages: state.sqlMessages,
-                    chartMessages: state.chartMessages
+                   
                 }));
 
                 // 调用错误回调
@@ -213,14 +176,12 @@ export function useDataFlow(options: UseDataFlowOptions = {}) {
 
         return processingPromise;
 
-    }, [options.onStart, options.onSuccess, options.onError, options.collectSQLQuery, state.sqlMessages, state.chartMessages]);
+    }, [options]);
 
     // 执行查询的便捷方法
-    const executeQuery = useCallback((flowId: string, query: string, intentMessages?: Message[], sqlMessages?: Message[], chartMessages?: Message[]) => {
-        console.log("sqlMessages", sqlMessages);
-        console.log("chartMessages", chartMessages);
-        console.log("intentMessages", intentMessages);
-        return processData(flowId, query, options.dataSource, options.format, intentMessages, sqlMessages, chartMessages);
+    const executeQuery = useCallback((flowId: string, query: string) => {
+
+        return processData(flowId, query, options.dataSource, options.format);
     }, [processData, options.dataSource, options.format]);
 
     // 重试当前查询

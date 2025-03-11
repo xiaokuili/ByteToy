@@ -43,18 +43,38 @@ description: 商品描述"""
 # 示例图表数据
 EXAMPLE_CHART_DATA = [
     {
-        "name": "商品1",
-        "price": 100,
-        "stock": 50,
-        "category": "电子产品"
+        "id": 1,
+        "name": "超值商品套装",
+        "price": 500.00,
+        "stock": 100,
+        "category": "服装",
+        "description": "这是一个高性价比的商品套装"
     },
     {
-        "name": "商品2",
-        "price": 200,
-        "stock": 30,
-        "category": "服装"
+        "id": 2,
+        "name": "限量特惠商品", 
+        "price": 299.99,
+        "stock": 50,
+        "category": "电子产品",
+        "description": "限时特惠，数量有限"
     }
 ]
+
+# SQL请求示例
+EXAMPLE_SQL_REQUEST = {
+    "session_id": "test-session-001", 
+    "type": "complete",
+    "user_input": "查询每个类别中价格最高的商品",
+    "datasource": EXAMPLE_DATASOURCE
+}
+
+# 图表请求示例
+EXAMPLE_CHART_REQUEST = {
+    "session_id": "test-session-001",
+    "type": "complete", 
+    "user_input": "展示各个类别的商品数量分布",
+    "data": EXAMPLE_CHART_DATA
+}
 
 # 完整的请求示例
 EXAMPLE_REQUEST = {
@@ -68,11 +88,13 @@ EXAMPLE_REQUEST = {
 # 测试数据集
 TEST_DATA = [
     {
+        "id": i,
         "name": f"商品{i}",
         "price": 100 + i * 10,
         "stock": 50 + i * 5,
         "category": ["电子产品", "服装", "家居", "食品", "玩具"][i % 5],
-        "description": f"商品{i}描述"
+        "description": f"商品{i}描述",
+        "created_at": "2024-01-01T00:00:00"
     } for i in range(1, 101)
 ]
 
@@ -102,4 +124,4 @@ TEST_CASES = {
             "expected_type": "bar"
         }
     ]
-} 
+}

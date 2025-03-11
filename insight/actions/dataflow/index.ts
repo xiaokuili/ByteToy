@@ -1,88 +1,119 @@
 "use server";
 
-import { DataSource, DisplayFormat, FetchResult, RenderConfig } from "@/lib/types";
+import { DataRecord, DataSource, DisplayFormat, FetchResult, RenderConfig } from "@/lib/types";
 import { detectIntent } from "./intent";
-import { select } from "./select";
-import { FetchData } from "./fetch";
-import { Generator } from "./configGenerator";
-import { Message } from "ai";
+import { DBConfig, RunGenerateSQLQuery } from "./fetch/sql";
 
 // 用于缓存数据的Map
-const dataCache = new Map<string, any>();
+const dataCache = new Map<string, { result: FetchResult }>();
 
+/**
+ * 从API获取SQL查询结果
+ */
+async function fetchSQLQuery(query: string, dataSource: DataSource, flowId: string) {
+    const response = await fetch('http://127.0.0.1:8000/generate/sql', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            user_input: query,
+            datasource: dataSource,
+            session_id: flowId
+        })
+    });
 
+    if (!response.ok) {
+        throw new Error('SQL生成失败: ' + await response.text());
+    }
+
+    const result = await response.json();
+    return result.sql.query;
+}
+
+/**
+ * 从API获取图表配置
+ */
+async function fetchChartConfig(query: string, data: DataRecord[], flowId: string) {
+    const response = await fetch('http://127.0.0.1:8000/generate/chart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            user_input: query,
+            data: data,
+            session_id: flowId
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error('图表配置生成失败: ' + await response.text());
+    }
+
+    const result = await response.json();
+    return result.chart_config;
+}
 
 /**
  * 处理数据流程的核心逻辑
- * 
- * @param query 用户查询
- * @param dataSource 数据源
- * @param format 显示格式
- * @param flowId 流程ID
- * @param messages 对话历史
- * @param options 选项
- * @returns 处理结果
  */
 export async function processDataFlow(
     query: string,
     dataSource: DataSource,
     format: DisplayFormat = 'chart',
     flowId: string,
-    intentMessages: Message[] = [],
-    chartMessages: Message[] = [],
-    sqlMessages: Message[] = [],
 ): Promise<{
     result: RenderConfig;
-    newSqlMessages: Message[];
-    newChartMessages: Message[];
-    newIntentMessages: Message[];
     sqlQuery?: string;
     intentType?: string;
 }> {
-    let newIntentMessages: Message[] = [];
-    let newSqlMessages: Message[] = [];
-    let newChartMessages: Message[] = [];
     try {
         // 1. 意图检测阶段
         const { intent } = await detectIntent(query);
-        // 检查缓存中是否有数据，如果意图不是SQL相关，可以复用之前的数据
-        const cacheKey = `${dataSource.name}_${flowId}`;
-        let fetchResult: { result: FetchResult; messages?: Message[] };
-        // 2. 选择和获取阶段
-        if (intent === "生成图表" && !dataCache.has(cacheKey)) {
-            // 需要获取新数据
-            const fetchConfig = await select(dataSource, query);
 
-            // 执行数据获取
-            fetchResult = await FetchData(fetchConfig);
-            newSqlMessages = [...sqlMessages, ...(fetchResult.messages as Message[])];
-            // 缓存数据
-            if (fetchResult.result.data && fetchResult.result.data.length > 0) {
-                dataCache.set(cacheKey, fetchResult);
+
+        
+        // 检查缓存中是否有数据
+        const cacheKey = `${dataSource.name}_${flowId}`;
+
+        // 2. 选择和获取阶段
+        let fetchResult: { result: FetchResult } = { result: { data: [] } };
+
+        if (intent === "生成图表" && !dataCache.has(cacheKey)) {
+            // 获取SQL查询
+            const sqlQuery = await fetchSQLQuery(query, dataSource, flowId);
+            try {
+                const result = await RunGenerateSQLQuery(sqlQuery, {} as DBConfig);
+                // 缓存数据
+                if (result && result.length > 0) {
+                    fetchResult = { result: { data: result } };
+                    dataCache.set(cacheKey, fetchResult);
+                }
+            } catch (error) {
+                throw new Error("SQL查询失败: " + error);
             }
         } else if (dataCache.has(cacheKey)) {
             // 使用缓存数据
-            fetchResult = dataCache.get(cacheKey);
+            const cachedResult = dataCache.get(cacheKey);
+            if (!cachedResult) {
+                throw new Error("缓存数据不存在");
+            }
+            fetchResult = cachedResult;
         } else {
-            // 没有缓存且意图是图表配置，但没有数据可用
             throw new Error("需要先获取数据才能配置图表");
         }
-        // 检查数据获取结果
-        if (fetchResult.result.error) {
-            throw new Error(fetchResult.result.error.message || '获取数据失败');
-        }
 
-        if (!fetchResult.result.data || fetchResult.result.data.length === 0) {
-            throw new Error('没有返回数据');
-        }
-
-        // 3. 配置阶段 - 生成渲染配置
-        const finalConfig = await Generator(fetchResult.result.data.slice(0, 5), query, chartMessages);
-        newChartMessages = [...chartMessages, ...(finalConfig.messages as Message[])];
-        // 将SQL查询添加到最终配置的元数据中
+        // 3. 配置阶段 - 获取图表配置
+        const finalConfig = await fetchChartConfig(query, fetchResult.result.data as DataRecord[], flowId);
+        // 构建增强配置
         const enhancedConfig: RenderConfig = {
             id: flowId,
-            ...finalConfig,
+            data: fetchResult.result.data as DataRecord[],
+            chartConfig: {
+                options: finalConfig.config
+            },
+            format: format,
             isLoading: false,
             metadata: {
                 ...finalConfig.metadata,
@@ -91,13 +122,10 @@ export async function processDataFlow(
             }
         };
 
-
         return {
             result: enhancedConfig,
-            newSqlMessages: newSqlMessages,
-            newChartMessages: newChartMessages,
-            newIntentMessages: newIntentMessages,
-            sqlQuery: fetchResult.result.metadata?.query,
+            sqlQuery: fetchResult.result.metadata?.query as string,
+            intentType: intent
         };
     } catch (error) {
         const err = error instanceof Error ? error : new Error('处理数据时发生未知错误');
@@ -113,12 +141,8 @@ export async function processDataFlow(
             errorMessage: err.message
         };
 
-
         return {
             result: errorConfig,
-            newSqlMessages: sqlMessages,
-            newChartMessages: chartMessages,
-            newIntentMessages: intentMessages,
             intentType: "error"
         };
     }
@@ -126,7 +150,6 @@ export async function processDataFlow(
 
 /**
  * 清除数据缓存
- * @param dataSourceId 可选的数据源ID，如果提供则只清除该数据源的缓存
  */
 export async function clearDataCache(dataSourceId?: string) {
     if (dataSourceId) {

@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from enum import Enum
 from typing import Optional, Dict, Any, List
+from fastapi.middleware.cors import CORSMiddleware
 
 
 from dataVisualizerManager import  generate_sql, generate_chart_config, get_messages
@@ -9,16 +10,18 @@ from interfaces import DataSource
 from test_data import (
     EXAMPLE_DATASOURCE,
     EXAMPLE_CHART_DATA,
-    EXAMPLE_REQUEST
+    EXAMPLE_CHART_REQUEST,
+    EXAMPLE_SQL_REQUEST
 )
 
-# TODO，将测试数据放到另一个文件中， 然后通过import 引入，让这里的文件更加清晰， 分离职能
 
 class ProcessType(str, Enum):
+    """处理类型枚举"""
     COMPLETE = "complete"  # 完成流程
     ADJUST = "adjust"     # 调整配置
 
 class DataSourceModel(BaseModel):
+    """数据源模型"""
     name: str = Field(
         description="数据源名称",
         example=EXAMPLE_DATASOURCE["name"]
@@ -40,29 +43,46 @@ class DataSourceModel(BaseModel):
         example=EXAMPLE_DATASOURCE["special_fields"]
     )
 
-class QueryRequest(BaseModel):
+class SQLRequest(BaseModel):
+    """SQL请求模型"""
     session_id: str = Field(
         description="会话ID，用于追踪请求",
-        example=EXAMPLE_REQUEST["session_id"]
+        example=EXAMPLE_SQL_REQUEST["session_id"]
     )
-    type: ProcessType = Field(
-        description="处理类型：complete(完整流程) 或 adjust(调整配置)",
-        example=EXAMPLE_REQUEST["type"]
-    )
+
     user_input: str = Field(
-        description="用户输入的查询或可视化需求",
-        example=EXAMPLE_REQUEST["user_input"]
+        description="用户输入的查询需求",
+        example=EXAMPLE_SQL_REQUEST["user_input"]
     )
-    datasource: DataSourceModel
-    data: Optional[List[Dict[str, Any]]] = Field(
-        default=None,
+    datasource: DataSourceModel = Field(
+        description="数据源信息",
+        example=EXAMPLE_SQL_REQUEST["datasource"]
+    )
+
+    class Config:
+        json_schema_extra = {
+            "example": EXAMPLE_SQL_REQUEST
+        }
+
+class ChartRequest(BaseModel):
+    """图表请求模型"""
+    session_id: str = Field(
+        description="会话ID，用于追踪请求",
+        example=EXAMPLE_CHART_REQUEST["session_id"]
+    )
+
+    user_input: str = Field(
+        description="用户输入的可视化需求",
+        example=EXAMPLE_CHART_REQUEST["user_input"]
+    )
+    data: List[Dict[str, Any]] = Field(
         description="用于生成图表的数据",
         example=EXAMPLE_CHART_DATA
     )
 
     class Config:
         json_schema_extra = {
-            "example": EXAMPLE_REQUEST
+            "example": EXAMPLE_CHART_REQUEST
         }
 
 app = FastAPI(
@@ -75,15 +95,49 @@ app = FastAPI(
 - 生成图表配置
 - 获取会话历史记录
     """,
-    version="1.0.0"
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
+
+# 添加CORS中间件
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 允许所有源
+    allow_credentials=True,
+    allow_methods=["*"],  # 允许所有方法
+    allow_headers=["*"],  # 允许所有头
 )
 
 @app.post("/generate/sql", 
     response_model=Dict[str, Any],
     summary="生成SQL查询",
-    description="根据用户输入和数据源信息生成对应的SQL查询语句"
+    description="根据用户输入和数据源信息生成对应的SQL查询语句",
+    responses={
+        200: {
+            "description": "成功生成SQL查询",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "sql": {"query": "SELECT * FROM table"},
+                        "session_id": "abc123"
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "服务器内部错误"
+        }
+    }
 )
-async def generate_sql_query(request: QueryRequest):
+async def generate_sql_query(request: SQLRequest):
+    """
+    生成SQL查询接口
+    
+    - **request**: SQL请求参数
+    - 返回生成的SQL查询和会话ID
+    """
     try:
         # 创建数据源
         datasource = DataSource(
@@ -112,13 +166,35 @@ async def generate_sql_query(request: QueryRequest):
 @app.post("/generate/chart",
     response_model=Dict[str, Any],
     summary="生成图表配置",
-    description="根据用户输入和数据生成对应的图表配置"
+    description="根据用户输入和数据生成对应的图表配置",
+    responses={
+        200: {
+            "description": "成功生成图表配置",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "chart_config": {"type": "bar"},
+                        "session_id": "abc123"
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "服务器内部错误"
+        }
+    }
 )
-async def generate_chart(request: QueryRequest):
+async def generate_chart(request: ChartRequest):
+    """
+    生成图表配置接口
+    
+    - **request**: 图表请求参数
+    - 返回生成的图表配置和会话ID
+    """
     try:
         # 生成图表配置
         chart_config = generate_chart_config(
-            data=request.data if request.data else [],
+            data=request.data,
             query=request.user_input,
             session_id=request.session_id
         )
@@ -133,9 +209,31 @@ async def generate_chart(request: QueryRequest):
 
 @app.get("/messages/{session_id}",
     summary="获取会话消息",
-    description="获取指定会话ID的所有历史消息记录"
+    description="获取指定会话ID的所有历史消息记录",
+    responses={
+        200: {
+            "description": "成功获取会话消息",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "sql_messages": [],
+                        "chart_messages": []
+                    }
+                }
+            }
+        },
+        500: {
+            "description": "服务器内部错误"
+        }
+    }
 )
 async def get_session_messages(session_id: str):
+    """
+    获取会话消息接口
+    
+    - **session_id**: 会话ID
+    - 返回SQL消息和图表消息列表
+    """
     try:
         sql_messages, chart_messages = get_messages(session_id)
         return {
@@ -148,5 +246,3 @@ async def get_session_messages(session_id: str):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-

@@ -22,7 +22,7 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Config, ChartConfig, RenderConfig, Render, DisplayFormat, DataRecord } from "@/lib/types";
+import {  ChartConfig, RenderConfig, Render,  DataRecord } from "@/lib/types";
 import { transformDataForMultiLineChart } from "@/lib/rechart-format";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +52,7 @@ interface ChartFactoryProps {
 
 export default function ChartFactory({ config, className, chartData }: ChartFactoryProps) {
     const { options } = config;
+
 
     if (!chartData || !options) {
         return <div>No chart data</div>;

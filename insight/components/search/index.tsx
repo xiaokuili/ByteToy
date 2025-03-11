@@ -58,6 +58,7 @@ export const RenderSearchResult = ({ format, config, onExport }: { format: Displ
      * 根据不同格式渲染对应内容
      */
     const renderContent = () => {
+        console.log("renderContent", config);
         if (format === "chart" && config.chartConfig) {
             return (
                 <div className="w-full chart-container bg-white dark:bg-gray-800">
@@ -129,12 +130,4 @@ export const RenderSearchResult = ({ format, config, onExport }: { format: Displ
     );
 };
 
-/**
- * 展示格式指示器组件
- */
-function FormatIndicator({ formatInfo }: { formatInfo: DisplayFormat }) {
-    return (
-        <div className="p-1 rounded-md bg-gray-100 dark:bg-gray-700">
-        </div>
-    );
-}
+

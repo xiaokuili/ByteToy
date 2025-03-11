@@ -1,7 +1,5 @@
 "use client"
 import { useState, useRef, useEffect } from "react";
-import { Search, MessageSquare, Send } from "lucide-react";
-import Link from "next/link";
 import { RenderConfig } from "@/lib/types";
 import { useSearchParams } from "next/navigation";
 import SearchInput from "@/components/search/SearchInput";
@@ -13,15 +11,14 @@ import { toast } from "sonner";
 import { useDataflowStorage } from "@/hook/useDataflowStorage";
 import { Header } from "@/components/layout/Header";
 import { useSession } from "next-auth/react";
-import { Message } from "ai";
 
 export default function Page() {
     const searchParams = useSearchParams();
-    const query = searchParams.get('q') || '';
-    const model = searchParams.get('model') || 'DEEPSEEK';
-    const format = searchParams.get('format') || 'pie';
-    const source = searchParams.get('source') || '';
-    const flowId = searchParams.get('flowId') || '';
+    const query = searchParams?.get('q') || '';
+    const model = searchParams?.get('model') || 'DEEPSEEK';
+    const format = searchParams?.get('format') || 'pie';
+    const source = searchParams?.get('source') || '';
+    const flowId = searchParams?.get('flowId') || '';
 
     const dataSource = testTableData;
 
@@ -29,15 +26,13 @@ export default function Page() {
 
     const searchedQueriesRef = useRef<Set<string>>(new Set());
     const [searchResults, setSearchResults] = useState<RenderConfig[]>([]);
-    const { saveDraft, removeDraft, createDataflow, drafts } = useDataflowStorage();
+    const { saveDraft, createDataflow, drafts } = useDataflowStorage();
 
     // 使用 useDataFlow hook
     const {
         executeQuery,
         sqlQueries,
-        intentMessages,
-        sqlMessages,
-        chartMessages
+
     } = useDataFlow({
         dataSource: dataSource,
         format: 'chart' as DisplayFormat,
@@ -138,6 +133,18 @@ export default function Page() {
         }
     }
 
+    // 使用 useDataFlow 实现搜索处理
+    const handleSearch = async (question: string) => {
+        if (!question.trim()) return;
+        try {
+            // 使用 executeQuery 方法执行查询
+            await executeQuery(flowId, question);
+        } catch (e) {
+            console.error(e);
+            toast.error("An error occurred. Please try again.");
+        }
+    };
+
     useEffect(() => {
         const searchKey = `${query}_${model}_${format}_${source}`;
         if (query && !searchedQueriesRef.current.has(searchKey)) {
@@ -145,18 +152,6 @@ export default function Page() {
             handleSearch(query);
         }
     }, [query, model, format, source]);
-
-    // 使用 useDataFlow 实现搜索处理
-    const handleSearch = async (question: string) => {
-        if (!question.trim()) return;
-        try {
-            // 使用 executeQuery 方法执行查询
-            await executeQuery(flowId, question, intentMessages, sqlMessages, chartMessages);
-        } catch (e) {
-            console.error(e);
-            toast.error("An error occurred. Please try again.");
-        }
-    };
 
     // SQL查询历史组件（可选，用于调试）
     const SQLHistoryDebug = () => {
