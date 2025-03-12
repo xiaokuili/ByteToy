@@ -22,11 +22,11 @@ export function Header({ variant = "full" }: HeaderProps) {
                         <div className="relative w-10 h-10 mr-3">
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-80"></div>
                             <div className="absolute inset-0.5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                                <span className="text-white text-sm font-bold">BT</span>
+                                <span className="text-white text-sm font-bold">IC</span>
                             </div>
                         </div>
                         <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
-                            ByteToy Insight
+                            Inseen Chat
                         </h1>
                     </Link>
 

@@ -57,7 +57,7 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>ByteToy Insight - 智能搜索与知识管理平台</title>
+        <title>见 - 基于自然语言数据可视化</title>
         <meta name="description" content="ByteToy Insight 是一个现代化的智能搜索与知识管理平台，帮助您更高效地获取和组织信息。" />
         <meta name="keywords" content="智能搜索,知识管理,AI,人工智能,ByteToy" />
       </Head>
@@ -79,14 +79,14 @@ export default function HomePage() {
               <div className="mb-6 relative w-24 h-24 mx-auto">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full opacity-20 animate-pulse"></div>
                 <div className="absolute inset-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-3xl font-bold">BT</span>
+                  <span className="text-white text-3xl font-bold">IC</span>
                 </div>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
-                ByteToy Insight
+              Inseen Chat
               </h1>
               <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300">
-                智能搜索与知识管理平台
+                与数据对话，轻松可视化
               </p>
             </div>
 

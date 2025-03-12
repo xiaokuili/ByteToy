@@ -9,11 +9,11 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | ByteToy Insight',
-    default: 'ByteToy Insight - 智能搜索与知识管理平台',
+    template: '%s | Inseen Chat',
+    default: 'Inseen Chat - 与数据对话，轻松可视化',
   },
-  description: 'ByteToy Insight 是一个现代化的智能搜索与知识管理平台，帮助您更高效地获取和组织信息。',
-  keywords: ['智能搜索', '知识管理', 'AI', '人工智能', 'ByteToy'],
+  description: 'Inseen Chat 是一个现代化的智能搜索与知识管理平台，帮助您更高效地获取和组织信息。',
+  keywords: ['数据可视化', '数据分析', 'AI', '人工智能', 'Inseen', "AI数据可视化", "AI生成图片"],
   authors: [{ name: '7788' }],
   creator: '7788',
   publisher: '7788',
