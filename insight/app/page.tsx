@@ -91,7 +91,7 @@ export default function HomePage() {
             </div>
 
             {/* 搜索区域 */}
-            <div className="space-y-4">
+            <div className="w-full max-w-4xl mx-auto">
               <SearchInput
                 value={searchQuery}
                 onChange={setSearchQuery}
