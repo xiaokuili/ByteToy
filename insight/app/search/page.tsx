@@ -19,6 +19,7 @@ interface SearchResultsProps {
 }
 
 const SearchResults = ({ results, onExport }: SearchResultsProps) => (
+    
     <div className="space-y-8">
         {results.map((result, index) => (
             <RenderSearchResult

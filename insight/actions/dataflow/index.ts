@@ -145,6 +145,7 @@ export async function processDataFlow(
         // 构建增强配置
         const enhancedConfig: RenderConfig = {
             id: chatId,
+            query: query,
             data: fetchResult.result.data as DataRecord[],
             chartConfig: {
                 options: finalConfig.config
