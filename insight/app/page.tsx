@@ -6,13 +6,12 @@ import { SearchInput } from "@/components/home/SearchInput"
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
 import { useDatasource } from "@/hook/useDatasource";
-import { DataSource } from "@/lib/types";
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
-  const {saveDatasource, dataSource, clearLocalStorage, getAllDatasources}= useDatasource()
+  const {saveDatasource, clearLocalStorage, getAllDatasources}= useDatasource()
   const router = useRouter();
 
   useEffect(() => {
@@ -87,7 +86,7 @@ export default function HomePage() {
                 onRemove={() => {
                   clearLocalStorage();
                 }}
-                dataSource={dataSource as DataSource}
+                getDatasource={getAllDatasources}
               />
 
              

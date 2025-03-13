@@ -70,20 +70,26 @@ export function useDatasource() {
         localStorage.clear();
     }, []);
 
+    // TODO: 目前只能获取一个datasource
     const getAllDatasources = useCallback(() => {
-        
+        const dataSources: DataSource[] = [];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             if (key?.startsWith('datasource_')) {
                 const value = localStorage.getItem(key);
                 if (value) {
-                    setDataSource(JSON.parse(value));
+                    const parsedValue = JSON.parse(value);
+                    dataSources.push(parsedValue);
                 }
             }
         }
+        if (dataSources.length > 0) {
+            setDataSource(dataSources[dataSources.length - 1]); // Set the last datasource as current
+        }
+        return dataSources.length > 0 ? dataSources[dataSources.length - 1] : null;
     }, []);
 
-    
+
     return {
         dataSource,
 

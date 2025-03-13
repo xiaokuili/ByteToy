@@ -1,6 +1,6 @@
 import { Upload, Send, Loader2, File, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { DataSource } from "@/lib/types";
 
@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 
+
 interface SearchInputProps {
     value: string;
     onChange: (value: string) => void;
     onFileUpload: (file: File) => Promise<{ loading: boolean, error: Error | null }>;
     onSearch: () => void;
     placeholder?: string;
-    dataSource?: DataSource;
+    getDatasource: () => DataSource | null | undefined;
     onRemove: () => void;
 }
 
@@ -27,7 +28,7 @@ export function SearchInput({
     onFileUpload,
     onSearch,
     placeholder = "请先上传文件，支持拖拽上传， 然后输入您想要的可视化效果...",
-    dataSource,
+    getDatasource,
     onRemove,
     
 }: SearchInputProps) {
@@ -36,12 +37,37 @@ export function SearchInput({
     const [isDragging, setIsDragging] = useState(false);
     
     const [isUploading, setIsUploading] = useState(false);
+    const [isRemove, setIsRemove] = useState(false);
+    const [dataSource, setDataSource] = useState<DataSource | null>(null);
+
+    useEffect(() => {
+        const dataSource = getDatasource()
+        if (dataSource) {   
+            setDataSource(dataSource)
+        }
+    }, []);
+
+    const handleRemove =  () => {
+        try {
+            setIsRemove(true);  // 设置加载状态
+            
+            // 执行删除操作
+            onRemove();  
+
+            // 获取最新数据
+            setDataSource(null)
+
+            toast.success("删除成功");  
+        } catch (error) {
+            console.error("删除失败:", error);
+            toast.error("删除失败");
+        } finally {
+            setIsRemove(false);  // 无论成功失败，都结束加载状态
+        }
+    };
 
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
+    const handleFileUpload = async (file: File) => {
         if (!file.name.endsWith('.csv')) {
             toast.error("请上传CSV格式的文件");
             return;
@@ -58,6 +84,16 @@ export function SearchInput({
             setHasFile(true);
             toast.success("文件上传成功");
         }
+        const dataSource = getDatasource()
+        if (dataSource) {
+            setDataSource(dataSource)
+        }
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        await handleFileUpload(file);
     };
 
     const handleDrop = async (e: React.DragEvent) => {
@@ -71,23 +107,7 @@ export function SearchInput({
 
         const file = e.dataTransfer.files?.[0];
         if (!file) return;
-
-        if (!file.name.endsWith('.csv')) {
-            toast.error("请上传CSV格式的文件");
-            return;
-        }
-        setIsUploading(true);
-        toast.info("正在上传文件");
-
-        const result = await onFileUpload(file);
-        setIsUploading(result.loading);
-        
-        if (result.error) {
-            toast.error("文件上传失败" + result.error.message as string );
-        } else {
-            setHasFile(true);
-            toast.success("文件上传成功");
-        }
+        await handleFileUpload(file);
     };
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -132,11 +152,13 @@ export function SearchInput({
                                 <Plus className="w-4 h-4" />
                             </button>
                             <button 
-                                onClick={onRemove}
+                                onClick={handleRemove}
                                 className="p-1 rounded-full hover:bg-gray-100 text-gray-500"
                                 title="清除所有数据源"
                             >
-                                <X className="w-4 h-4" />
+                                {
+                                    isRemove ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />
+                                }
                             </button>
                         </div>
                     </div>
@@ -147,11 +169,11 @@ export function SearchInput({
                                     <span className="truncate text-sm text-gray-700">{dataSource.name || `数据源`}</span>
                                 </div>
                                 <button 
-                                    onClick={onRemove}
+                                    onClick={handleRemove}
                                     className="p-1 rounded-full hover:bg-gray-200 text-gray-400"
                                     title="移除数据源"
                                 >
-                                    <X className="w-3.5 h-3.5" />
+                                    {isRemove ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
                                 </button>
                             </div>
                        
