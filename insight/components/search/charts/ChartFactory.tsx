@@ -51,7 +51,7 @@ interface ChartFactoryProps {
 
 export default function ChartFactory({ config, className, chartData }: ChartFactoryProps) {
     const { options } = config;
-
+    
     if (!chartData || !options) {
         return <div>No chart data</div>;
     }
@@ -69,17 +69,10 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
         : parsedChartData;
 
     const getColor = (key: string, index: number) => {
-        options.colors?.map((color, index) => {
-            console.log("color", color)
-        })
-
+        console.log("key", "color", options.colors?.[key])
         return options.colors?.[key] || defaultColors[index % defaultColors.length];
     };
-    console.log(options)
-    processedData.map((item, index) => {
-        console.log("item", item)
-        console.log("item", getColor(options.yKeys[0], index))
-    })
+
     const renderChart = () => {
         switch (options.type) {
             case "bar":
@@ -159,8 +152,8 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                             cy="50%"
                             outerRadius={120}
                         >
-                            {processedData.map((_, index) => (
-                                <Cell key={`cell-${index}`} fill={getColor(options.yKeys[0], index)} />
+                            {processedData.map((item, index) => (
+                                <Cell key={`cell-${index}`} fill={getColor(item[options.xKey] as string, index)} />
                             ))}
                         </Pie>
                         <ChartTooltip content={<ChartTooltipContent />} />

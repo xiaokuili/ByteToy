@@ -69,8 +69,8 @@ export default function SearchPage() {
                 ? prev.map(item => item.id === config.id ? config : item)
                 : [config, ...prev];
 
-           
-
+           console.log("newResults", newResults)
+            
             return newResults;
         });
     };
