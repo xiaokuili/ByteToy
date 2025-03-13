@@ -63,9 +63,11 @@ export const RunGenerateSQLQuery = async (query: string) => {
  * 从API获取SQL查询结果
  */
 async function fetchSQLQuery(query: string, dataSource: DataSource, flowId: string): Promise<string> {
-    const response = await fetch('http://127.0.0.1:8000/generate/sql', {
+    console.log("API Key :", process.env.NEXT_PUBLIC_API_KEY);
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/generate/sql`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' , 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_KEY}`},
         body: JSON.stringify({ user_input: query, datasource: dataSource, session_id: flowId })
     });
 
@@ -81,9 +83,9 @@ async function fetchSQLQuery(query: string, dataSource: DataSource, flowId: stri
  * 从API获取图表配置
  */
 async function fetchChartConfig(query: string, data: DataRecord[], flowId: string) {
-    const response = await fetch('http://127.0.0.1:8000/generate/chart', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/generate/chart`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' , 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_API_KEY}`},
         body: JSON.stringify({ user_input: query, data, session_id: flowId })
     });
 

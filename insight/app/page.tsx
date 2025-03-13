@@ -86,7 +86,7 @@ export default function HomePage() {
                 onRemove={() => {
                   clearLocalStorage();
                 }}
-                getDatasource={getAllDatasources}
+                getDatasource={getAllDatasources }
               />
 
              

@@ -55,8 +55,9 @@ export function useDatasource() {
             return { loading: false, error: err, dataSource: null };
         } 
     }, []);
-
     const getDatasourceFromLocalStorage = useCallback((name: string) => {
+        if (typeof window === 'undefined') return null;
+        
         const cached = localStorage.getItem(`datasource_${name}`);
         if (cached) {
             return JSON.parse(cached) as DataSource;
@@ -65,9 +66,16 @@ export function useDatasource() {
     }, []);
 
 
-
     const clearLocalStorage = useCallback(() => {
-        localStorage.clear();
+        if (typeof window === 'undefined') return;
+        
+        // Clear only datasource_ prefixed items
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key?.startsWith('datasource_')) {
+                localStorage.removeItem(key);
+            }
+        }
     }, []);
 
     // TODO: 目前只能获取一个datasource

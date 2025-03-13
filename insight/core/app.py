@@ -1,9 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header, Depends
 from pydantic import BaseModel, Field
 from enum import Enum
 from typing import Optional, Dict, Any, List
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+import os
 
 from dataVisualizerManager import  generate_sql, generate_chart_config, get_messages
 from interfaces import DataSource
@@ -14,6 +15,21 @@ from test_data import (
     EXAMPLE_SQL_REQUEST
 )
 
+# API密钥配置
+API_KEY = os.getenv("API_KEY")
+security = HTTPBearer(auto_error=False)
+
+async def verify_api_key(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)):
+    """验证API密钥"""    
+    # 如果Header中没有api-key，则检查Authorization Bearer token
+    if credentials and credentials.credentials == API_KEY:
+        return credentials.credentials
+    
+    # 如果两种方式都没有提供有效的API密钥，则抛出异常
+    raise HTTPException(
+        status_code=401, 
+        detail="无效的API密钥"
+    )
 
 class ProcessType(str, Enum):
     """处理类型枚举"""
@@ -126,12 +142,18 @@ app.add_middleware(
                 }
             }
         },
+        401: {
+            "description": "未授权访问"
+        },
         500: {
             "description": "服务器内部错误"
         }
     }
 )
-async def generate_sql_query(request: SQLRequest):
+async def generate_sql_query(
+    request: SQLRequest, 
+    token: str = Depends(verify_api_key)
+):
     """
     生成SQL查询接口
     
@@ -179,12 +201,18 @@ async def generate_sql_query(request: SQLRequest):
                 }
             }
         },
+        401: {
+            "description": "未授权访问"
+        },
         500: {
             "description": "服务器内部错误"
         }
     }
 )
-async def generate_chart(request: ChartRequest):
+async def generate_chart(
+    request: ChartRequest, 
+    token: str = Depends(verify_api_key)
+):
     """
     生成图表配置接口
     
@@ -222,12 +250,18 @@ async def generate_chart(request: ChartRequest):
                 }
             }
         },
+        401: {
+            "description": "未授权访问"
+        },
         500: {
             "description": "服务器内部错误"
         }
     }
 )
-async def get_session_messages(session_id: str):
+async def get_session_messages(
+    session_id: str, 
+    token: str = Depends(verify_api_key)
+):
     """
     获取会话消息接口
     

@@ -24,6 +24,40 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def filter_messages_by_window(messages: List[BaseMessage], window_size: int = 5) -> List[BaseMessage]:
+    """
+    Filter messages using a sliding window to keep the conversation context manageable.
+    
+    Args:
+        messages: List of conversation messages
+        window_size: Size of the sliding window (number of message pairs to keep)
+        
+    Returns:
+        List[BaseMessage]: Filtered list of messages within the window
+    """
+    if not messages:
+        return []
+        
+    # If messages are less than window size, return all
+    if len(messages) <= window_size * 2:
+        return messages
+        
+    # Keep the first system message if it exists
+    filtered = []
+    if isinstance(messages[0], SystemMessage):
+        filtered.append(messages[0])
+        messages = messages[1:]
+        
+    # Get the last N pairs of messages (human + AI)
+    message_pairs = list(zip(messages[::2], messages[1::2]))
+    recent_pairs = message_pairs[-window_size:]
+    
+    # Flatten the pairs back into a single list
+    filtered.extend([msg for pair in recent_pairs for msg in pair])
+    
+    return filtered
+
+
 class DataVisualizer:
     """
     Class for generating SQL queries and chart configurations from natural language.
@@ -91,7 +125,11 @@ class DataVisualizer:
                 history.append(f"Human: {msg.content}")
             elif isinstance(msg, AIMessage):
                 history.append(f"Assistant: {msg.content}")
-        return "\n".join(history)
+
+                
+        filtered_history = filter_messages_by_window(history)
+        return "\n".join(filtered_history)
+
 
     def generate_intent(self, query: str) -> str:
         """
