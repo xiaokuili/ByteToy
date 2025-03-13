@@ -5,6 +5,10 @@ from typing import Optional, Dict, Any, List
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import os
+from loguru import logger
+import sys
+import json
+import datetime
 
 from dataVisualizerManager import  generate_sql, generate_chart_config, get_messages
 from interfaces import DataSource
@@ -13,6 +17,29 @@ from test_data import (
     EXAMPLE_CHART_DATA,
     EXAMPLE_CHART_REQUEST,
     EXAMPLE_SQL_REQUEST
+)
+
+# Configure loguru logger
+# Remove default handler
+logger.remove()
+# Add console handler with color
+logger.add(
+    sys.stdout,
+    colorize=True,
+    format="{message}",
+    level="INFO",
+    serialize=False  # 禁用JSON格式输出，使用自定义格式
+)
+# Add file handler with rotation
+logger.add(
+    "logs/insight_api_{time:YYYY-MM-DD}.log",
+    rotation="00:00",  # Create new file at midnight
+    retention="30 days",  # Keep logs for 30 days
+    compression="zip",  # Compress rotated logs
+    format="{message}",
+    level="INFO",
+    encoding="utf-8",
+    serialize=False  # 禁用JSON格式输出，使用自定义格式
 )
 
 # API密钥配置
@@ -161,6 +188,8 @@ async def generate_sql_query(
     - 返回生成的SQL查询和会话ID
     """
     try:
+        session_id = request.session_id
+     
         # 创建数据源
         datasource = DataSource(
             name=request.datasource.name,
@@ -174,15 +203,39 @@ async def generate_sql_query(
         sql_result = generate_sql(
             query=request.user_input,
             datasource=datasource,
-            session_id=request.session_id
+            session_id=session_id
         )
+    
+        # 构建日志消息为JSON格式字符串
+        log_data = {
+            "session_id": session_id,
+            "user_input": request.user_input,
+            "generated_query": sql_result,
+            "status": "success"
+        }
+        
+        # 输出结构化日志
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        logger.info(f"{current_time} | INFO     | __main__:generate_sql_query:0 - SQL generation request\n{json.dumps(log_data, indent=2, ensure_ascii=False)}")
 
         return {
             "sql": sql_result,
-            "session_id": request.session_id
+            "session_id": session_id
         }
 
     except Exception as e:
+        # 构建错误日志消息为JSON格式字符串
+        log_data = {
+            "session_id": session_id,
+            "user_input": request.user_input,
+            "error": str(e),
+            "status": "failed"
+        }
+        
+        # 输出结构化日志
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        logger.error(f"{current_time} | ERROR    | __main__:generate_sql_query:0 - SQL generation failed\n{json.dumps(log_data, indent=2, ensure_ascii=False)}")
+        
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/generate/chart",
@@ -220,19 +273,45 @@ async def generate_chart(
     - 返回生成的图表配置和会话ID
     """
     try:
+        session_id = request.session_id
+    
         # 生成图表配置
         chart_config = generate_chart_config(
             data=request.data,
             query=request.user_input,
-            session_id=request.session_id
+            session_id=session_id
         )
-
+        
+        # 构建日志消息为JSON格式字符串
+        log_data = {
+            "session_id": session_id,
+            "user_input": request.user_input,
+            "chart_config": chart_config,
+            "status": "success"
+        }
+        
+        # 输出结构化日志
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        logger.info(f"{current_time} | INFO     | __main__:generate_chart:0 - Chart generation request\n{json.dumps(log_data, indent=2, ensure_ascii=False)}")
+        
         return {
             "chart_config": chart_config,
-            "session_id": request.session_id
+            "session_id": session_id
         }
 
     except Exception as e:
+        # 构建错误日志消息为JSON格式字符串
+        log_data = {
+            "session_id": session_id,
+            "user_input": request.user_input,
+            "error": str(e),
+            "status": "failed"
+        }
+        
+        # 输出结构化日志
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        logger.error(f"{current_time} | ERROR    | __main__:generate_chart:0 - Chart generation failed\n{json.dumps(log_data, indent=2, ensure_ascii=False)}")
+        
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/messages/{session_id}",
@@ -269,14 +348,38 @@ async def get_session_messages(
     - 返回SQL消息和图表消息列表
     """
     try:
+        # 构建日志消息为JSON格式字符串
+        log_data = {
+            "session_id": session_id,
+            "status": "retrieving"
+        }
+        
+        # 输出结构化日志
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        logger.info(f"{current_time} | INFO     | __main__:get_session_messages:0 - Retrieving messages\n{json.dumps(log_data, indent=2, ensure_ascii=False)}")
+        
         sql_messages, chart_messages = get_messages(session_id)
         return {
             "sql_messages": [msg.model_dump() for msg in sql_messages],
             "chart_messages": [msg.model_dump() for msg in chart_messages]
         }
     except Exception as e:
+        # 构建错误日志消息为JSON格式字符串
+        log_data = {
+            "session_id": session_id,
+            "error": str(e),
+            "status": "failed"
+        }
+        
+        # 输出结构化日志
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        logger.error(f"{current_time} | ERROR    | __main__:get_session_messages:0 - Error retrieving messages\n{json.dumps(log_data, indent=2, ensure_ascii=False)}")
+        
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
+    # 输出启动日志
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+    logger.info(f"{current_time} | INFO     | __main__:<module>:0 - Starting Insight API server")
     uvicorn.run(app, host="0.0.0.0", port=8000)
