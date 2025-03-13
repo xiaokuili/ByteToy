@@ -1,20 +1,25 @@
 "use client";
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { SearchInput } from "@/components/home/SearchInput"
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
 import { useDatasource } from "@/hook/useDatasource";
+import { DataSource } from "@/lib/types";
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
-  const {saveDatasource}= useDatasource()
+  const {saveDatasource, dataSource, clearLocalStorage, getAllDatasources}= useDatasource()
   const router = useRouter();
 
-  const handleSearch = () => {
+  useEffect(() => {
+    getAllDatasources();
+  }, []);
+
+  const handleSearch = () => {  
     if (!searchQuery.trim()) return;
     const flowId = crypto.randomUUID();
     const params = new URLSearchParams({
@@ -79,7 +84,10 @@ export default function HomePage() {
                 onChange={setSearchQuery}
                 onFileUpload={handleFileUpload}
                 onSearch={handleSearch}
-             
+                onRemove={() => {
+                  clearLocalStorage();
+                }}
+                dataSource={dataSource as DataSource}
               />
 
              

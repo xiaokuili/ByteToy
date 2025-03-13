@@ -1,7 +1,15 @@
-import { Upload, Send, Loader2 } from "lucide-react";
+import { Upload, Send, Loader2, File, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { DataSource } from "@/lib/types";
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 
 interface SearchInputProps {
     value: string;
@@ -9,7 +17,8 @@ interface SearchInputProps {
     onFileUpload: (file: File) => Promise<{ loading: boolean, error: Error | null }>;
     onSearch: () => void;
     placeholder?: string;
-   
+    dataSource?: DataSource;
+    onRemove: () => void;
 }
 
 export function SearchInput({
@@ -17,14 +26,16 @@ export function SearchInput({
     onChange,
     onFileUpload,
     onSearch,
-    placeholder = "请先上传文件，然后输入您想要的可视化效果...",
+    placeholder = "请先上传文件，支持拖拽上传， 然后输入您想要的可视化效果...",
+    dataSource,
+    onRemove,
     
 }: SearchInputProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [hasFile, setHasFile] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     
-    const [isLoading, setIsLoading] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,11 +48,12 @@ export function SearchInput({
         }
 
         toast.info("正在上传文件");
+        setIsUploading(true);
         const result = await onFileUpload(file);
-        setIsLoading(result.loading);
+        setIsUploading(result.loading);
         
         if (result.error) {
-            toast.error(result.error.message);
+            toast.error("文件上传失败" + result.error.message as string );
         } else {
             setHasFile(true);
             toast.success("文件上传成功");
@@ -52,7 +64,7 @@ export function SearchInput({
         e.preventDefault();
         setIsDragging(false);
 
-        if (isLoading) {
+        if (isUploading) {
             toast.error("正在上传文件");
             return;
         }
@@ -64,14 +76,14 @@ export function SearchInput({
             toast.error("请上传CSV格式的文件");
             return;
         }
-        setIsLoading(true);
+        setIsUploading(true);
         toast.info("正在上传文件");
 
         const result = await onFileUpload(file);
-        setIsLoading(result.loading);
+        setIsUploading(result.loading);
         
         if (result.error) {
-            toast.error(result.error.message);
+            toast.error("文件上传失败" + result.error.message as string );
         } else {
             setHasFile(true);
             toast.success("文件上传成功");
@@ -86,6 +98,67 @@ export function SearchInput({
     const handleDragLeave = (e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
+    };
+
+    // Function to render the data source dropdown
+    const renderDataSourceDropdown = () => {
+        if (!dataSource) return null;
+        
+        return (
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <button
+                        disabled={isUploading}
+                        className={`btn-icon mr-2 p-2 rounded-full transition-colors bg-green-100 hover:bg-green-200 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                        <File className="w-5 h-5 text-green-600" />
+                    </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64 p-0 shadow-md rounded-md border border-gray-200">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                        <h3 className="font-medium text-sm text-gray-700">Attached Files</h3>
+                        <div className="flex space-x-2">
+                            <button 
+                                onClick={() => {
+                                    if (isUploading) {
+                                        toast.error("正在上传文件");
+                                        return;
+                                    }
+                                    fileInputRef.current?.click();
+                                }}
+                                className="p-1 rounded-full hover:bg-gray-100 text-gray-500"
+                                title="添加数据源"
+                            >
+                                <Plus className="w-4 h-4" />
+                            </button>
+                            <button 
+                                onClick={onRemove}
+                                className="p-1 rounded-full hover:bg-gray-100 text-gray-500"
+                                title="清除所有数据源"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="max-h-60 overflow-y-auto">
+                            <div  className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
+                                <div className="flex items-center space-x-2">
+                                    <File className="w-4 h-4 text-gray-500" />
+                                    <span className="truncate text-sm text-gray-700">{dataSource.name || `数据源`}</span>
+                                </div>
+                                <button 
+                                    onClick={onRemove}
+                                    className="p-1 rounded-full hover:bg-gray-200 text-gray-400"
+                                    title="移除数据源"
+                                >
+                                    <X className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                       
+                    </div>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        );
     };
 
     return (
@@ -115,42 +188,40 @@ export function SearchInput({
                         placeholder={placeholder}
                         className="flex-1 bg-transparent text-slate-800 placeholder:text-slate-400 focus-visible:ring-0 focus:outline-none !border-none !shadow-none !outline-none h-12 text-lg"
                         onKeyDown={(e) => hasFile && e.key === 'Enter' && onSearch()}
-                        disabled={isLoading}
+                        disabled={isUploading}
                     />
                 </div>
 
 
                 {/* 下部按钮区域 */}
                 <div className="flex items-center justify-between px-4 py-2 pt-0">
-                    <div className="text-sm text-gray-500">
-                        {hasFile ? '文件已上传' : '支持拖拽或点击上传CSV文件'}
-                    </div>
-                    <div className="flex items-center">
-                        {/* 文件上传按钮 */}
-                        <button
-                            onClick={() => {
-                                if (isLoading) {
-                                    toast.error("正在处理中，请稍后再试");
-                                    return;
-                                }
-                                fileInputRef.current?.click();
-                            }}
-                            disabled={isLoading}
-                            className={`btn-icon mr-2 p-2 rounded-full transition-colors ${hasFile
-                                    ? 'bg-green-100 hover:bg-green-200'
-                                    : 'bg-blue-100 hover:bg-blue-200'
-                                } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                            <Upload className={`w-5 h-5 ${hasFile ? 'text-green-600' : 'text-blue-600'}`} />
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                className="hidden"
-                                onChange={handleFileChange}
-                                accept=".csv"
-                                disabled={isLoading}
-                            />
-                        </button>
+               
+                        {/* 数据源/文件按钮 */}
+                        {dataSource ? (
+                            renderDataSourceDropdown()
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    if (isUploading) {
+                                        toast.error("正在上传文件");
+                                        return;
+                                    }
+                                    fileInputRef.current?.click();
+                                }}
+                                disabled={isUploading}
+                                className={`btn-icon mr-2 p-2 rounded-full transition-colors bg-blue-100 hover:bg-blue-200 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                <Upload className="w-5 h-5 text-blue-600" />
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    onChange={handleFileChange}
+                                    accept=".csv"
+                                    disabled={isUploading}
+                                />
+                            </button>
+                        )}
 
                         {/* 搜索按钮 */}
                         <button
@@ -165,21 +236,21 @@ export function SearchInput({
                                     toast.error(`搜索失败: ${err instanceof Error ? err.message : '未知错误'}`);
                                 }
                             }}
-                            disabled={!hasFile || isLoading}
-                            className={`p-2 rounded-full transition-colors ${hasFile && !isLoading
+                            disabled={!hasFile || isUploading}
+                            className={`p-2 rounded-full transition-colors ${hasFile && !isUploading
                                     ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700'
                                     : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                         >
-                            {isLoading ? (
+                            {isUploading ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
                                 <Send className="h-4 w-4" />
                             )}
                         </button>
-                    </div>
                 </div>
             </div>
         </div>
     );
 }
+

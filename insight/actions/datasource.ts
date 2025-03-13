@@ -6,7 +6,6 @@ import { datasources } from '../lib/schema'
 import { db } from '@/lib/db'
 import { DataSource } from '@/lib/types'
 
-
 export async function saveDatasourceToDB(data: DataSource) {
     const result = await db
         .insert(datasources)
@@ -19,10 +18,10 @@ export async function saveDatasourceToDB(data: DataSource) {
             special_fields: data.special_fields
         })
         .onConflictDoUpdate({
-            target: datasources.id,
+            target: [datasources.name], // Change to use name as conflict target since it has a unique constraint
             set: {
-                name: data.name,
-                description: data.description,
+                id: data.id,
+                description: data.description, 
                 schema: data.schema,
                 example_data: data.example_data,
                 special_fields: data.special_fields

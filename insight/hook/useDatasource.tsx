@@ -6,6 +6,7 @@ import { DataSource } from '@/lib/types';
 
 export function useDatasource() {
     const [dataSource, setDataSource] = useState<DataSource | null>();
+    
 
     const saveDatasource = useCallback(async (file: File) => {
         let err: Error | null = null;
@@ -63,13 +64,35 @@ export function useDatasource() {
         return null;
     }, []);
 
+
+
+    const clearLocalStorage = useCallback(() => {
+        localStorage.clear();
+    }, []);
+
+    const getAllDatasources = useCallback(() => {
+        
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key?.startsWith('datasource_')) {
+                const value = localStorage.getItem(key);
+                if (value) {
+                    setDataSource(JSON.parse(value));
+                }
+            }
+        }
+    }, []);
+
+    
     return {
         dataSource,
 
         saveDatasource,
         getDatasourceByName,
 
-        getDatasourceFromLocalStorage
+        getDatasourceFromLocalStorage,
+        getAllDatasources,
+        clearLocalStorage
     };
 }
 
