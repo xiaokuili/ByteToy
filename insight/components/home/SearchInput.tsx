@@ -44,6 +44,7 @@ export function SearchInput({
         const dataSource = getDatasource()
         if (dataSource) {   
             setDataSource(dataSource)
+            setHasFile(true)
         }
     }, []);
 
