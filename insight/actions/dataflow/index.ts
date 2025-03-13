@@ -1,7 +1,6 @@
 "use server";
 
 import { DataRecord, DataSource, DisplayFormat, FetchResult, RenderConfig } from "@/lib/types";
-import { detectIntent } from "./intent";
 import {  createConnection } from "@/lib/db";
 
 // Cache for storing query results
@@ -110,59 +109,42 @@ export async function processDataFlow(
     intentType?: string;
 }> {
     try {
-        // 1. 意图检测阶段
-        const { intent } = await detectIntent(query);
-
-        // 检查缓存中是否有数据
-        const cacheKey = `${dataSource.name}_${flowId}`;
-
-        // 2. 选择和获取阶段
+        // 1. 获取数据
         let fetchResult: { result: FetchResult } = { result: { data: [] } };
+        const sqlQuery = await fetchSQLQuery(query, dataSource, flowId);
+        console.log("sqlQuery", sqlQuery);
 
-        if (intent === "生成图表" && !dataCache.has(cacheKey)) {
-            // 获取SQL查询
-            const sqlQuery = await fetchSQLQuery(query, dataSource, flowId);
-            console.log("sqlQuery", sqlQuery);
-            const result = await RunGenerateSQLQuery(sqlQuery);
-            
-            if (result?.length > 0) {
-                fetchResult = { result: { data: result } };
-                dataCache.set(cacheKey, fetchResult);
-            }
-        } else if (dataCache.has(cacheKey)) {
-            // 使用缓存数据
-            const cachedResult = dataCache.get(cacheKey);
-            if (!cachedResult) {
-                throw new Error("缓存数据不存在");
-            }
-            fetchResult = cachedResult;
+        const cacheKey = `${flowId}_${sqlQuery}`;
+
+        if (dataCache.has(cacheKey)) {
+            fetchResult = dataCache.get(cacheKey) as { result: FetchResult };
         } else {
-            throw new Error("需要先获取数据才能配置图表");
+            const result = await RunGenerateSQLQuery(sqlQuery);
+            fetchResult = { result: { data: result } };
+            dataCache.set(cacheKey, fetchResult);
         }
 
-        // 3. 配置阶段 - 获取图表配置
-        const finalConfig = await fetchChartConfig(query, fetchResult.result.data as DataRecord[], flowId);
-        // 构建增强配置
-        const enhancedConfig: RenderConfig = {
+        // 2.获取配置
+        const config = await fetchChartConfig(query, fetchResult.result.data as DataRecord[], flowId);
+        
+        const finalConfig: RenderConfig = {
             id: chatId,
             query: query,
             data: fetchResult.result.data as DataRecord[],
             chartConfig: {
-                options: finalConfig.config
+                options: config.config
             },
             format: format,
             isLoading: false,
             metadata: {
-                ...finalConfig.metadata,
+                ...config.metadata,
                 sqlQuery: fetchResult.result.metadata?.query,
-                intentType: intent
             }
         };
 
         return {
-            result: enhancedConfig,
+            result: finalConfig,
             sqlQuery: fetchResult.result.metadata?.query as string,
-            intentType: intent
         };
     } catch (error) {
         const err = error instanceof Error ? error : new Error('处理数据时发生未知错误');

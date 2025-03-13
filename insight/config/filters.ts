@@ -1,5 +1,5 @@
 import { createElement } from 'react';
-import { Sparkles, Database, Globe, FileText, BarChart3, PieChart, LineChart, Table, List } from "lucide-react";
+import {  Database, Globe, FileText, BarChart3, PieChart, LineChart, Table, List } from "lucide-react";
 import { JSX } from 'react';
 
 // home config 

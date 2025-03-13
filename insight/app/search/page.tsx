@@ -2,7 +2,6 @@
 import { useState, useRef, useEffect } from "react";
 import { RenderConfig, DisplayFormat } from "@/lib/types";
 import { useSearchParams } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 import SearchInput from "@/components/search/SearchInput";
@@ -10,8 +9,8 @@ import { RenderSearchResult } from "@/components/search/index";
 import { Header } from "@/components/layout/Header";
 
 import { useDataFlow } from "@/hook/useDataFlow";
-import { useDataflowStorage } from "@/hook/useDataflowStorage";
-import { testTableData } from "@/test/test-table-data";
+import { useDatasource } from "@/hook/useDatasource";
+import { DataSource } from "@/lib/types";
 
 interface SearchResultsProps {
     results: RenderConfig[];
@@ -51,40 +50,26 @@ const SQLDebugger = ({ queries }: { queries: string[] }) => {
 
 export default function SearchPage() {
     const searchParams = useSearchParams();
-    const { data: session } = useSession();
     const [searchResults, setSearchResults] = useState<RenderConfig[]>([]);
-
+    const {  getDatasourceFromLocalStorage } = useDatasource()
+    
     const query = searchParams?.get('q') || '';
-    const model = searchParams?.get('model') || 'DEEPSEEK';
-    const format = searchParams?.get('format') || 'pie';
-    const source = searchParams?.get('source') || '';
+    const sourceName = searchParams?.get('source') || '';
     const flowId = searchParams?.get('flowId') || '';
+    const dataSource = getDatasourceFromLocalStorage(sourceName)
+
 
     const searchedQueriesRef = useRef<Set<string>>(new Set());
 
-    const { saveDraft, createDataflow, drafts } = useDataflowStorage();
 
     const handleSearchSuccess = (config: RenderConfig) => {
         setSearchResults(prev => {
-            debugger;
             const exists = prev.some(item => item.id === config.id);
             const newResults = exists
                 ? prev.map(item => item.id === config.id ? config : item)
                 : [config, ...prev];
 
-            if (config.id && session?.user?.email) {
-                saveDraft(config.id, {
-                    id: config.id,
-                    name: config.query,
-                    datasourceId: testTableData.id as string,
-                    sql: config.metadata?.sqlQuery,
-                    chartType: config.format,
-                    chartConfig: config.chartConfig?.options,
-                    chartFramework: "recharts",
-                    createdBy: session.user.email,
-                    updatedBy: session.user.email,
-                });
-            }
+           
 
             return newResults;
         });
@@ -107,9 +92,9 @@ export default function SearchPage() {
     const {
         executeQuery,
         sqlQueries,
-        
+        isLoading
     } = useDataFlow({
-        dataSource: testTableData,
+        dataSource:dataSource as DataSource,
         format: 'chart' as DisplayFormat,
         collectSQLQuery: true,
         onStart: (config) => setSearchResults(prev => [config, ...prev]),
@@ -128,35 +113,11 @@ export default function SearchPage() {
     };
 
     const handleExport = async (configId: string) => {
-        const draft = drafts[configId];
-        if (!draft) {
-            toast.error("Draft not found");
-            return;
-        }
-
-        const toastId = "export-loading";
-        try {
-            toast.loading("Exporting to database...", { id: toastId });
-            const result = await createDataflow(draft);
-            
-            toast.dismiss(toastId);
-            if (result) {
-                toast.success("Export successful", {
-                    description: "Chart saved to database"
-                });
-            } else {
-                throw new Error("Export failed");
-            }
-        } catch (error) {
-            toast.dismiss(toastId);
-            toast.error("Export failed", {
-                description: error instanceof Error ? error.message : "Unknown error"
-            });
-        }
+        console.log("export", configId);
     };
 
     useEffect(() => {
-        const searchKey = `${query}_${model}_${format}_${source}`;
+        const searchKey = `${query}_${sourceName}`;
         if (query && !searchedQueriesRef.current.has(searchKey)) {
             searchedQueriesRef.current.add(searchKey);
             handleSearch(query);
@@ -169,8 +130,8 @@ export default function SearchPage() {
             
             <SearchInput
                 onSearch={handleSearch}
-                defaultModel={model}
                 placeholder="Enter your question..."
+                isLoading={isLoading}
             />
 
             <div className="flex-1 w-full max-w-4xl mx-auto px-4 py-8">

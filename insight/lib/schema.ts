@@ -1,12 +1,23 @@
+import { sql } from 'drizzle-orm';
 import { jsonb, pgTable, text, varchar, timestamp } from 'drizzle-orm/pg-core';
 
 export const datasources = pgTable('datasources', {
-    name: varchar('name', { length: 256 }).notNull(),
+    id: text('id').primaryKey(),
+    name: text('name').notNull().unique(),
     description: text('description'),
-    schema: text('schema'),
+    schema: text('schema').notNull(),
     example_data: text('example_data'),
-    special_fields: text('special_fields')
+    special_fields: text('special_fields'),
+    // 使用 sql.now() 设置默认值
+    created_at: timestamp('created_at', { mode: 'date' })
+        .default(sql`CURRENT_TIMESTAMP`)
+        .notNull(),
+    // 使用触发器自动更新
+    updated_at: timestamp('updated_at', { mode: 'date' })
+        .default(sql`CURRENT_TIMESTAMP`)
+        .notNull()
 });
+
 
 
 // TODO : 1. 在 /Users/root1/mycode/ByteToy/insight/actions 中实现dataflowConfig 的数据库操作

@@ -699,6 +699,22 @@ tenacity = ">=8.1.0,<8.4.0 || >8.4.0,<10.0.0"
 typing-extensions = ">=4.7"
 
 [[package]]
+name = "langchain-deepseek"
+version = "0.1.2"
+description = "An integration package connecting DeepSeek and LangChain"
+optional = false
+python-versions = "<4.0,>=3.9"
+groups = ["main"]
+files = [
+    {file = "langchain_deepseek-0.1.2-py3-none-any.whl", hash = "sha256:6ec76c621670afa763671eba8a54ff356b1772f3779fea4ea963cf01e5119145"},
+    {file = "langchain_deepseek-0.1.2.tar.gz", hash = "sha256:0ccb482d1241ed16a5578dcb7606b847d923b7dd56737e7e5ba20be635d0ca34"},
+]
+
+[package.dependencies]
+langchain-core = ">=0.3.34,<1.0.0"
+langchain-openai = ">=0.3.5,<1.0.0"
+
+[[package]]
 name = "langchain-openai"
 version = "0.3.8"
 description = "An integration package connecting OpenAI and LangChain"
@@ -1835,4 +1851,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "696664a460ff8829685332dd283ed3fc2038b68cd80e8f7a78380e639a7a7def"
+content-hash = "021555c5ba1fedb12d6d49b51467b82f70deafdee9c66ab7ab41a54098fa6bac"

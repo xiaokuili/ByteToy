@@ -69,9 +69,17 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
         : parsedChartData;
 
     const getColor = (key: string, index: number) => {
+        options.colors?.map((color, index) => {
+            console.log("color", color)
+        })
+
         return options.colors?.[key] || defaultColors[index % defaultColors.length];
     };
-
+    console.log(options)
+    processedData.map((item, index) => {
+        console.log("item", item)
+        console.log("item", getColor(options.yKeys[0], index))
+    })
     const renderChart = () => {
         switch (options.type) {
             case "bar":

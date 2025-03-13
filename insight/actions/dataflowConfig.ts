@@ -13,7 +13,7 @@ export type DataflowConfigInput = {
     datasourceId: string;
     sql?: string;
     chartType: string;
-    chartConfig?: any;
+    chartConfig?: unknown;
     chartFramework: chartFramework;
     createdBy: string;
     updatedBy?: string;

@@ -1,34 +1,7 @@
 import { Message } from "ai";
 import { z } from "zod";
 
-//=============================================================================
-// 完整数据处理流程
-//=============================================================================
 
-/**
- * 数据处理流程由五个主要步骤组成：
- * 1. 选择(Select) - 根据数据源类型选择合适的数据获取方法
- * 2. 获取(Fetch) - 从选定的数据源获取数据
- * 3. 配置(Configure) - 分析数据并生成适当的渲染配置
- * 4. 渲染(Render) - 将获取的数据以选定格式展示
- */
-
-//=============================================================================
-// 核心数据流类型
-//=============================================================================
-
-/** 数据源选择器 - 根据数据源和查询类型选择合适的获取方法 */
-export type FetchSelector = (dataSource: DataSource, query: string) => FetchConfig;
-
-/** 数据获取函数 - 从特定数据源获取数据 */
-export type Fetch = (config: FetchConfig) => Promise<{
-    result: FetchResult;
-    messages?: Message[];
-}>;
-
-
-/** 配置生成器 - 为选定的展示格式生成配置 */
-export type ConfigGenerator = (data: DataRecord[], query: string, messages?: Message[]) => Promise<RenderConfig>;
 
 /** 数据渲染函数 - 接收配置并返回React组件 */
 export interface Render {
@@ -62,16 +35,7 @@ export type FetchResult = Result<DataRecord[]>;
 //=============================================================================
 
 
-/** 数据获取配置 */
-export interface FetchConfig {
-    fetchType: FetchType;   // 获取数据的方式
-    query: string;          // 查询内容
-    parameters?: Record<string, any>; // 额外参数
-    dataSource?: DataSource; // 数据源
 
-    // 多轮对话记录
-    messages?: Message[];
-}
 
 
 /** 渲染配置 */
@@ -82,9 +46,7 @@ export interface RenderConfig {
     data: DataRecord[];     // 要渲染的数据
     format: DisplayFormat;  // 展示格式
     chartConfig?: ChartConfig; // 图表配置（如果format为chart）
-    tableConfig?: TableConfig; // 表格配置（如果format为table）
-    searchConfig?: SearchConfig; // 搜索结果配置（如果format为search）
-
+    
     // loading 
     isLoading?: boolean;
     loadingMessage?: string;
@@ -93,38 +55,22 @@ export interface RenderConfig {
     errorMessage?: string;
 
     // 元数据 
-    metadata?: Record<string, any>;
+    metadata?: Record<string,unknown>;
     messages?: Message[]; // 多轮对话记录
 }
 
-/** 表格配置 */
-export interface TableConfig {
-    columns: Array<{
-        key: string;
-        title: string;
-        width?: number;
-    }>;
-    pagination?: boolean;
-}
-
-/** 搜索结果配置 */
-export interface SearchConfig {
-    highlightFields: string[];
-    showMetadata: boolean;
-}
 
 /** 数据源定义 */
-export interface DataSource {
-    name: string;           // 数据源名称
-    description?: string;   // 数据源描述
-    schema?: string;        // 建表语句
-    example_data?: string;  // 样例数据
-    special_fields?: string; // 特殊字段
-    fetch_type?: FetchType; // 该数据源默认的获取方式
-}
 
-/** 数据获取类型 */
-export type FetchType = "sql" | "rag" | "web";
+export interface DataSource {
+    id: string;
+    name: string;
+    description: string;
+    schema: string;
+    example_data: string;
+    special_fields: string;
+
+}
 
 /** 数据展示格式 */
 export type DisplayFormat = "chart" | "table" | "search";

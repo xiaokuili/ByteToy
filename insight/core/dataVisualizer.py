@@ -2,12 +2,14 @@
 # Core interfaces for SQL generation and chart configuration from natural language
 from typing import Dict, List, Any, Optional
 import uuid
+import os 
 
 from interfaces import DataSource
 
 from langchain.prompts import ChatPromptTemplate
 from langchain.output_parsers import PydanticOutputParser
 from langchain_openai import ChatOpenAI
+from langchain_deepseek import ChatDeepSeek
 from pydantic import BaseModel, Field
 from langchain_core.messages import (
     HumanMessage,
@@ -36,14 +38,47 @@ class DataVisualizer:
             model_name: The name of the language model to use
             session_id: Unique identifier for this session
         """
-        self.model_name = model_name
+        self.model_name = os.getenv("BASE_MODEL_NAME")
         self.session_id = session_id or str(uuid.uuid4())
-        self.sql_system_message = """You are a SQL (postgres) and data visualization expert. 
-        Your job is to help the user write a SQL query to retrieve the data they need."""
-        self.chart_system_message = """You are a data visualization expert. 
-        Your job is to generate chart configurations that best visualize the data and answer the user's query."""
-        self.sql_messages: List[BaseMessage] = [SystemMessage(content=self.sql_system_message)]
-        self.chart_messages: List[BaseMessage] = [SystemMessage(content=self.chart_system_message)]
+        self.intent_system_message = """你是一个意图识别专家，你的任务是, 基于用户多轮对话， 判度用户当前输入是否需要重新生成sql
+                                        1. 如果用户输入与修改SQL无关，之和图表配置有关，返回no 
+                                        2. 如果用户输入涉及数据重新获取，返回yes
+                                        3. 请注意联系多轮对话上下文， 不要孤立的看待当前输入
+
+                                        示例1:
+                                        历史对话:
+                                        Human: 查询销售数据
+                                        Assistant: 已生成查询销售数据的SQL
+                                        Human: 把图表改成柱状图
+                                        判断: no (因为只是修改图表类型，不需要重新查询数据)
+
+                                        示例2:
+                                        历史对话:
+                                        Human: 查询去年的销售数据
+                                        Assistant: 已生成去年销售数据的SQL
+                                        Human: 我想看今年的数据
+                                        判断: yes (因为需要查询新的时间范围的数据)
+
+                                        示例3:
+                                        历史对话:
+                                        Human: 分析产品A的销售情况
+                                        判断: yes (需要获取数据)
+                                        """
+
+                                    
+                            
+        self.sql_system_message = """你是一个PostgreSQL专家，你的任务是:
+                                    1. 基于用户的多轮对话历史和当前输入，生成合适的SQL查询语句
+                                    """
+        self.chart_system_message = """你是一个数据可视化专家，你的任务是:
+                                    1. 基于用户的多轮对话历史和当前输入，生成合适的图表配置
+                                    2. 我会提供历史用户输入和历史图表配置，请你更加聪明的结合上下文进行处理
+                                    3. 如果是颜色， 基于hsl() 这种样式返回
+                                   """
+        self.intent_messages: List[BaseMessage] = []
+        self.sql_messages: List[BaseMessage] = []
+        self.chart_messages: List[BaseMessage] = []
+
         self.last_sql_query: Optional[str] = None
         self.last_chart_config: Optional[Dict[str, Any]] = None
         self.sql_query = ""
@@ -57,6 +92,61 @@ class DataVisualizer:
             elif isinstance(msg, AIMessage):
                 history.append(f"Assistant: {msg.content}")
         return "\n".join(history)
+
+    def generate_intent(self, query: str) -> str:
+        """
+        生成意图
+        
+        Args:
+            query: 用户输入的自然语言查询
+            
+        Returns:
+            str: 意图判断结果 ('yes' 或 'no')
+        """
+        if not self.intent_messages:
+            return "yes"
+        try:
+            # 1. Define output schema using Pydantic
+            class IntentOutput(BaseModel):
+                intent: str = Field(description="意图判断结果，yes表示需要重新生成SQL，no表示不需要")
+                explanation: str = Field(description="意图判断的解释说明")
+
+            # 2. Construct the prompt template with chat history
+            chat_history = self._get_chat_history(self.intent_messages)
+            template = self.intent_system_message + """
+            
+            Previous conversation:
+            {chat_history}
+            
+            User Query: {query}
+            
+            判断是否需要重新生成SQL查询。
+            """
+
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", template),
+                ("human", "{input}")
+            ])
+
+            # 3. Set up the LLM with structured output
+            model = ChatDeepSeek(model=self.model_name, api_base=os.getenv("DEEPSEEK_BASE_URL"), temperature=0)
+            chain = prompt | model.with_structured_output(IntentOutput)
+
+            # 4. Execute the chain
+            result = chain.invoke({
+                "chat_history": chat_history,
+                "query": query,
+                "input": query
+            })
+
+            self.intent_messages.extend([
+                HumanMessage(content=query),
+                AIMessage(content=str(result))
+            ])
+            return result.intent
+
+        except Exception as e:
+            raise Exception(f"Failed to generate intent: {str(e)}")
 
     def generate_sql(
         self,
@@ -78,13 +168,12 @@ class DataVisualizer:
         try:
             # 1. Define output schema using Pydantic
             class SQLQueryOutput(BaseModel):
-                query: str = Field(description="The SQL query to execute")
-                explanation: str = Field(description="Explanation of what the SQL query does")
+                query: str = Field(description="The SQL query to execute, 也可能是历史sql")
+                explanation: str = Field(description="Explanation of what the SQL query does，如果是历史sql，也进行解释")
 
             # 2. Construct the prompt template with chat history
             chat_history = self._get_chat_history(self.sql_messages)
-            template = """
-            You are a SQL expert. Generate a SQL query based on the following information:
+            template = self.sql_system_message + """
             
             Table Schema:
             {schema}
@@ -109,9 +198,8 @@ class DataVisualizer:
             ])
 
             # 3. Set up the LLM with structured output
-            model = ChatOpenAI(model=self.model_name, temperature=0)
+            model = ChatDeepSeek(model=self.model_name, api_base=os.getenv("DEEPSEEK_BASE_URL"), temperature=0)
             chain = prompt | model.with_structured_output(SQLQueryOutput)
-
             # 4. Execute the chain
             result = chain.invoke({
                 "schema": datasource.schema,
@@ -122,14 +210,17 @@ class DataVisualizer:
                 "input": query
             })
             
-            # 5. Update conversation history
-            self.sql_messages.extend([
+
+            self.intent_messages.extend([
                 HumanMessage(content=query),
                 AIMessage(content=str(result))
             ])
+       
             
             self.last_sql_query = result.query
             self.sql_query = result.query
+
+           
             return {
                 "query": result.query,
                 "explanation": result.explanation
@@ -173,9 +264,8 @@ class DataVisualizer:
 
             # 2. Construct the prompt template with chat history
             chat_history = self._get_chat_history(self.chart_messages)
-            template = """
-            You are a data visualization expert. Generate a chart configuration based on the following:
-            
+            template = self.chart_system_message + """
+
             Data Sample:
             {data}
             
@@ -208,7 +298,7 @@ class DataVisualizer:
             ])
 
             # 3. Set up the LLM with structured output
-            model = ChatOpenAI(model=self.model_name, temperature=0)
+            model = ChatDeepSeek(model=self.model_name, api_base=os.getenv("DEEPSEEK_BASE_URL"), temperature=0)
             chain = prompt | model.with_structured_output(ChartConfigOutput)
 
             # 4. Execute the chain
@@ -218,20 +308,21 @@ class DataVisualizer:
                 "query": query,
                 "input": query
             })
-
+            
             # 5. Update conversation history
             self.chart_messages.extend([
                 HumanMessage(content=query),
                 AIMessage(content=str(result))
             ])
-            
+
+        
             self.last_chart_config = result
             if result.colors is None:
                 # Generate colors for each y-axis key
                 result.colors = {}
                 for i, key in enumerate(result.yKeys):
                     result.colors[key] = f"hsl(var(--chart-{i + 1}))"
-
+          
             return {
                 "config": {
                     "description": result.description,

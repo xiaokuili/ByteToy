@@ -70,8 +70,19 @@ class DataVisualizerManager:
             Dict[str, Any]: Dictionary containing the generated SQL query and updated messages
         """
         visualizer = self.get_visualizer(session_id)
-        return visualizer.generate_sql(query, datasource, **kwargs)
-    
+        intent = visualizer.generate_intent(query)
+        print("intent", intent)
+        if intent == "yes":
+            return visualizer.generate_sql(query, datasource, **kwargs)
+        else:
+            sql = visualizer.get_sql_query()
+            print("sql", sql)
+            return {
+                "query": sql,
+                "explanation": intent
+            }
+            
+        
     def generate_chart_config(
         self,
         data: List[Dict[str, Any]],

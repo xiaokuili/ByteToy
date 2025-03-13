@@ -1,4 +1,4 @@
-import { Search, Sparkles, Share2 } from 'lucide-react';
+import { Search, Sparkles, Share2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ChartFactory from './charts/ChartFactory';
 import { DisplayFormat, RenderConfig } from '@/lib/types';
@@ -87,9 +87,11 @@ export const RenderSearchResult = ({ format, config, onExport }: { format: Displ
                 <div className="flex-1">
                     <h3 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                         {query}
-                        <span className={cn("inline-block", isLoading ? "animate-pulse" : "opacity-50")}>
-                            <Sparkles className="h-4 w-4 text-amber-400" />
-                        </span>
+                        {isLoading ? (
+                            <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+                        ) : (
+                            <Sparkles className="h-4 w-4 text-amber-400 opacity-50" />
+                        )}
                     </h3>
                 </div>
 
@@ -114,8 +116,11 @@ export const RenderSearchResult = ({ format, config, onExport }: { format: Displ
             {/* 内容区域 */}
             <div className="p-5 bg-white/90 dark:bg-gray-850/90 border-t border-gray-200 dark:border-gray-700">
                 {isLoading ? (
-                    <div className="animate-pulse">
-                        <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+                    <div className="animate-pulse space-y-4">
+                        <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/3 animate-pulse"></div>
+                        <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded w-full animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 animate-pulse"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse"></div>
                     </div>
                 ) : isError ? (
                     <div className="text-red-500">
@@ -128,5 +133,4 @@ export const RenderSearchResult = ({ format, config, onExport }: { format: Displ
         </div>
     );
 };
-
 
