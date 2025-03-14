@@ -1,5 +1,5 @@
 # Docker configuration
-COMPOSE_FILE = insight/dockerfiles/docker-compose.yaml
+COMPOSE_FILE = /dockerfiles/docker-compose.yaml
 
 # Ports
 POSTGRES_PORT = 5432
