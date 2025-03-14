@@ -1,22 +1,25 @@
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install poetry
-RUN pip install poetry
+# 设置 pip 镜像源
+RUN pip install --upgrade pip \
+    && pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
-# Copy pyproject.toml and poetry.lock
+# 安装 poetry 并设置镜像源
+RUN pip install poetry \
+    && poetry config virtualenvs.create false \
+    && poetry config repositories.pypi https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 复制 pyproject.toml 和 poetry.lock
 COPY core/pyproject.toml core/poetry.lock ./
 
-# Install dependencies using poetry
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
+# 安装依赖
+RUN poetry install --no-interaction --no-ansi
 
-# Copy the rest of the application
+# 复制应用代码
 COPY core/ .
 
-# Expose the port
 EXPOSE 8000
 
-# Start the application
 CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
