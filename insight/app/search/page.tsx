@@ -11,6 +11,7 @@ import { Header } from "@/components/layout/Header";
 import { useDataFlow } from "@/hook/useDataFlow";
 import { useDatasource } from "@/hook/useDatasource";
 import { DataSource } from "@/lib/types";
+import { randomID } from "@/lib/utils";
 
 interface SearchResultsProps {
     results: RenderConfig[];
@@ -75,7 +76,7 @@ function SearchPageContent() {
 
     const handleSearchError = (error: Error) => {
         const errorConfig: RenderConfig = {
-            id: crypto.randomUUID(),
+            id: randomID(),
             query: "",
             format: "chart",
             data: [],
@@ -102,7 +103,7 @@ function SearchPageContent() {
 
     const handleSearch = async (question: string) => {
         if (!question.trim()) return;
-        const chatId = crypto.randomUUID();
+        const chatId = randomID();
         try {
             await executeQuery(flowId, question, chatId);
         } catch (error) {

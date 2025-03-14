@@ -6,6 +6,7 @@ import { SearchInput } from "@/components/home/SearchInput"
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
 import { useDatasource } from "@/hook/useDatasource";
+import {randomID} from "@/lib/utils"
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,7 +25,7 @@ export default function HomePage() {
 
   const handleSearch = () => {  
     if (!searchQuery.trim()) return;
-    const flowId = crypto.randomUUID();
+    const flowId = randomID();
     const params = new URLSearchParams({
       q: searchQuery,
       source: selectedSource || "",

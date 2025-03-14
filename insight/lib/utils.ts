@@ -1,6 +1,7 @@
 import { Message } from "ai";
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { v4 as uuidv4 } from 'uuid';
 
 
 /**
@@ -46,3 +47,10 @@ export function filterMessagesByTokenCount(messages: Message[], maxTokens: numbe
 
   return chatMessages;
 }
+
+
+export const randomID = () => {
+  return uuidv4();
+}
+
+
