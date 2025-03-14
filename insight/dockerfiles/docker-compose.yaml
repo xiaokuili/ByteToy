@@ -18,7 +18,7 @@ services:
 
   fastapi:
     build:
-      context: ../../core
+      context: ../..
       dockerfile: insight/dockerfiles/fastapi.Dockerfile
     image: bytetoy-fastapi
     container_name: bytetoy-fastapi-container

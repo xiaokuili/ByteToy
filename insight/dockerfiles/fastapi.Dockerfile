@@ -12,13 +12,13 @@ RUN pip install poetry \
     && poetry config repositories.pypi https://pypi.tuna.tsinghua.edu.cn/simple
 
 # 复制 pyproject.toml 和 poetry.lock
-COPY core/pyproject.toml core/poetry.lock ./
+COPY insight/core/pyproject.toml insight/core/poetry.lock ./
 
 # 安装依赖
 RUN poetry install --no-interaction --no-ansi --no-root
 
 # 复制应用代码
-COPY core/ .
+COPY insight/core/ .
 
 EXPOSE 8000
 
