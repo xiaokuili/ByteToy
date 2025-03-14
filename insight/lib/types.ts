@@ -96,7 +96,7 @@ export const configSchema = z
                 "Describe the chart. What is it showing? What is interesting about the way the data is displayed?",
             ),
         takeaway: z.string().describe("What is the main takeaway from the chart?"),
-        type: z.enum(["bar", "line", "area", "pie"]).describe("Type of chart"),
+        type: z.enum(["bar", "line", "area", "pie", "scatter", "radar", "radialBar", "composed"]).describe("Type of chart"),
         title: z.string(),
         xKey: z.string().describe("Key for x-axis or category"),
         yKeys: z.array(z.string()).describe("Key(s) for y-axis values this is typically the quantitative column"),

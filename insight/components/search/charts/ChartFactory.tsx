@@ -14,7 +14,18 @@ import {
     YAxis,
     CartesianGrid,
     Legend,
-    Label
+    Label,
+    Scatter,
+    ScatterChart,
+    Radar,
+    RadarChart,
+    PolarGrid,
+    PolarAngleAxis,
+    PolarRadiusAxis,
+    RadialBar,
+    RadialBarChart,
+    ComposedChart,
+    Tooltip as RechartsTooltip
 } from "recharts";
 import {
     ChartContainer,
@@ -64,12 +75,13 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
         return parsedItem;
     });
 
-    const processedData = options.type === "bar" || options.type === "pie"
+    // Limit data points for certain chart types to prevent performance issues
+    const processedData = ["bar", "pie", "radar", "radialBar"].includes(options.type)
         ? parsedChartData.slice(0, 20)
         : parsedChartData;
 
     const getColor = (key: string, index: number) => {
-        console.log("key", "color", options.colors?.[key])
+        // Use the configured color if available, otherwise use default colors
         return options.colors?.[key] || defaultColors[index % defaultColors.length];
     };
 
@@ -88,7 +100,12 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                         <ChartTooltip content={<ChartTooltipContent />} />
                         {options.legend && <Legend />}
                         {options.yKeys.map((key, index) => (
-                            <Bar key={key} dataKey={key} fill={getColor(key, index)} />
+                            <Bar 
+                                key={key} 
+                                dataKey={key} 
+                                fill={getColor(key, index)} 
+                                stroke={getColor(key, index)}
+                            />
                         ))}
                     </BarChart>
                 );
@@ -112,10 +129,22 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                         {options.legend && <Legend />}
                         {useTransformedData
                             ? lineFields.map((key, index) => (
-                                <Line key={key} type="monotone" dataKey={key} stroke={getColor(key, index)} />
+                                <Line 
+                                    key={key} 
+                                    type="monotone" 
+                                    dataKey={key} 
+                                    stroke={getColor(key, index)} 
+                                    fill={getColor(key, index)}
+                                />
                             ))
                             : options.yKeys.map((key, index) => (
-                                <Line key={key} type="monotone" dataKey={key} stroke={getColor(key, index)} />
+                                <Line 
+                                    key={key} 
+                                    type="monotone" 
+                                    dataKey={key} 
+                                    stroke={getColor(key, index)} 
+                                    fill={getColor(key, index)}
+                                />
                             ))}
                     </LineChart>
                 );
@@ -125,8 +154,12 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                 return (
                     <AreaChart data={processedData}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey={options.xKey} />
-                        <YAxis />
+                        <XAxis dataKey={options.xKey}>
+                            <Label value={toTitleCase(options.xKey)} offset={0} position="insideBottom" />
+                        </XAxis>
+                        <YAxis>
+                            <Label value={toTitleCase(options.yKeys[0])} angle={-90} position="insideLeft" />
+                        </YAxis>
                         <ChartTooltip content={<ChartTooltipContent />} />
                         {options.legend && <Legend />}
                         {options.yKeys.map((key, index) => (
@@ -152,13 +185,133 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                             cy="50%"
                             outerRadius={120}
                         >
-                            {processedData.map((item, index) => (
-                                <Cell key={`cell-${index}`} fill={getColor(item[options.xKey] as string, index)} />
-                            ))}
+                            {processedData.map((item, index) => {
+                                const key = item[options.xKey] as string;
+                                return (
+                                    <Cell key={`cell-${index}`} fill={getColor(key, index)} />
+                                );
+                            })}
                         </Pie>
                         <ChartTooltip content={<ChartTooltipContent />} />
                         {options.legend && <Legend />}
                     </PieChart>
+                );
+
+            case "scatter":
+                return (
+                    <ScatterChart>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey={options.xKey} type="number">
+                            <Label value={toTitleCase(options.xKey)} offset={0} position="insideBottom" />
+                        </XAxis>
+                        <YAxis dataKey={options.yKeys[0]} type="number">
+                            <Label value={toTitleCase(options.yKeys[0])} angle={-90} position="insideLeft" />
+                        </YAxis>
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        {options.legend && <Legend />}
+                        {options.yKeys.map((key, index) => (
+                            <Scatter
+                                key={key}
+                                name={toTitleCase(key)}
+                                data={processedData}
+                                fill={getColor(key, index)}
+                            />
+                        ))}
+                    </ScatterChart>
+                );
+
+            case "radar":
+                return (
+                    <RadarChart cx="50%" cy="50%" outerRadius={120} data={processedData}>
+                        <PolarGrid />
+                        <PolarAngleAxis dataKey={options.xKey} />
+                        <PolarRadiusAxis />
+                        {options.yKeys.map((key, index) => (
+                            <Radar
+                                key={key}
+                                name={toTitleCase(key)}
+                                dataKey={key}
+                                stroke={getColor(key, index)}
+                                fill={getColor(key, index)}
+                                fillOpacity={0.6}
+                            />
+                        ))}
+                        <RechartsTooltip />
+                        {options.legend && <Legend />}
+                    </RadarChart>
+                );
+
+            case "radialBar":
+                return (
+                    <RadialBarChart 
+                        cx="50%" 
+                        cy="50%" 
+                        innerRadius={20} 
+                        outerRadius={140} 
+                        barSize={10} 
+                        data={processedData}
+                    >
+                        <RadialBar
+                            label={{ position: 'insideStart', fill: '#fff' }}
+                            background
+                            dataKey={options.yKeys[0]}
+                        >
+                            {processedData.map((entry, index) => {
+                                const key = entry[options.xKey] as string;
+                                return <Cell key={`cell-${index}`} fill={getColor(key, index)} />;
+                            })}
+                        </RadialBar>
+                        <RechartsTooltip />
+                        {options.legend && <Legend iconSize={10} layout="vertical" verticalAlign="middle" align="right" />}
+                    </RadialBarChart>
+                );
+
+            case "composed":
+                return (
+                    <ComposedChart data={processedData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey={options.xKey}>
+                            <Label value={toTitleCase(options.xKey)} offset={0} position="insideBottom" />
+                        </XAxis>
+                        <YAxis>
+                            <Label value={toTitleCase(options.yKeys[0])} angle={-90} position="insideLeft" />
+                        </YAxis>
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        {options.legend && <Legend />}
+                        {options.yKeys.map((key, index) => {
+                            // Alternate between different chart types for each key
+                            const chartType = index % 3;
+                            if (chartType === 0) {
+                                return (
+                                    <Bar
+                                        key={key}
+                                        dataKey={key}
+                                        fill={getColor(key, index)}
+                                        stroke={getColor(key, index)}
+                                    />
+                                );
+                            } else if (chartType === 1) {
+                                return (
+                                    <Line
+                                        key={key}
+                                        type="monotone"
+                                        dataKey={key}
+                                        stroke={getColor(key, index)}
+                                    />
+                                );
+                            } else {
+                                return (
+                                    <Area
+                                        key={key}
+                                        type="monotone"
+                                        dataKey={key}
+                                        fill={getColor(key, index)}
+                                        stroke={getColor(key, index)}
+                                    />
+                                );
+                            }
+                        })}
+                    </ComposedChart>
                 );
 
             default:
@@ -210,7 +363,7 @@ export const ChartResultComponent: Render = {
     error: (config: RenderConfig): React.ReactNode => {
         return <div>Error: {config.errorMessage}</div>;
     },
-    loading: (config: RenderConfig): React.ReactNode => {
+    loading: (): React.ReactNode => {
         return <div>Loading...</div>;
     }
 };
