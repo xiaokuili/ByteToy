@@ -1,5 +1,5 @@
 "use client"
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { RenderConfig, DisplayFormat } from "@/lib/types";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -48,19 +48,17 @@ const SQLDebugger = ({ queries }: { queries: string[] }) => {
     );
 };
 
-export default function SearchPage() {
+function SearchPageContent() {
     const searchParams = useSearchParams();
     const [searchResults, setSearchResults] = useState<RenderConfig[]>([]);
-    const {  getDatasourceFromLocalStorage } = useDatasource()
+    const { getDatasourceFromLocalStorage } = useDatasource();
     
     const query = searchParams?.get('q') || '';
     const sourceName = searchParams?.get('source') || '';
     const flowId = searchParams?.get('flowId') || '';
-    const dataSource = getDatasourceFromLocalStorage(sourceName)
-
+    const dataSource = getDatasourceFromLocalStorage(sourceName);
 
     const searchedQueriesRef = useRef<Set<string>>(new Set());
-
 
     const handleSearchSuccess = (config: RenderConfig) => {
         setSearchResults(prev => {
@@ -94,7 +92,7 @@ export default function SearchPage() {
         sqlQueries,
         isLoading
     } = useDataFlow({
-        dataSource:dataSource as DataSource,
+        dataSource: dataSource as DataSource,
         format: 'chart' as DisplayFormat,
         collectSQLQuery: true,
         onStart: (config) => setSearchResults(prev => [config, ...prev]),
@@ -122,7 +120,7 @@ export default function SearchPage() {
             searchedQueriesRef.current.add(searchKey);
             handleSearch(query);
         }
-    }, );
+    }, [query, sourceName]);
 
     return (
         <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-950">
@@ -139,5 +137,13 @@ export default function SearchPage() {
                 <SQLDebugger queries={sqlQueries} />
             </div>
         </div>
+    );
+}
+
+export default function SearchPage() {
+    return (
+        <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+            <SearchPageContent />
+        </Suspense>
     );
 }
