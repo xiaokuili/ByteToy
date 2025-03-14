@@ -12,83 +12,83 @@ NEXTJS_PORT = 3000
 FASTAPI_PORT = 8000
 
 # Docker commands
-.PHONY:docker-build-postgres docker-start-postgres docker-stop-postgres docker-build-frontend docker-build-backend docker-start-frontend docker-start-backend docker-stop-frontend docker-stop-backend docker-start docker-stop
+.PHONY: pg-build pg-start pg-stop fe-build be-build fe-start fe-stop be-start be-stop d-start d-stop
 
-docker-build-postgres:
+pg-build:
 	mkdir -p dockerfiles
 	@echo "Building Docker images..."
-	docker build -t $(POSTGRES_IMAGE) -f dockerfiles/pogstgres.Dockerfile .
+	docker build -t postgres:latest .
 
-docker-start-postgres:
+pg-start:
 	@echo "Starting Postgres Docker container..."
-	docker run -d --name $(POSTGRES_CONTAINER) -p $(POSTGRES_PORT):5432 $(POSTGRES_IMAGE)
+	docker run -d --name $(POSTGRES_CONTAINER) -p $(POSTGRES_PORT):5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=insight postgres:latest
 
-docker-stop-postgres:
+pg-stop:
 	@echo "Stopping Postgres Docker container..."
 	docker stop $(POSTGRES_CONTAINER) || true
 	docker rm $(POSTGRES_CONTAINER) || true
 
-docker-build-frontend:
+fe-build:
 	mkdir -p dockerfiles
 	@echo "Building Docker images..."
 	docker build -t $(NEXTJS_IMAGE) -f dockerfiles/nextjs.Dockerfile .
 
-docker-build-backend:
+be-build:
 	mkdir -p dockerfiles
 	@echo "Building Docker images..."
 	docker build -t $(FASTAPI_IMAGE) -f dockerfiles/fastapi.Dockerfile .
 
 # Frontend specific commands
-docker-start-frontend:
+fe-start:
 	@echo "Starting frontend Docker container..."
 	docker run -d --name $(NEXTJS_CONTAINER) -p $(NEXTJS_PORT):3000 $(NEXTJS_IMAGE)
 
-docker-stop-frontend:
+fe-stop:
 	@echo "Stopping frontend Docker container..."
 	docker stop $(NEXTJS_CONTAINER) || true
 	docker rm $(NEXTJS_CONTAINER) || true
 
 # Backend specific commands
-docker-start-backend:
+be-start:
 	@echo "Starting backend Docker container..."
 	docker run -d --name $(FASTAPI_CONTAINER) -p $(FASTAPI_PORT):8000 $(FASTAPI_IMAGE)
 
-docker-stop-backend:
+be-stop:
 	@echo "Stopping backend Docker container..."
 	docker stop $(FASTAPI_CONTAINER) || true
 	docker rm $(FASTAPI_CONTAINER) || true
 
 # Combined docker commands
-docker-start: docker-start-frontend docker-start-backend
+d-start: fe-start be-start
 
-docker-stop: docker-stop-frontend docker-stop-backend
+d-stop: fe-stop be-stop
 
 # Direct application commands
-.PHONY: run-frontend run-backend run stop-frontend stop-backend stop
+.PHONY: run-fe run-be run stop-fe stop-be stop
 
-run-frontend:
+run-fe:
 	@echo "Starting frontend application directly..."
 	cd . && npm run dev &
 
-run-backend:
+run-be:
 	@echo "Starting backend application directly..."
 	cd core && uvicorn main:app --reload --port $(FASTAPI_PORT) &
 
-run: run-frontend run-backend
+run: run-fe run-be
 
-stop-frontend:
+stop-fe:
 	@echo "Stopping frontend application..."
 	pkill -f "npm run dev" || true
 
-stop-backend:
+stop-be:
 	@echo "Stopping backend application..."
 	pkill -f "uvicorn main:app" || true
 
-stop: stop-frontend stop-backend
+stop: stop-fe stop-be
 
 # Combined commands
 .PHONY: start
 
-start: docker-start
+start: d-start
 
-stop: docker-stop
+stop: d-stop
