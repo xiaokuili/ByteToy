@@ -15,7 +15,7 @@ RUN pip install poetry \
 COPY core/pyproject.toml core/poetry.lock ./
 
 # 安装依赖
-RUN poetry install --no-interaction --no-ansi
+RUN poetry install --no-interaction --no-ansi --no-root
 
 # 复制应用代码
 COPY core/ .
