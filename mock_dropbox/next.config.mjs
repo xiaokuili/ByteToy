@@ -7,5 +7,6 @@ const nextConfig = {
     images: {
         remotePatterns: [{ hostname: 'fjord.dropboxstatic.com' }],
     },
+    output: 'standalone',
 };
 export default nextConfig;
