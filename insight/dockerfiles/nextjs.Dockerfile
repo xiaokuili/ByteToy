@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:18-alpine
 
 WORKDIR /app
 
@@ -23,9 +23,6 @@ RUN pnpm install
 # Copy the rest of the application
 COPY --chown=node:node insight/. .
 COPY --chown=node:node insight/.env.prod .env
-# Remove .env.local if it exists to avoid conflicts with .env.prod
-RUN rm -f .env.local
-
 
 # Build the application
 RUN pnpm build
