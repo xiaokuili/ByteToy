@@ -1,4 +1,4 @@
-import { Render, RenderConfig, DisplayFormat } from "@/lib/types";
+import { Render, RenderConfig } from "@/lib/types";
 
 const SearchResultsComponent: Render = {
     content: (config: RenderConfig): React.ReactNode => {
@@ -20,6 +20,7 @@ const SearchResultsComponent: Render = {
         );
     },
     loading: (config: RenderConfig): React.ReactNode => {
+        console.log(config)
         return (
             <div className="animate-pulse">
                 Loading search results...
