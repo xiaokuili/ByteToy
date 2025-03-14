@@ -7,25 +7,25 @@ NEXTJS_PORT = 3000
 FASTAPI_PORT = 8000
 
 # Docker Compose commands
-.PHONY: d-build d-start d-stop d-down d-logs
+.PHONY: build start stop down logs
 
-d-build:
+build:
 	@echo "Building all Docker images..."
 	docker-compose -f $(COMPOSE_FILE) build
 
-d-start:
+start:
 	@echo "Starting all containers..."
 	docker-compose -f $(COMPOSE_FILE) up -d
 
-d-stop:
+stop:
 	@echo "Stopping all containers..."
 	docker-compose -f $(COMPOSE_FILE) stop
 
-d-down:
+down:
 	@echo "Stopping and removing all containers..."
 	docker-compose -f $(COMPOSE_FILE) down
 
-d-logs:
+logs:
 	@echo "Viewing logs from all containers..."
 	docker-compose -f $(COMPOSE_FILE) logs -f
 
@@ -79,9 +79,3 @@ stop-be:
 
 stop: stop-fe stop-be
 
-# Combined commands
-.PHONY: start
-
-start: d-start
-
-stop: d-stop 
