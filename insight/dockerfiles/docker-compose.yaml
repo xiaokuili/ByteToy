@@ -42,12 +42,15 @@ services:
       - "3000:3000"
     depends_on:
       - fastapi
+    environment:
+      - API_URL=http://fastapi:8000
     restart: unless-stopped
-    network_mode: "service:fastapi"
+    networks:
+      - bytetoy-network
 
 volumes:
   postgres_data:
-  
+
 networks:
   bytetoy-network:
     driver: bridge
