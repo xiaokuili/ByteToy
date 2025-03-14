@@ -2,11 +2,17 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# 安装 pnpm 并复制 package.json
+# 设置 npm 镜像源
+RUN npm config set registry https://registry.npmmirror.com
+
+# 安装 pnpm
 RUN npm install -g pnpm && \
     pnpm --version && \
     mkdir -p /app && \
     chown -R node:node /app
+
+# 设置 pnpm 镜像源
+RUN pnpm config set registry https://registry.npmmirror.com
 
 # Copy package.json and package-lock.json
 COPY --chown=node:node package*.json ./
