@@ -15,14 +15,14 @@ RUN npm install -g pnpm && \
 RUN pnpm config set registry https://registry.npmmirror.com
 
 # Copy package.json and package-lock.json
-COPY --chown=node:node package*.json ./
+COPY --chown=node:node insight/package*.json ./
 
 # Install dependencies
 RUN pnpm install
 
 # Copy the rest of the application
-COPY --chown=node:node . .
-COPY --chown=node:node .env.prod .env
+COPY --chown=node:node insight/. .
+COPY --chown=node:node insight/.env.prod .env
 
 # Build the application
 RUN pnpm build
