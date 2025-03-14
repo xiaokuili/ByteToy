@@ -56,26 +56,4 @@ be-stop:
 	@echo "Stopping backend container..."
 	docker-compose -f $(COMPOSE_FILE) stop fastapi
 
-# Direct application commands (for local development)
-.PHONY: run-fe run-be run stop-fe stop-be stop
-
-run-fe:
-	@echo "Starting frontend application directly..."
-	cd . && npm run dev &
-
-run-be:
-	@echo "Starting backend application directly..."
-	cd core && uvicorn main:app --reload --port $(FASTAPI_PORT) &
-
-run: run-fe run-be
-
-stop-fe:
-	@echo "Stopping frontend application..."
-	pkill -f "npm run dev" || true
-
-stop-be:
-	@echo "Stopping backend application..."
-	pkill -f "uvicorn main:app" || true
-
-stop: stop-fe stop-be
 
