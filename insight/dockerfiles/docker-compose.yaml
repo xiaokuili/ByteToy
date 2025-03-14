@@ -1,4 +1,3 @@
-
 version: '3.8'
 
 services:
@@ -14,6 +13,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - bytetoy-network
 
   fastapi:
     build:
@@ -28,6 +29,8 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/insight
     restart: unless-stopped
+    networks:
+      - bytetoy-network
 
   nextjs:
     build:
@@ -40,6 +43,7 @@ services:
     depends_on:
       - fastapi
     restart: unless-stopped
+    network_mode: "service:fastapi"
 
 volumes:
   postgres_data:
