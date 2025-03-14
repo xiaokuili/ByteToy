@@ -13,9 +13,13 @@ export default function HomePage() {
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const {saveDatasource, clearLocalStorage, getAllDatasources}= useDatasource()
   const router = useRouter();
-
+  
   useEffect(() => {
-    getAllDatasources();
+    const datasource = getAllDatasources();
+    
+    if (datasource ) {
+      setSelectedSource(datasource.name);
+    }
   }, []);
 
   const handleSearch = () => {  
@@ -26,16 +30,22 @@ export default function HomePage() {
       source: selectedSource || "",
       flowId: flowId
     });
-
+    console.log(params.toString());
     router.push(`/search?${params.toString()}`);
   };
 
   const handleFileUpload = async (file: File) => {
     const result = await saveDatasource(file);
     setSelectedSource(result.dataSource?.name || "");
-    console.log(result.dataSource?.name);
     return result;
   };
+
+  const handleRemove = () => {
+    clearLocalStorage();
+    setSelectedSource(null);
+  };
+
+  
 
 
 
@@ -83,10 +93,8 @@ export default function HomePage() {
                 onChange={setSearchQuery}
                 onFileUpload={handleFileUpload}
                 onSearch={handleSearch}
-                onRemove={() => {
-                  clearLocalStorage();
-                }}
-                getDatasource={getAllDatasources }
+                onRemove={handleRemove}
+                selectedDatasource={selectedSource }
               />
 
              

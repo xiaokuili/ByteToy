@@ -1,8 +1,7 @@
 import { Upload, Send, Loader2, File, X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { DataSource } from "@/lib/types";
+import { useEffect, useRef, useState } from "react";
 
 import {
     DropdownMenu,
@@ -18,8 +17,8 @@ interface SearchInputProps {
     onFileUpload: (file: File) => Promise<{ loading: boolean, error: Error | null }>;
     onSearch: () => void;
     placeholder?: string;
-    getDatasource: () => DataSource | null | undefined;
     onRemove: () => void;
+    selectedDatasource: string | null;
 }
 
 export function SearchInput({
@@ -28,36 +27,27 @@ export function SearchInput({
     onFileUpload,
     onSearch,
     placeholder = "请先上传文件，支持拖拽上传， 然后输入您想要的可视化效果...",
-    getDatasource,
+
     onRemove,
+    selectedDatasource,
     
 }: SearchInputProps) {
+    console.log(selectedDatasource)
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [hasFile, setHasFile] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
-    
     const [isUploading, setIsUploading] = useState(false);
     const [isRemove, setIsRemove] = useState(false);
-    const [dataSource, setDataSource] = useState<DataSource | null>(null);
-
+  
     useEffect(() => {
-        const dataSource = getDatasource()
-        if (dataSource) {   
-            setDataSource(dataSource)
-            setHasFile(true)
-        }
-    }, []);
-
+        setHasFile(selectedDatasource ? true : false)
+    }, [selectedDatasource] )
+    
     const handleRemove =  () => {
         try {
             setIsRemove(true);  // 设置加载状态
-            
             // 执行删除操作
             onRemove();  
-
-            // 获取最新数据
-            setDataSource(null)
-
             toast.success("删除成功");  
         } catch (error) {
             console.error("删除失败:", error);
@@ -84,10 +74,6 @@ export function SearchInput({
         } else {
             setHasFile(true);
             toast.success("文件上传成功");
-        }
-        const dataSource = getDatasource()
-        if (dataSource) {
-            setDataSource(dataSource)
         }
     };
 
@@ -123,7 +109,7 @@ export function SearchInput({
 
     // Function to render the data source dropdown
     const renderDataSourceDropdown = () => {
-        if (!dataSource) return null;
+        if (!selectedDatasource) return null;
         
         return (
             <DropdownMenu>
@@ -167,7 +153,7 @@ export function SearchInput({
                             <div  className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
                                 <div className="flex items-center space-x-2">
                                     <File className="w-4 h-4 text-gray-500" />
-                                    <span className="truncate text-sm text-gray-700">{dataSource.name || `数据源`}</span>
+                                    <span className="truncate text-sm text-gray-700">{selectedDatasource || `数据源`}</span>
                                 </div>
                                 <button 
                                     onClick={handleRemove}
@@ -220,7 +206,7 @@ export function SearchInput({
                 <div className="flex items-center justify-between px-4 py-2 pt-0">
                
                         {/* 数据源/文件按钮 */}
-                        {dataSource ? (
+                        {selectedDatasource ? (
                             renderDataSourceDropdown()
                         ) : (
                             <button
