@@ -1,2 +1,7 @@
-# 忽略 components/ui 文件夹
-insight/components/ui/**
+# 忽略所有 UI 组件
+**/components/ui/**
+components/ui/*
+./components/ui/*
+
+# 忽略特定文件
+components/layout/Header.tsx
