@@ -1,4 +1,9 @@
 # Docker configuration
+
+POSTGRES_IMAGE = bytetoy-postgres
+POSTGRES_CONTAINER = bytetoy-postgres-container
+POSTGRES_PORT = 5432
+
 NEXTJS_IMAGE = bytetoy-nextjs
 FASTAPI_IMAGE = bytetoy-fastapi
 NEXTJS_CONTAINER = bytetoy-nextjs-container
@@ -7,7 +12,21 @@ NEXTJS_PORT = 3000
 FASTAPI_PORT = 8000
 
 # Docker commands
-.PHONY: docker-build-frontend docker-build-backend docker-start-frontend docker-start-backend docker-stop-frontend docker-stop-backend docker-start docker-stop
+.PHONY:docker-build-postgres docker-start-postgres docker-stop-postgres docker-build-frontend docker-build-backend docker-start-frontend docker-start-backend docker-stop-frontend docker-stop-backend docker-start docker-stop
+
+docker-build-postgres:
+	mkdir -p dockerfiles
+	@echo "Building Docker images..."
+	docker build -t $(POSTGRES_IMAGE) -f dockerfiles/pogstgres.Dockerfile .
+
+docker-start-postgres:
+	@echo "Starting Postgres Docker container..."
+	docker run -d --name $(POSTGRES_CONTAINER) -p $(POSTGRES_PORT):5432 $(POSTGRES_IMAGE)
+
+docker-stop-postgres:
+	@echo "Stopping Postgres Docker container..."
+	docker stop $(POSTGRES_CONTAINER) || true
+	docker rm $(POSTGRES_CONTAINER) || true
 
 docker-build-frontend:
 	mkdir -p dockerfiles
