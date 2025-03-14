@@ -73,7 +73,6 @@ class DataVisualizerManager:
         """
         visualizer = self.get_visualizer(session_id)
         intent = visualizer.generate_intent(query)
-        print("intent", intent)
         if intent == "yes":
             return visualizer.generate_sql(query, datasource, **kwargs)
         else:
