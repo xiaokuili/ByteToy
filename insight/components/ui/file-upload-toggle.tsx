@@ -13,7 +13,7 @@ interface FileUploadToggleProps {
     className?: string
 }
 
-export function FileUploadToggle({ isUpload, onToggle, onFileSelect, onSearch, className = "" }: FileUploadToggleProps) {
+export function FileUploadToggle({ onToggle, onFileSelect, onSearch, className = "" }: FileUploadToggleProps) {
     const searchParams = useSearchParams();
     
     const [searchText, setSearchText] = useState(searchParams.get("q") || "");
