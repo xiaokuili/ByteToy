@@ -1,0 +1,45 @@
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: bytetoy-postgres-container
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=insight
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  fastapi:
+    build:
+      context: ../..
+      dockerfile: insight/dockerfiles/fastapi.Dockerfile
+    image: bytetoy-fastapi
+    container_name: bytetoy-fastapi-container
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/insight
+    restart: unless-stopped
+
+  nextjs:
+    build:
+      context: ../..
+      dockerfile: insight/dockerfiles/nextjs.Dockerfile
+    image: bytetoy-nextjs
+    container_name: bytetoy-nextjs-container
+    ports:
+      - "3000:3000"
+    depends_on:
+      - fastapi
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

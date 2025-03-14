@@ -1,69 +1,62 @@
 # Docker configuration
+COMPOSE_FILE = insight/dockerfiles/docker-compose.yaml
 
-POSTGRES_IMAGE = bytetoy-postgres
-POSTGRES_CONTAINER = bytetoy-postgres-container
+# Ports
 POSTGRES_PORT = 5432
-
-NEXTJS_IMAGE = bytetoy-nextjs
-FASTAPI_IMAGE = bytetoy-fastapi
-NEXTJS_CONTAINER = bytetoy-nextjs-container
-FASTAPI_CONTAINER = bytetoy-fastapi-container
 NEXTJS_PORT = 3000
 FASTAPI_PORT = 8000
 
-# Docker commands
-.PHONY: pg-build pg-start pg-stop fe-build be-build fe-start fe-stop be-start be-stop d-start d-stop
+# Docker Compose commands
+.PHONY: d-build d-start d-stop d-down d-logs
 
-pg-build:
-	mkdir -p dockerfiles
-	@echo "Building Docker images..."
-	docker build -t postgres:latest .
+d-build:
+	@echo "Building all Docker images..."
+	docker-compose -f $(COMPOSE_FILE) build
+
+d-start:
+	@echo "Starting all containers..."
+	docker-compose -f $(COMPOSE_FILE) up -d
+
+d-stop:
+	@echo "Stopping all containers..."
+	docker-compose -f $(COMPOSE_FILE) stop
+
+d-down:
+	@echo "Stopping and removing all containers..."
+	docker-compose -f $(COMPOSE_FILE) down
+
+d-logs:
+	@echo "Viewing logs from all containers..."
+	docker-compose -f $(COMPOSE_FILE) logs -f
+
+# Service-specific commands
+.PHONY: pg-start pg-stop fe-start fe-stop be-start be-stop
 
 pg-start:
-	@echo "Starting Postgres Docker container..."
-	docker run -d --name $(POSTGRES_CONTAINER) -p $(POSTGRES_PORT):5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=insight postgres:latest
+	@echo "Starting PostgreSQL container..."
+	docker-compose -f $(COMPOSE_FILE) up -d postgres
 
 pg-stop:
-	@echo "Stopping Postgres Docker container..."
-	docker stop $(POSTGRES_CONTAINER) || true
-	docker rm $(POSTGRES_CONTAINER) || true
+	@echo "Stopping PostgreSQL container..."
+	docker-compose -f $(COMPOSE_FILE) stop postgres
 
-fe-build:
-	mkdir -p dockerfiles
-	@echo "Building Docker images..."
-	docker build -t $(NEXTJS_IMAGE) -f dockerfiles/nextjs.Dockerfile .
-
-be-build:
-	mkdir -p dockerfiles
-	@echo "Building Docker images..."
-	docker build -t $(FASTAPI_IMAGE) -f dockerfiles/fastapi.Dockerfile .
-
-# Frontend specific commands
 fe-start:
-	@echo "Starting frontend Docker container..."
-	docker run -d --name $(NEXTJS_CONTAINER) -p $(NEXTJS_PORT):3000 $(NEXTJS_IMAGE)
+	@echo "Starting frontend container..."
+	docker-compose -f $(COMPOSE_FILE) up -d nextjs
 
 fe-stop:
-	@echo "Stopping frontend Docker container..."
-	docker stop $(NEXTJS_CONTAINER) || true
-	docker rm $(NEXTJS_CONTAINER) || true
+	@echo "Stopping frontend container..."
+	docker-compose -f $(COMPOSE_FILE) stop nextjs
 
-# Backend specific commands
 be-start:
-	@echo "Starting backend Docker container..."
-	docker run -d --name $(FASTAPI_CONTAINER) -p $(FASTAPI_PORT):8000 $(FASTAPI_IMAGE)
+	@echo "Starting backend container..."
+	docker-compose -f $(COMPOSE_FILE) up -d fastapi
 
 be-stop:
-	@echo "Stopping backend Docker container..."
-	docker stop $(FASTAPI_CONTAINER) || true
-	docker rm $(FASTAPI_CONTAINER) || true
+	@echo "Stopping backend container..."
+	docker-compose -f $(COMPOSE_FILE) stop fastapi
 
-# Combined docker commands
-d-start: fe-start be-start
-
-d-stop: fe-stop be-stop
-
-# Direct application commands
+# Direct application commands (for local development)
 .PHONY: run-fe run-be run stop-fe stop-be stop
 
 run-fe:
@@ -91,4 +84,4 @@ stop: stop-fe stop-be
 
 start: d-start
 
-stop: d-stop
+stop: d-stop 
