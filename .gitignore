@@ -12,3 +12,4 @@ joker/ai_core/chromadb/*
 joker/ai_core/model_cache/*
 model_cache/*
 insight/app/search/重新优化首页.ini
+*.log
