@@ -80,11 +80,11 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
         ? parsedChartData.slice(0, 20)
         : parsedChartData;
 
+    
     const getColor = (key: string, index: number) => {
-        // Use the configured color if available, otherwise use default colors
         return options.colors?.[key] || defaultColors[index % defaultColors.length];
     };
-
+// TODO：处理bar 无法按照配置的函数进行展示的问题
     const renderChart = () => {
         switch (options.type) {
             case "bar":
@@ -185,12 +185,13 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                             cy="50%"
                             outerRadius={120}
                         >
-                            {processedData.map((item, index) => {
-                                const key = item[options.xKey] as string;
-                                return (
-                                    <Cell key={`cell-${index}`} fill={getColor(key, index)} />
-                                );
-                            })}
+                            {processedData.map((entry, index) => (
+                                <Cell 
+                                    key={`cell-${index}`} 
+                                    fill={defaultColors[index % defaultColors.length]} 
+                                    
+                                />
+                            ))}
                         </Pie>
                         <ChartTooltip content={<ChartTooltipContent />} />
                         {options.legend && <Legend />}
@@ -256,10 +257,13 @@ export default function ChartFactory({ config, className, chartData }: ChartFact
                             background
                             dataKey={options.yKeys[0]}
                         >
-                            {processedData.map((entry, index) => {
-                                const key = entry[options.xKey] as string;
-                                return <Cell key={`cell-${index}`} fill={getColor(key, index)} />;
-                            })}
+                            {processedData.map((entry, index) => (
+                                <Cell 
+                                    key={`cell-${index}`} 
+                                    fill={defaultColors[index % defaultColors.length]} 
+                                   
+                                />
+                            ))}
                         </RadialBar>
                         <RechartsTooltip />
                         {options.legend && <Legend iconSize={10} layout="vertical" verticalAlign="middle" align="right" />}

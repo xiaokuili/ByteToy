@@ -9,7 +9,9 @@ import ChartFactory from '@/components/search/charts/ChartFactory';
 import { RunGenerateSQLQuery } from '@/actions/dataflow/index';
 import { ChartConfig, DataRecord } from "@/lib/types";
 
-
+// TODO：
+// 1. 复制renderconfig很麻烦， 需要一个格式化
+// 2. 复制sql 需要自动去除 \n 和 \t
 export default function DebugChartPage() {
   const [config, setConfig] = useState<string>('');
   const [sql, setSql] = useState<string>('');

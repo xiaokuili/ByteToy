@@ -116,4 +116,3 @@ export const configSchema = z
 
 
 
-export type Intent = "美化图表" | "生成图表"

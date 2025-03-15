@@ -58,6 +58,7 @@ def filter_messages_by_window(messages: List[BaseMessage], window_size: int = 5)
 
 
 class DataVisualizer:
+    # TODO：应该添加顶嘴功能，作为一个边界控制， 如果超出边界，应该返回而不是报错
     """
     Class for generating SQL queries and chart configurations from natural language.
     Handles both SQL generation and visualization configuration based on user queries.
@@ -112,8 +113,63 @@ class DataVisualizer:
         self.chart_system_message = """你是一个数据可视化专家，你的任务是:
                                     1. 基于用户的多轮对话历史和当前输入，生成合适的图表配置
                                     2. 我会提供历史用户输入和历史图表配置，请你更加聪明的结合上下文进行处理
-                                    3. 如果是颜色， 基于hsl() 这种样式返回
-                                   """
+                                    3. 颜色必须使用hsl()格式返回
+                                    4. 针对不同类型的图表，颜色配置方式不同:
+                                    
+                                       A. 对于 bar, line, area, scatter, radar, composed 等图表:
+                                          - 必须按照数据系列(yKeys)来配置颜色
+                                          - 即使只有一个数据系列，也应使用yKey作为colors的键
+                                          - 不要使用xKey中的值(如分类名称)作为colors的键
+                                       
+                                       B. 只有radialBar和pie类型图表:
+                                          - 按照数据类别(xKey的值)配置颜色
+                                    
+                                    图表配置必须包含：图表类型、标题、描述、主要发现、x轴和y轴的键名、颜色设置、是否显示图例等。
+
+                                    数据系列颜色配置示例(用于bar, line, area等):
+                                    const barChartConfig = {{
+                                        description: "This bar chart shows monthly sales by product category.",
+                                        takeaway: "Electronics has the highest monthly sales among all categories.",
+                                        type: "bar",
+                                        title: "Monthly Sales by Category",
+                                        xKey: "category",
+                                        yKeys: ["sales", "profit"],
+                                        colors: {{
+                                            "sales": "hsl(240, 70%, 50%)",    // 蓝色
+                                            "profit": "hsl(120, 70%, 50%)"    // 绿色
+                                        }},
+                                        legend: true
+                                    }};
+                                    
+                                    // 即使只有一个数据系列，也使用yKey作为colors的键
+                                    const singleSeriesBarConfig = {{
+                                        description: "This bar chart shows monthly sales by category.",
+                                        takeaway: "Electronics has the highest monthly sales.",
+                                        type: "bar",
+                                        title: "Monthly Sales by Category",
+                                        xKey: "category",
+                                        yKeys: ["sales"],
+                                        colors: {{
+                                            "sales": "hsl(240, 70%, 50%)"    // 蓝色
+                                        }},
+                                        legend: true
+                                    }};
+                                    
+                                    类别颜色配置示例(仅用于pie和radialBar):
+                                    const pieChartConfig = {{
+                                        description: "This pie chart shows the distribution of different categories.",
+                                        takeaway: "The pie chart highlights the proportions of each category.",
+                                        type: "pie",
+                                        title: "Distribution of Categories",
+                                        xKey: "category",
+                                        yKeys: ["value"],
+                                        colors: {{ 
+                                            "Apple": "hsl(0, 70%, 50%)",      // 红色
+                                            "Orange": "hsl(30, 70%, 50%)"     // 橙色
+                                        }}, 
+                                        legend: true
+                                    }};
+                                    """
      
         self.intent_messages: List[BaseMessage] = []
         self.sql_messages: List[BaseMessage] = []
@@ -388,22 +444,7 @@ class DataVisualizer:
             
             User Query: {query}
             
-            Generate an appropriate chart configuration to visualize this data.
-            The configuration must include:
-            - A description of what the chart shows
-            - The main takeaway from the data
-            - Appropriate chart type (bar, line, area, or pie)
-            - Clear title
-            - X and Y axis keys
-            - Legend configuration
-            
-            For colors:
-            - If the user specifies any colors in their query (e.g. "make it blue", "use yellow"), you MUST include those colors in the colors configuration
-            - Colors should be specified as CSS color values (hex, rgb, or color names)
-            - The colors configuration should map data keys to their corresponding colors
-            - Example: if query mentions "yellow bars", set colors: {{"value": "yellow"}}
-            
-            Pay special attention to color requirements in the query and ensure they are reflected in the colors configuration.
+           
             """
 
             prompt = ChatPromptTemplate.from_messages([
