@@ -135,8 +135,8 @@ class DataVisualizer:
                                         xKey: "category",
                                         yKeys: ["sales", "profit"],
                                         colors: {{
-                                            "sales": "hsl(240, 70%, 50%)",    // 蓝色
-                                            "profit": "hsl(120, 70%, 50%)"    // 绿色
+                                            "sales": "hsl(210, 70%, 60%)",    // 柔和的蓝色
+                                            "profit": "hsl(150, 60%, 50%)"    // 柔和的绿色
                                         }},
                                         legend: true
                                     }};
@@ -150,7 +150,7 @@ class DataVisualizer:
                                         xKey: "category",
                                         yKeys: ["sales"],
                                         colors: {{
-                                            "sales": "hsl(240, 70%, 50%)"    // 蓝色
+                                            "sales": "hsl(210, 70%, 60%)"    // 柔和的蓝色
                                         }},
                                         legend: true
                                     }};
@@ -164,8 +164,8 @@ class DataVisualizer:
                                         xKey: "category",
                                         yKeys: ["value"],
                                         colors: {{ 
-                                            "Apple": "hsl(0, 70%, 50%)",      // 红色
-                                            "Orange": "hsl(30, 70%, 50%)"     // 橙色
+                                            "Apple": "hsl(0, 60%, 60%)",      // 柔和的红色
+                                            "Orange": "hsl(30, 70%, 60%)"     // 柔和的橙色
                                         }}, 
                                         legend: true
                                     }};
