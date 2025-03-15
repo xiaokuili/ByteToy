@@ -70,6 +70,7 @@ export async function fetchCreateTableSQL(flowId: string, query: string, datasou
 }
 
 
+// TODO: 这个命名不好，容易引起歧义，这里的意思应该是执行见表语句和插入数据， 而不是执行SQL
 export async function executeSQL(sql: string, tableName: string, rows: Record<string, string>[]) {
     const datasourceDB = drizzle(process.env.DATABASE_URL! as string)
 

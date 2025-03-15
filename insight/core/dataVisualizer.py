@@ -282,7 +282,7 @@ class DataVisualizer:
         try:
             # 1. Define output schema using Pydantic
             class SQLQueryOutput(BaseModel):
-                query: str = Field(description="The SQL query to execute, 也可能是历史sql")
+                sql: str = Field(description="The SQL query to execute, 也可能是历史sql")
                 explanation: str = Field(description="Explanation of what the SQL query does，如果是历史sql，也进行解释")
 
             # 2. Construct the prompt template with chat history
@@ -331,12 +331,12 @@ class DataVisualizer:
             ])
        
             
-            self.last_sql_query = result.query
-            self.sql_query = result.query
+            self.last_sql_query = result.sql
+            self.sql_query = result.sql
 
            
             return {
-                "query": result.query,
+                "query": result.sql,
                 "explanation": result.explanation
             }
 

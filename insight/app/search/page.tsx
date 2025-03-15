@@ -133,7 +133,7 @@ function SearchPageContent() {
                 isLoading={isLoading}
             />
 
-            <div className="flex-1 w-full max-w-4xl mx-auto px-4 py-8">
+            <div className="flex-1 w-full max-w-4xl mx-auto px-4 py-8 ">
                 <SearchResults results={searchResults} onExport={handleExport} />
                 <SQLDebugger queries={sqlQueries} />
             </div>
@@ -141,8 +141,10 @@ function SearchPageContent() {
     );
 }
 
+
 export default function SearchPage() {
     return (
+        // TODO：这里的loading状态有问题， 如果刷新也页面就会什么都不显示 ， 而且说实话 我也没有看到Loading提示出现
         <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
             <SearchPageContent />
         </Suspense>
