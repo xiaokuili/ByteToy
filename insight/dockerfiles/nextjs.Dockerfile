@@ -23,6 +23,8 @@ RUN pnpm install
 # Copy the rest of the application
 COPY --chown=node:node insight/. .
 COPY --chown=node:node insight/.env.prod .env
+RUN rm -f .env.local
+
 
 # Build the application
 RUN pnpm build
