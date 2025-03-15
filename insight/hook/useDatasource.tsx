@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { saveDatasourceToDB, getDatasourceByName as getDatasourceByNameFromDB ,executeSQL} from '@/actions/datasource';
 import { DataSource } from '@/lib/types';
+import { fetchCreateTableSQL } from '@/actions/datasource';
 
 export function useDatasource() {
     const [dataSource, setDataSource] = useState<DataSource | null>();
@@ -145,43 +146,41 @@ export function useDatasource() {
         throw new Error('CSV文件格式错误：表头中存在重复的列名');
     }
     
-    const rows = lines.slice(1).map(line => line.split(',').map(cell => cell.trim()));
-    
-    // 检查数据行的列数是否与表头一致
-    const invalidRows = rows.findIndex(row => row.length !== headers.length);
-    if (invalidRows !== -1) {
-        throw new Error(`CSV文件格式错误：第 ${invalidRows + 2} 行的列数与表头不一致`);
-    }
+    // 解析数据行并转换为带表头的对象数组
+    const rows = lines.slice(1).map(line => {
+        const cells = line.split(',').map(cell => cell.trim());
+        // 检查数据行的列数是否与表头一致
+        if (cells.length !== headers.length) {
+            throw new Error(`CSV文件格式错误：第 ${lines.indexOf(line) + 2} 行的列数与表头不一致`);
+        }
+        
+        // 将每行数据转换为带表头的对象
+        return headers.reduce((obj, header, i) => {
+            obj[header] = cells[i] || '';
+            return obj;
+        }, {} as Record<string, string>);
+    });
 
-    // 生成建表语句
-    // 处理特殊字符，将中文括号替换为英文括号，移除空格
-    const sanitizeHeader = (header: string) => {
-        return header
-            .replace(/[（]/g, '(')
-            .replace(/[）]/g, ')')
-            .replace(/\s+/g, '_');
-    };
-
-    const columnDefs = headers.map(header => `"${sanitizeHeader(header)}" TEXT`).join(', ');
     
     // 使用文件名作为表名，移除.csv后缀并替换特殊字符
     const fileName = file.name.toLowerCase().replace('.csv', '').replace(/[^a-z0-9_]/g, '_');
     const tableName = `ds_${fileName}`;
     
-    const createTableSQL = `CREATE TABLE IF NOT EXISTS "${tableName}" (${columnDefs}) WITH (OIDS=FALSE);`;
-
     // 提取示例数据（前5行）
     const exampleData = rows.slice(0, 5)
-        .map(row => headers.reduce((obj, header, i) => {
-            obj[header] = row[i] || '';
-            return obj;
-        }, {} as Record<string, string>))
         .map(obj => JSON.stringify(obj))
         .join('\n');
 
+    
     // 生成唯一ID
     const id = `ds_${Date.now()}`;
-
+    const createTableSQL = await fetchCreateTableSQL(id, tableName, {
+        id: id,
+        name: tableName,
+        description: `从文件 ${file.name} 导入的数据，包含 ${headers.length} 列和 ${rows.length} 行数据。`,
+        example_data: exampleData,
+        special_fields: ""
+    });
     await executeSQL(createTableSQL, tableName, rows);
 
     return {
@@ -190,6 +189,6 @@ export function useDatasource() {
         description: `从文件 ${file.name} 导入的数据，包含 ${headers.length} 列和 ${rows.length} 行数据。`,
         schema: createTableSQL,
         example_data: exampleData,
-        special_fields: headers.map(h => `${h}: ${h}`).join('\n')
+        special_fields: ""
     };
 };

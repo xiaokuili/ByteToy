@@ -10,7 +10,7 @@ import sys
 import json
 import datetime
 
-from dataVisualizerManager import  generate_sql, generate_chart_config, get_messages
+from dataVisualizerManager import  generate_create_table_sql, generate_sql, generate_chart_config, get_messages
 from interfaces import DataSource
 from test_data import (
     EXAMPLE_DATASOURCE,
@@ -63,6 +63,8 @@ class ProcessType(str, Enum):
     COMPLETE = "complete"  # 完成流程
     ADJUST = "adjust"     # 调整配置
 
+
+
 class DataSourceModel(BaseModel):
     """数据源模型"""
     name: str = Field(
@@ -73,9 +75,10 @@ class DataSourceModel(BaseModel):
         description="数据源描述",
         example=EXAMPLE_DATASOURCE["description"]
     )
-    schema: str = Field(
+    schema: Optional[str] = Field(
         description="数据表结构定义",
-        example=EXAMPLE_DATASOURCE["schema"]
+        example=EXAMPLE_DATASOURCE["schema"],
+        default=None
     )
     example_data: str = Field(
         description="示例数据，JSON格式的字符串",
@@ -86,6 +89,20 @@ class DataSourceModel(BaseModel):
         example=EXAMPLE_DATASOURCE["special_fields"]
     )
 
+class SchemaRequest(BaseModel):
+    """表结构请求模型"""
+    session_id: str = Field(
+        description="会话ID，用于追踪请求",
+        example=EXAMPLE_SQL_REQUEST["session_id"]
+    )
+    user_input: str = Field(
+        description="用户输入的查询需求",
+        example=EXAMPLE_SQL_REQUEST["user_input"]
+    )
+    datasource: DataSourceModel = Field(
+        description="数据源信息",
+        example=EXAMPLE_SQL_REQUEST["datasource"]
+    )
 class SQLRequest(BaseModel):
     """SQL请求模型"""
     session_id: str = Field(
@@ -152,6 +169,94 @@ app.add_middleware(
     allow_methods=["*"],  # 允许所有方法
     allow_headers=["*"],  # 允许所有头
 )
+
+
+@app.post("/generate/schema", 
+    response_model=Dict[str, Any],
+    summary="生成表结构",
+    description="根据用户输入和数据源信息生成对应的表结构",
+    responses={
+        200: {
+            "description": "成功生成表结构",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "schema": {"create_table_sql": "CREATE TABLE table (id SERIAL PRIMARY KEY, name VARCHAR(200) NOT NULL)"}
+                    }
+                }
+            }
+        },
+        401: {
+            "description": "未授权访问"
+        },
+        500: {
+            "description": "服务器内部错误"
+        }
+    }
+)
+async def generate_create_sql(
+    request: SchemaRequest, 
+    token: str = Depends(verify_api_key)
+):
+    """
+    生成表结构接口
+
+    - **request**: 表结构请求参数
+    - 返回生成的表结构和会话ID
+    """
+    try:
+        session_id = request.session_id
+
+        # 创建数据源
+        datasource = DataSource(
+            name=request.datasource.name,
+            description=request.datasource.description,
+            schema=request.datasource.schema,   
+            example_data=request.datasource.example_data,
+            special_fields=request.datasource.special_fields
+        )
+
+        # 生成表结构
+        create_sql_result = generate_create_table_sql(
+            query=request.user_input,
+            datasource=datasource,
+            session_id=session_id
+        )
+
+        # 构建日志消息为JSON格式字符串
+        log_data = {
+            "session_id": session_id,
+            "user_input": request.user_input,
+            "create_sql_result": create_sql_result,
+            "status": "success"
+        }
+
+        # 输出结构化日志
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        logger.info(f"{current_time} | INFO     | __main__:generate_create_sql:0 - Schema generation request\n{json.dumps(log_data, indent=2, ensure_ascii=False)}")
+
+        return {
+            "create_sql_result": create_sql_result,
+            "session_id": session_id
+        }
+
+    except Exception as e:
+        # 构建错误日志消息为JSON格式字符串
+        log_data = {
+            "session_id": session_id,
+            "user_input": request.user_input,
+            "error": str(e),
+            "status": "failed"
+        }
+
+        # 输出结构化日志
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        logger.error(f"{current_time} | ERROR    | __main__:generate_schema:0 - Schema generation failed\n{json.dumps(log_data, indent=2, ensure_ascii=False)}")
+        
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 
 @app.post("/generate/sql", 
     response_model=Dict[str, Any],

@@ -1,4 +1,3 @@
-
 # Core interfaces for SQL generation and chart configuration from natural language
 from typing import Dict, List, Any, Optional
 import uuid
@@ -98,7 +97,13 @@ class DataVisualizer:
                                         Human: 分析产品A的销售情况
                                         判断: yes (需要获取数据)
                                         """
-
+        self.schema_system_message = """你是一个数据库模式分析专家，你的任务是:
+                                    1. 基于用户的多轮对话历史和当前输入，生成创建表的SQL语句
+                                    2. 返回的SQL语句需要符合PostgreSQL的语法， 并且只能够创建表
+                                    3. 返回的SQL语句需要包含表的名称， 字段名称， 字段类型， 字段约束等
+                                    4. 为了方便，通过create table if not exists 来创建表
+                                    5. 请你一点定要按照规定的格式返回
+                                   """
                                     
                             
         self.sql_system_message = """你是一个PostgreSQL专家，你的任务是:
@@ -109,9 +114,11 @@ class DataVisualizer:
                                     2. 我会提供历史用户输入和历史图表配置，请你更加聪明的结合上下文进行处理
                                     3. 如果是颜色， 基于hsl() 这种样式返回
                                    """
+     
         self.intent_messages: List[BaseMessage] = []
         self.sql_messages: List[BaseMessage] = []
         self.chart_messages: List[BaseMessage] = []
+        self.schema_messages: List[BaseMessage] = []
 
         self.last_sql_query: Optional[str] = None
         self.last_chart_config: Optional[Dict[str, Any]] = None
@@ -185,6 +192,75 @@ class DataVisualizer:
 
         except Exception as e:
             raise Exception(f"Failed to generate intent: {str(e)}")
+
+    def generate_create_table_sql(
+        self,
+        query: str,
+        datasource: DataSource,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Generate schema based on natural language query and datasource information.
+        
+        Args:
+            query: Natural language query requesting data
+            datasource: Information about the data source
+            **kwargs: Additional parameters
+            
+        Returns:
+            Dict[str, Any]: Dictionary containing the identified schema information
+        """
+        try:
+            # 1. Define output schema using Pydantic
+            class SchemaOutput(BaseModel):
+                sql: str = Field(description="The SQL to create the table")
+
+            # 2. Construct the prompt template with chat history
+            chat_history = self._get_chat_history(self.schema_messages)
+            template = self.schema_system_message + """
+            
+            Example Data:
+            {example_data}
+            
+            Special Fields:
+            {special_fields}
+            
+            Previous conversation:
+            {chat_history}
+            
+          
+            
+            """
+
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", template),
+                ("human", "{input}")
+            ])
+
+            # 3. Set up the LLM with structured output
+            model = ChatDeepSeek(model=self.model_name, api_base=os.getenv("DEEPSEEK_BASE_URL"), temperature=0)
+            chain = prompt | model.with_structured_output(SchemaOutput)
+
+            # 4. Execute the chain
+            result = chain.invoke({
+                "example_data": datasource.example_data,
+                "special_fields": datasource.special_fields,
+                "chat_history": chat_history,
+                "input": query
+            })
+
+            # 5. Update conversation history
+            self.schema_messages.extend([
+                HumanMessage(content=query),
+                AIMessage(content=str(result))
+            ])
+            print(result)
+            return {
+                "create_table_sql": result.sql,
+            }
+
+        except Exception as e:
+            raise Exception(f"Failed to generate schema: {str(e)}")
 
     def generate_sql(
         self,

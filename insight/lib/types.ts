@@ -65,10 +65,10 @@ export interface RenderConfig {
 export interface DataSource {
     id: string;
     name: string;
-    description: string;
-    schema: string;
-    example_data: string;
-    special_fields: string;
+    description?: string;
+    schema?: string;
+    example_data?: string;
+    special_fields?: string;
 
 }
 
