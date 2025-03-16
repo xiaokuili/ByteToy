@@ -24,10 +24,10 @@ services:
     container_name: bytetoy-fastapi-container
     ports:
       - "8000:8000"
-    depends_on:
-      - postgres
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/insight
+    # depends_on:
+    #   - postgres
+    # environment:
+    #   - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/insight
     restart: unless-stopped
     networks:
       - bytetoy-network
