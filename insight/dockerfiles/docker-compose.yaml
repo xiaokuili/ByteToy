@@ -1,20 +1,20 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:latest
-    container_name: bytetoy-postgres-container
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=insight
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    networks:
-      - bytetoy-network
+  # postgres:
+  #   image: postgres:latest
+  #   container_name: bytetoy-postgres-container
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=insight
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+  #   networks:
+  #     - bytetoy-network
 
   fastapi:
     build:
