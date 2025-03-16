@@ -70,9 +70,31 @@ export async function fetchCreateTableSQL(flowId: string, query: string, datasou
 }
 
 
-// TODO: 这个命名不好，容易引起歧义，这里的意思应该是执行见表语句和插入数据， 而不是执行SQL
-export async function executeSQL(sql: string, tableName: string, rows: Record<string, string>[]) {
+export async function initDatasource(sql: string, tableName: string, rows: Record<string, string>[]) {
     const datasourceDB = drizzle(process.env.DATABASE_URL! as string)
+
+       // Check if the table already exists before creating it
+    // TODO： 删除真的是最好的方案吗？ 数据管理还需要在想一下策略
+    try {
+        const checkTableSQL = `
+            SELECT table_name FROM information_schema.tables 
+            WHERE table_schema = 'public' AND table_name = '${tableName}'
+        `;
+        const result = await datasourceDB.execute(checkTableSQL);
+        
+        // If table exists, drop it first to avoid conflicts
+        // Check if we have any rows in the result
+        // Check if the table exists by examining the rows property
+        const tableExists = result && 'rows' in result && Array.isArray(result.rows) && result.rows.length > 0;
+        if (tableExists) {
+            const dropTableSQL = `DROP TABLE IF EXISTS "${tableName}"`;
+            await datasourceDB.execute(dropTableSQL);
+            console.log(`Existing table "${tableName}" dropped and will be recreated`);
+        }
+    } catch (error) {
+        console.error(`Error checking if table exists: ${error}`);
+        // Continue with table creation even if check fails
+    }
 
     // Execute the CREATE TABLE statement
     await datasourceDB.execute(sql);
@@ -81,6 +103,7 @@ export async function executeSQL(sql: string, tableName: string, rows: Record<st
     if (!tableName) {
         throw new Error('Invalid CREATE TABLE statement');
     }
+ 
 
     // Get column names from the CREATE TABLE statement
     // Extract column names directly from the first row of data
@@ -112,6 +135,7 @@ export async function executeSQL(sql: string, tableName: string, rows: Record<st
     return {
         tableName,
         rowCount: rows.length
+
     };
 }
 

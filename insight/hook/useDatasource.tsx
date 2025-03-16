@@ -1,10 +1,14 @@
 'use client'
 
 import { useState, useCallback } from 'react';
-import { saveDatasourceToDB, getDatasourceByName as getDatasourceByNameFromDB ,executeSQL} from '@/actions/datasource';
+import { saveDatasourceToDB, getDatasourceByName as getDatasourceByNameFromDB ,initDatasource} from '@/actions/datasource';
 import { DataSource } from '@/lib/types';
 import { fetchCreateTableSQL } from '@/actions/datasource';
 
+
+// TODO： 文件上传业务不清晰，datasource 应该如何展示 
+// 1. 初始化文件系统，最好一个上传 ，一个展示？我还不清楚 ， 或者是否从数据库获取 ？
+// 2. 沟通场景  
 export function useDatasource() {
     const [dataSource, setDataSource] = useState<DataSource | null>();
     
@@ -181,7 +185,8 @@ export function useDatasource() {
         example_data: exampleData,
         special_fields: ""
     });
-    await executeSQL(createTableSQL, tableName, rows);
+
+    await initDatasource(createTableSQL, tableName, rows);
 
     return {
         id,
