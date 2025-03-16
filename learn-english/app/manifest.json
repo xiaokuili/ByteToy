@@ -1,0 +1,162 @@
+{
+    "name": "Listen Speak",
+    "short_name": "ListenSpeak",
+    "icons": [
+      {
+        "src": "/icons/manifest-icon-192.maskable.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "/icons/manifest-icon-192.maskable.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "maskable"
+      },
+      {
+        "src": "/icons/manifest-icon-512.maskable.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any"
+      },
+      {
+        "src": "/icons/manifest-icon-512.maskable.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      }
+    ],
+    "theme_color": "#FFFFFF",
+    "background_color": "#FFFFFF",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "splash_pages": null,
+    "apple_splash_screens": [
+      {
+        "src": "/icons/apple-splash-2732-2048.png",
+        "sizes": "2732x2048"
+      },
+      {
+        "src": "/icons/apple-splash-2360-1640.png",
+        "sizes": "2360x1640"
+      },
+      {
+        "src": "/icons/apple-splash-2048-2732.png",
+        "sizes": "2048x2732"
+      },
+      {
+        "src": "/icons/apple-splash-2388-1668.png",
+        "sizes": "2388x1668"
+      },
+      {
+        "src": "/icons/apple-splash-1640-2360.png",
+        "sizes": "1640x2360"
+      },
+      {
+        "src": "/icons/apple-splash-1536-2048.png",
+        "sizes": "1536x2048"
+      },
+      {
+        "src": "/icons/apple-splash-2224-1668.png",
+        "sizes": "2224x1668"
+      },
+      {
+        "src": "/icons/apple-splash-1320-2868.png",
+        "sizes": "1320x2868"
+      },
+      {
+        "src": "/icons/apple-splash-1668-2388.png",
+        "sizes": "1668x2388"
+      },
+      {
+        "src": "/icons/apple-splash-2048-1536.png",
+        "sizes": "2048x1536"
+      },
+      {
+        "src": "/icons/apple-splash-2868-1320.png",
+        "sizes": "2868x1320"
+      },
+      {
+        "src": "/icons/apple-splash-1620-2160.png",
+        "sizes": "1620x2160"
+      },
+      {
+        "src": "/icons/apple-splash-2160-1620.png",
+        "sizes": "2160x1620"
+      },
+      {
+        "src": "/icons/apple-splash-1290-2796.png",
+        "sizes": "1290x2796"
+      },
+      {
+        "src": "/icons/apple-splash-1179-2556.png",
+        "sizes": "1179x2556"
+      },
+      {
+        "src": "/icons/apple-splash-1206-2622.png",
+        "sizes": "1206x2622"
+      },
+      {
+        "src": "/icons/apple-splash-1284-2778.png",
+        "sizes": "1284x2778"
+      },
+      {
+        "src": "/icons/apple-splash-1668-2224.png",
+        "sizes": "1668x2224"
+      },
+      {
+        "src": "/icons/apple-splash-2622-1206.png",
+        "sizes": "2622x1206"
+      },
+      {
+        "src": "/icons/apple-splash-2266-1488.png",
+        "sizes": "2266x1488"
+      },
+      {
+        "src": "/icons/apple-splash-1488-2266.png",
+        "sizes": "1488x2266"
+      },
+      {
+        "src": "/icons/apple-splash-640-1136.png",
+        "sizes": "640x1136"
+      },
+      {
+        "src": "/icons/apple-splash-1242-2688.png",
+        "sizes": "1242x2688"
+      },
+      {
+        "src": "/icons/apple-splash-2556-1179.png",
+        "sizes": "2556x1179"
+      },
+      {
+        "src": "/icons/apple-splash-2778-1284.png",
+        "sizes": "2778x1284"
+      },
+      {
+        "src": "/icons/apple-splash-1125-2436.png",
+        "sizes": "1125x2436"
+      },
+      {
+        "src": "/icons/apple-splash-2532-1170.png",
+        "sizes": "2532x1170"
+      },
+      {
+        "src": "/icons/apple-splash-750-1334.png",
+        "sizes": "750x1334"
+      },
+      {
+        "src": "/icons/apple-splash-2688-1242.png",
+        "sizes": "2688x1242"
+      },
+      {
+        "src": "/icons/apple-splash-1242-2208.png",
+        "sizes": "1242x2208"
+      },
+      {
+        "src": "/icons/apple-splash-1170-2532.png",
+        "sizes": "1170x2532"
+      }
+    ]
+  }
