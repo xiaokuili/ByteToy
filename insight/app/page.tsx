@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { SearchInput } from "@/components/home/SearchInput"
 import Head from "next/head";
 import { Header } from "@/components/layout/Header";
-import { useDatasource } from "@/hook/useDatasource";
+import { useDatasource } from "@/hooks/useDatasource";
 import {randomID} from "@/lib/utils"
 
 export default function HomePage() {

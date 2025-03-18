@@ -8,8 +8,8 @@ import SearchInput from "@/components/search/SearchInput";
 import { RenderSearchResult } from "@/components/search/index";
 import { Header } from "@/components/layout/Header";
 
-import { useDataFlow } from "@/hook/useDataFlow";
-import { useDatasource } from "@/hook/useDatasource";
+import { useDataFlow } from "@/hooks/useDataFlow";
+import { useDatasource } from "@/hooks/useDatasource";
 import { DataSource } from "@/lib/types";
 import { randomID } from "@/lib/utils";
 
