@@ -1,3 +1,10 @@
+import ChatMessage from "./ChatMessage";
 
-
-// ChatThread 负责整体布局和通用样式，包括头像、用户名、时间戳等。
+export default function ChatThread() {
+    return (
+        <div>
+            <h1></h1>
+            <ChatMessage />
+        </div>
+    )
+}
