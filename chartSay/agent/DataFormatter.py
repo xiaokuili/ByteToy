@@ -1,7 +1,8 @@
 import json
 from langchain_core.prompts import ChatPromptTemplate
 from LLMManager import LLMManager
-from graph_instructions import graph_instructions
+# from graph_instructions import graph_instructions
+from graph_instructions import graph_instructions_with_type as graph_instructions
 
 
 class DataFormatter:
@@ -200,7 +201,7 @@ class DataFormatter:
         return {"formatted_data_for_visualization": formatted_data}
 
     def _format_other_visualizations(self, visualization, question, sql_query, results):
-        instructions = graph_instructions[visualization]
+        instructions = graph_instructions(visualization)
         prompt = ChatPromptTemplate.from_messages([
             ("system", "You are a Data expert who formats data according to the required needs. You are given the question asked by the user, it's sql query, the result of the query and the format you need to format it in."),
             ("human", 'For the given question: {question}\n\nSQL query: {sql_query}\n\Result: {results}\n\nUse the following example to structure the data: {instructions}. Just give the json string. Do not format it'),

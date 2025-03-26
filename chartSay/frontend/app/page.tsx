@@ -1,25 +1,21 @@
 "use client"
 import { chartDictionary, InputType } from "@/components/chat/charts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { exampleData } from "@/components/chat/charts/BarChart"
+
 export default function Home() {
   // 选择要渲染的图表类型
   const [chartType, setChartType] = useState<string>("bar");
   const [inputData, setInputData] = useState<string>("");
   const [chartData, setChartData] = useState<InputType>({
-    data: exampleData.data as any,
-  })
+    data: "" as any,
+  });
   
-  // 获取对应的组件和示例数据
-  const chartInfo = chartDictionary[chartType as keyof typeof chartDictionary];
-  const ChartComponent = chartInfo.component;
-  
+  // 根据chartType获取对应的图表组件
+  const ChartComponent = chartDictionary[chartType as keyof typeof chartDictionary]?.component;
   
   const handleChartTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setChartType(e.target.value);
-    // 更新示例数据为所选图表类型的示例数据
-    const newChartInfo = chartDictionary[e.target.value as keyof typeof chartDictionary];
-    setChartData(newChartInfo.exampleData as InputType);
   };
   
   const handleDataChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -27,11 +23,15 @@ export default function Home() {
   };
   
   const handleApplyData = () => {
+    if (inputData === "") {
+      alert("请输入数据");
+      return;
+    }
     try {
-      const parsedData = JSON.parse(inputData);
-      console.log(parsedData);
+      const parsedData = JSON.parse(inputData)
+      console.log(parsedData.formatted_data_for_visualization);
       setChartData({
-        data: parsedData as any
+        data: parsedData.formatted_data_for_visualization as any
       });
     } catch (error) {
       alert("JSON格式错误，请检查输入数据");
@@ -74,7 +74,8 @@ export default function Home() {
       
       
       <div className="mt-4">
-        <ChartComponent data={chartData.data as any} />
+
+        {chartData.data  && ChartComponent && <ChartComponent data={chartData.data as any} />}
       </div>
     </div>
   );
