@@ -14,3 +14,4 @@ model_cache/*
 insight/app/search/重新优化首页.ini
 *.log
 *.pckl
+chartSay/node_modules/*
