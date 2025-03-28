@@ -1,7 +1,6 @@
 "use client"
 import { chartDictionary, InputType } from "@/components/chat/charts";
-import { useEffect, useState } from "react";
-import { exampleData } from "@/components/chat/charts/BarChart"
+import { useState } from "react";
 
 export default function Home() {
   // 选择要渲染的图表类型
@@ -9,7 +8,7 @@ export default function Home() {
   const [inputData, setInputData] = useState<string>("");
   const [chartData, setChartData] = useState<InputType>({
     data: "" as any,
-  });
+  } );
   
   // 根据chartType获取对应的图表组件
   const ChartComponent = chartDictionary[chartType as keyof typeof chartDictionary]?.component;
@@ -29,9 +28,10 @@ export default function Home() {
     }
     try {
       const parsedData = JSON.parse(inputData)
-      console.log(parsedData.formatted_data_for_visualization);
+      console.log(parsedData);
+      console.log(parsedData.formatted_data_for_visualization ?? parsedData.data);
       setChartData({
-        data: parsedData.formatted_data_for_visualization as any
+        data: parsedData.formatted_data_for_visualization ?? parsedData.data
       });
     } catch (error) {
       alert("JSON格式错误，请检查输入数据");
@@ -75,7 +75,7 @@ export default function Home() {
       
       <div className="mt-4">
 
-        {chartData.data  && ChartComponent && <ChartComponent data={chartData.data as any} />}
+        {chartData.data  && ChartComponent && <ChartComponent data={chartData.data } />}
       </div>
     </div>
   );
