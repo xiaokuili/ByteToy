@@ -1,8 +1,8 @@
 import json
 from langchain_core.prompts import ChatPromptTemplate
 from LLMManager import LLMManager
-# from graph_instructions import graph_instructions
-from graph_instructions import graph_instructions_with_type as graph_instructions
+from graph_instructions import graph_instructions
+# from graph_instructions import graph_instructions_with_type as graph_instructions
 
 
 class DataFormatter:
@@ -12,11 +12,13 @@ class DataFormatter:
     
     def format_data_for_visualization(self, state: dict) -> dict:
         """Format the data for the chosen visualization type."""
+        
         visualization = state['visualization']
         results = state['results']
         question = state['question']
         sql_query = state['sql_query']
 
+        print(visualization)
         if visualization == "none":
             return {"formatted_data_for_visualization": None}
         
