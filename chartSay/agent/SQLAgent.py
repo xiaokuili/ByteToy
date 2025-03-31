@@ -273,4 +273,5 @@ Recommend a visualization:'''),
         visualization = lines[0].split(': ')[1]
         reason = lines[1].split(': ')[1]
 
+
         return {"visualization": visualization, "visualization_reason": reason}
